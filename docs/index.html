@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="d6e328a">
+<meta name="lkk-version" content="26ac68c">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -271,6 +271,12 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .update-bar[hidden] { display: none; }
 .update-bar .btn { border-color: var(--board-ink); color: var(--board-ink); padding: 6px 12px; }
 .update-bar .btn.primary { background: #ffd34d; border-color: #ffd34d; color: #0d1b2e; }
+.gc-sum { display: flex; flex-direction: column; gap: 4px; font-size: 15px; }
+.gc-star { color: var(--gold); }
+.gc-sub { font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gc-scorers { color: var(--muted); }
+.gc-more { justify-self: start; background: none; border: 0; padding: 2px 0; font-family: var(--f-data); font-weight: 600; font-size: 14px; letter-spacing: .04em; color: var(--blue); cursor: pointer; }
+.gc-more:hover { text-decoration: underline; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -379,7 +385,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.43 · d6e328a</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.53 · 26ac68c</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1259,17 +1265,45 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const recHtml = ([w, l, o]) => `${w}–<span class="l">${l}</span>–<span class="o">${o}</span>`;
 
   const isDepth = (n) => !!(S.result && S.result.depth && S.result.depth.includes(n));
+  // Ottelukortti: tiivistelmä (tulos, ottelun tähti, Suomen maalintekijät), maalit avattavissa
   function gameDetail(g, idx) {
-    const goals = (g.goals || []).map((x) => x.fin
+    const fin = (g.goals || []).filter((x) => x.fin);
+    const pts = {};
+    for (const x of fin) {
+      (pts[x.s] = pts[x.s] || { n: x.s, g: 0, a: 0 }).g++;
+      for (const a of x.as) (pts[a] = pts[a] || { n: a, g: 0, a: 0 }).a++;
+    }
+    const lp = lineupPlayers();
+    const starPick = Object.values(pts).sort((a, b) => (b.g * 2 + b.a) - (a.g * 2 + a.a) || b.g - a.g || isDepth(a.n) - isDepth(b.n))[0];
+    let star = '';
+    if (g.win && g.a === 0 && lp.G) star = `${esc(lp.G.n)} <span class="gc-sub">nollapeli</span>`;
+    else if (starPick) star = `${esc(starPick.n)} <span class="gc-sub">${starPick.g}+${starPick.a}</span>`;
+    const scorers = {};
+    for (const x of fin) scorers[x.s] = (scorers[x.s] || 0) + 1;
+    const scorerTxt = Object.entries(scorers).map(([n, k]) => esc(surname(n)) + (k > 1 ? ' ' + k : '')).join(', ');
+    const open = S.expandGame === idx;
+    const rows = (g.goals || []).filter((x) => x.fin || x.ot).map((x) => x.fin
       ? `<li class="gl fin"><span class="gl-score">${x.f}–${x.a}</span><span><b${isDepth(x.s) ? ' class="gl-depth"' : ''}>${esc(surname(x.s))}</b>${x.as.length ? ` <span class="gl-as">(${esc(x.as.map(surname).join(', '))})</span>` : ''}${x.ot ? ' <span class="gl-ot">ja</span>' : ''}</span></li>`
-      : `<li class="gl"><span class="gl-score">${x.f}–${x.a}</span><span class="gl-opp">${esc(g.opp)}${x.ot ? ' <span class="gl-ot">ja</span>' : ''}</span></li>`).join('');
+      : `<li class="gl"><span class="gl-score">${x.f}–${x.a}</span><span class="gl-opp">${esc(g.opp)} ratkaisi <span class="gl-ot">ja</span></span></li>`).join('');
     const c = g.win ? 'W' : g.ot ? 'O' : 'L';
     return `<div class="game-card ${c}">
       <div class="gc-head"><span class="label">Ottelu ${idx + 1} · ${esc(stageLabel(g))}</span><span class="gc-tag">${g.win ? 'Voitto' : g.ot ? 'Jatkoaikatappio' : 'Tappio'}</span></div>
       <div class="gc-score"><span>Suomi – ${esc(g.opp)}</span><b>${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</b></div>
-      ${goals ? `<ol class="goals">${goals}</ol>` : '<p class="gl-none">Ei maaleja.</p>'}
-      ${g.pens && g.pens.length ? `<p class="gc-pens">Jäähyt: ${g.pens.map((x) => `${esc(surname(x.n))} ${x.min} min`).join(', ')}</p>` : ''}
+      <div class="gc-sum">
+        ${star ? `<span><span class="gc-star" aria-hidden="true">★</span> Ottelun tähti: <b>${star}</b></span>` : ''}
+        <span class="gc-scorers">${fin.length ? 'Suomen maalit: ' + scorerTxt : 'Suomi ei tehnyt maalia.'}</span>
+      </div>
+      ${fin.length || (g.pens && g.pens.length) ? `<button class="gc-more" data-exp="${idx}" aria-expanded="${open}">${open ? 'Piilota maalit ▴' : 'Näytä maalit ja syöttäjät ▾'}</button>` : ''}
+      ${open ? `${rows ? `<ol class="goals">${rows}</ol>` : ''}
+        ${g.pens && g.pens.length ? `<p class="gc-pens">Jäähyt: ${g.pens.map((x) => `${esc(surname(x.n))} ${x.min} min`).join(', ')}</p>` : ''}` : ''}
     </div>`;
+  }
+  function bindExpand() {
+    document.querySelectorAll('.gc-more').forEach((b) => b.onclick = () => {
+      const i = +b.dataset.exp;
+      S.expandGame = S.expandGame === i ? null : i;
+      render();
+    });
   }
 
   // opts.newestFirst: käynnissä oleva turnaus ylimmäksi; opts.latest: korostettavan ottelun indeksi
@@ -1376,6 +1410,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       </div>`;
     shown.length && document.querySelectorAll('#stages .gm').forEach((c) => c.classList.add(c.dataset.c));
     bindChips(render);
+    bindExpand();
     if (done) $('#toSummary').onclick = () => { finishSeason(false); render(); $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     else {
       $('#nextGame').onclick = () => { S.shown++; S.openGame = null; render(); $('#draftCol').scrollIntoView({ block: 'start' }); };
@@ -1422,6 +1457,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#copy').onclick = copyResult;
     $('#mkImg').onclick = showShareImage;
     bindChips(render);
+    bindExpand();
     animateResult(r);
   }
 

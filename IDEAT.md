@@ -99,3 +99,10 @@ Lisäys suunnitelmaan:
 7. Arviot sumennettuina oletuksena, napautus paljastaa (korvaa helppo tila -valintaruudun). Arvon selitys napautuksella.
 8. Välitön palaute: valittu kortti korostuu heti, lista päivittyy animaatiolla, ei viiveitä.
 9. Vinkkilaatikko ennen ensimmäistä draftia (3–4 vinkkiä).
+
+### Havainnot: Draft Prospects Hockey 84-0 (2026-11-24, käyttäjän testi)
+- Hyvää: pelaajakortissa tilastot (GP, G, A, PTS, +/-) ja oma kokonaisarvio (OVR), jonka merkitys selitetään yhdellä rivillä listan yläpuolella ("OVR is a game rating, computed from each player's stats").
+- Hyvää: "68 players available · 41 F · 22 D · 5 G still needed", Undo pick, Share lineup, lajittelu (PTS).
+- Ongelma: peli alkaa suoraan pelaajanvalintanäkymästä ilman arvontaa tai johdantoa, joten ei ymmärrä mistä on kyse.
+- Opetus meille: ensimmäisellä kierroksella pitää kertoa mitä tapahtuu (arvonta-animaatio + yksi lause: "Sinulle arvottiin Suomen MM 1995 -joukkue. Valitse siitä yksi pelaaja.").
+  Arvion selitys yhdellä rivillä listan yläpuolelle on hyvä malli kohtaan 7.
