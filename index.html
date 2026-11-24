@@ -395,7 +395,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     </div>
     <div class="clock" aria-label="Tilanne">
       <div><b id="roundNo">1/6</b><span id="roundLbl">Kierros</span></div>
-      <button class="best-box" id="bestBox" title="Paras kausisi tällä laitteella"><b id="bestRec">–</b><span>Paras kausi</span></button>
+      <button class="best-box" id="bestBox" title="Oma ennätyksesi tässä pelissä tällä laitteella"><b id="bestRec">–</b><span>Oma ennätys</span></button>
     </div>
   </div>
 </header>
@@ -437,12 +437,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   let S;
   function fresh() {
-    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
   }
 
   function start(data) {
     S = data && data.S ? data.S : fresh();
     if (!S.groupOpen) S.groupOpen = {};
+    if (!S.history) { S.history = []; S.future = []; }
     if (S.result && (!S.result.played || !S.result.mmAwards || !S.result.depth)) { S.phase = 'ready'; S.result = null; }
     if (S.openGame === undefined) S.openGame = null;
     if (!S.mode) { S.mode = 'aika'; S.draw = S.era || null; S.drawn = []; }
@@ -565,9 +566,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#bestRec').textContent = best || '–';
     $('#bestBox').onclick = () => {
       const b = store.get('lkk-best');
-      if (!b) { toast('Paras kausisi tallentuu tähän, kun olet pelannut ensimmäisen kauden.'); return; }
-      const [w, l, o] = b.split('–');
-      toast(`<b>Paras kausi</b><br>${w} voittoa, ${l} tappiota, ${o} jatkoaikatappiota. Tallentuu vain tälle laitteelle.`);
+      if (!b) { toast('Oma ennätyksesi tallentuu tähän, kun olet pelannut ensimmäisen kauden.'); return; }
+      const [w, l, o] = b.split('–').map(Number);
+      const n = (k, one, many) => `${k} ${k === 1 ? one : many}`;
+      toast(`<b>Oma ennätys</b><br>Paras kautesi tässä pelissä: ${n(w, 'voitto', 'voittoa')}, ${n(l, 'tappio', 'tappiota')}, ${n(o, 'jatkoaikatappio', 'jatkoaikatappiota')}. Tallentuu vain tälle laitteelle.`);
     };
     renderRink();
     if (S.phase === 'draft') renderDraft();
@@ -651,6 +653,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         </div>
         <div class="spin-actions">
           <button class="btn" id="reroll" ${S.rerolls ? '' : 'disabled'}>Arvo uusi ${tour ? 'turnaus' : 'aikakausi'} (${S.rerolls})</button>
+          <button class="btn" id="undoBtn" ${S.history.length ? '' : 'disabled'} title="Kumoa viimeisin valinta">↶ Kumoa</button>
           <button class="btn help-btn" id="helpBtn" aria-label="Ohjeet ja vinkit">?</button>
         </div>
       </div>
@@ -699,6 +702,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     else if (S.spin) { S.spin = false; spinDraw(); }
     else if (!spinning && !modalOpen) afterDrawShown();
     $('#helpBtn').onclick = () => showTips(false);
+    $('#undoBtn').onclick = undoPick;
     $('#reroll').onclick = () => {
       if (!S.rerolls || spinning) return;
       S.rerolls--;
@@ -709,7 +713,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     document.querySelectorAll('.seg').forEach((b) => b.onclick = () => {
       if (S.mode === b.dataset.mode) return;
       S.mode = b.dataset.mode; store.set('lkk-mode', S.mode);
-      S.drawn = []; S.groupOpen = {};
+      S.drawn = []; S.future = []; S.groupOpen = {};
       S.draw = rollDraw();
       S.spin = true;
       render();
@@ -762,9 +766,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       (gains.length ? `<br><b>Kultasuoni!</b> ${gains.map((c) => `${esc(c.name)} +${c.b.toFixed(1)}`).join(' · ')}` : ''));
     if (S.mode === 'aika') S.eraHistory.push(S.draw);
     S.drawn.push(S.draw);
+    S.history.push({ slot: slotId, name, draw: S.draw });
     S.groupOpen = {};
     S.round++;
     if (S.round > 6) { S.phase = 'ready'; S.draw = null; }
+    else if (S.future.length) { S.draw = S.future.pop(); S.spin = true; }
     else { S.draw = rollDraw(); S.spin = true; }
     render();
     S.justPlaced = null;
@@ -772,6 +778,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       const top = $('#draftCol').getBoundingClientRect().top + window.scrollY - $('.rinkcol').offsetHeight - 8;
       if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' });
     }
+  }
+
+  // Kumoa viimeisin valinta. Peruttu kierroksen arvonta pidetään tallessa, jotta uutta
+  // turnausta ei voi kalastella kumoamalla.
+  function undoPick() {
+    if (spinning || !S.history.length) return;
+    const h = S.history.pop();
+    if (S.phase === 'draft' && S.draw) S.future.push(S.draw);
+    delete S.lineup[h.slot];
+    S.drawn.pop();
+    if (S.mode === 'aika') S.eraHistory.pop();
+    S.round = Math.max(1, S.round - 1);
+    S.draw = h.draw;
+    S.phase = 'draft';
+    S.groupOpen = {};
+    S.spin = false;
+    toast(`↶ Kumottu: ${esc(h.name)}`);
+    render();
   }
 
   function renderReady() {
@@ -785,9 +809,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div class="actions">
           <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
           <button class="btn" id="playAll">Simuloi koko kausi</button>
+          <button class="btn" id="undoReady">↶ Kumoa viimeisin valinta</button>
           <button class="btn" id="restart">Aloita alusta</button>
         </div>
       </div>`;
+    $('#undoReady').onclick = undoPick;
     $('#playStep').onclick = () => startSeason('step');
     $('#playAll').onclick = () => startSeason('all');
     $('#restart').onclick = restart;
