@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="53879d0">
+<meta name="lkk-version" content="0e97358">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -277,6 +277,8 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gc-scorers { color: var(--muted); }
 .gc-more { justify-self: start; background: none; border: 0; padding: 2px 0; font-family: var(--f-data); font-weight: 600; font-size: 14px; letter-spacing: .04em; color: var(--blue); cursor: pointer; }
 .gc-more:hover { text-decoration: underline; }
+.gm-detail { margin-top: 8px; animation: pop .3s ease-out; }
+.st-era { display: block; font-size: 12.5px; font-weight: 400; color: var(--muted); line-height: 1.2; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -385,7 +387,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.00 · 53879d0</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.05 · 0e97358</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1322,7 +1324,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       }).join('');
       const w = gs.filter((g) => g.win).length;
       const extra = st.id === 'mm' && gs.length === 7 ? ` · ${r.groupPts} p` : '';
-      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div><div class="gms">${chips}</div></div>`;
+      const openHere = S.openGame !== null && gs.includes(r.games[S.openGame]) && !(opts.latest === S.openGame);
+      const detail = openHere ? `<div class="gm-detail" id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : '';
+      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div><div class="gms">${chips}</div>${detail}</div>`;
     }).join('');
   }
 
@@ -1338,6 +1342,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   const scoring = (games) => G.seasonStats(games).sort((a, b) => b.p - a.p || b.g - a.g);
 
+  const ERA_FROM = { '80': 1970, '90': 1990, '00': 2000, '10': 2010, '20': 2020 };
+  const ERA_TO = { '80': 1980, '90': 1990, '00': 2000, '10': 2010, '20': 2020 };
+  function eraText(n) {
+    const p = playerByName(n);
+    if (!p || !p.e.length) return '';
+    const keys = ['80', '90', '00', '10', '20'].filter((k) => p.e.includes(k));
+    const a = ERA_FROM[keys[0]], b = ERA_TO[keys[keys.length - 1]];
+    return a === b ? `${a}-luku` : `${a}–${String(b)}-luku`;
+  }
+  const nameCell = (n) => `${esc(n)}<span class="st-era">${eraText(n)}</span>`;
+
   function scoringHtml(games) {
     const lp = lineupPlayers();
     const rows = scoring(games);
@@ -1347,9 +1362,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return `<div>
       <div class="label" style="margin-bottom:6px">Pistepörssi · koko kausi</div>
       <table class="stats"><thead><tr><th>Pelaaja</th><th>M</th><th>S</th><th>P</th><th>J</th></tr></thead><tbody>
-      ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${esc(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
+      ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
       <tr class="sub"><td colspan="5">Muut kentät · pelin valitsemat</td></tr>
-      ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${esc(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
+      ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
       </tbody></table>
       <p class="gk-line">Maalivahti ${esc(lp.G.n)}: päästetyt ${games.length ? (ga / games.length).toFixed(2) : '0'} / ottelu · nollapelit ${so}</p>
     </div>`;
@@ -1405,7 +1420,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
             ? `<button class="btn primary" id="toSummary">Katso kauden yhteenveto</button>`
             : `<button class="btn primary" id="nextGame">${S.shown ? 'Pelaa seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi kausi loppuun</button>`}
         </div>
-        ${S.openGame !== null && S.openGame < S.shown - 1 ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
         ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown, { newestFirst: true, latest: S.shown - 1 })}</div>` : ''}
       </div>`;
     shown.length && document.querySelectorAll('#stages .gm').forEach((c) => c.classList.add(c.dataset.c));
@@ -1442,7 +1456,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <div class="label" style="margin-bottom:6px">Ottelut · avaa maalintekijät napauttamalla</div>
           <div class="stages" id="stages">${stagesHtml(r, r.games)}</div>
         </div>
-        ${S.openGame !== null ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
         <div class="legend"><span><i style="background:var(--win)"></i>Voitto</span><span><i style="background:var(--red)"></i>Tappio</span><span><i style="background:var(--amber)"></i>Jatkoaikatappio</span></div>
         <div class="actions" id="resActions" ${S.animate ? 'hidden' : ''}>
           <button class="btn primary" id="again">Uusi draft</button>
