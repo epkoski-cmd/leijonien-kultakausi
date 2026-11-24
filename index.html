@@ -130,7 +130,11 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .pl-hint { flex: 1 1 0; min-width: 0; font-size: 12.5px; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rating { font-family: var(--f-display); font-size: 19px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--blue); }
 .pos { font-size: 11px; padding: 2px 0; }
-.hide-ratings .rating { display: none; }
+.rating { cursor: pointer; filter: blur(5px); opacity: .8; transition: filter .25s, opacity .25s; user-select: none; min-width: 26px; text-align: center; }
+.rating.revealed, .show-ratings .rating { filter: none; opacity: 1; cursor: default; }
+.rating-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 6px; font-size: 13px; color: var(--muted); }
+.rating-info .demo { font-family: var(--f-display); font-weight: 800; font-size: 16px; color: var(--blue); filter: blur(3px); }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--blue); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 
 /* Kaukalo */
 .rinkcol { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
@@ -409,7 +413,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div class="label">Joukkueen vahvuus</div>
         <div class="strength" id="strength">?</div>
       </div>
-      <label class="toggle"><input type="checkbox" id="showRatings"> Näytä arviot (helppo tila)</label>
+
     </div>
     <div class="chips" id="chips"></div>
     <p class="note">Arviot ovat pelin tekijän suuntaa-antavia näkemyksiä pelaajien huippuvuosista. Kemiabonuksia saa joukkuekavereista ja saman sukupolven pelaajista.</p>
@@ -437,7 +441,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   let S;
   function fresh() {
-    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], revealed: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
   }
 
   function start(data) {
@@ -448,8 +452,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (S.openGame === undefined) S.openGame = null;
     if (!S.mode) { S.mode = 'aika'; S.draw = S.era || null; S.drawn = []; }
     if (S.phase === 'draft' && !S.draw) { S.draw = rollDraw(); S.spin = true; }
-    const sr = store.get('l820-ratings') === '1';
-    $('#showRatings').checked = sr;
+    if (!S.revealed) S.revealed = [];
     applyRatings();
     if (!store.get('lkk-seen-intro') && S.phase === 'draft' && !Object.keys(S.lineup).length) showIntro();
     render();
@@ -553,9 +556,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const openSlots = () => G.SLOTS.filter((s) => !S.lineup[s.id]);
   const taken = (p) => Object.values(S.lineup).includes(p.n);
   const placeable = (p) => openSlots().some((s) => G.fitPenalty(p, s.pos) !== null);
-  const ratingsOn = () => $('#showRatings').checked;
+  const ratingsOn = () => store.get('l820-ratings') === '1';
 
-  function applyRatings() { document.body.classList.toggle('hide-ratings', !ratingsOn()); }
+  function applyRatings() { document.body.classList.toggle('show-ratings', ratingsOn()); }
 
   function render() {
     document.body.dataset.phase = S.phase;
@@ -664,7 +667,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       </div>` : ''}
       <div class="hint-row" id="hintRow">${S.round === 1
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
-        : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>`;
+        : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
+      <div class="rating-info">${ratingsOn()
+        ? `<span>Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
         .sort((a, b) => a.n.localeCompare(b.n, 'fi'));
@@ -689,7 +695,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
           <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${esc(taken(p) ? 'Jo joukkueessa' : p.h)}</span></span>
-          <span class="rating">${p.r}</span>`;
+          <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
         else if (one) html += `<button class="pl one" data-n="${esc(p.n)}" data-slot="${opts[0].slot.id}" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts">${optHtml('span')}</span></button>`;
@@ -721,6 +727,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     document.querySelectorAll('.group-head').forEach((b) => b.onclick = () => {
       S.groupOpen[b.dataset.g] = b.getAttribute('aria-expanded') !== 'true';
       render();
+    });
+    $('#ratingsToggle').onclick = () => { store.set('l820-ratings', ratingsOn() ? '0' : '1'); applyRatings(); render(); };
+    document.querySelectorAll('.rating').forEach((r) => r.onclick = (e) => {
+      if (ratingsOn() || r.classList.contains('revealed')) return;
+      e.stopPropagation();
+      r.classList.add('revealed');
+      S.revealed.push(r.dataset.r);
     });
     document.querySelectorAll('.pl.one, .opt[data-slot]').forEach((b) => b.onclick = (e) => {
       e.stopPropagation();
@@ -1283,7 +1296,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   setInterval(checkUpdate, 5 * 60000);
   checkUpdate();
 
-  $('#showRatings').addEventListener('change', () => { store.set('l820-ratings', ratingsOn() ? '1' : '0'); applyRatings(); render(); });
+
 
   window.claude?.hot?.snapshot?.(() => ({ S }));
   window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

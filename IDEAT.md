@@ -96,7 +96,7 @@ Lisähavainnot (Classic, IceIQ, Dynasty tips):
 - "Dynasty tips" etusivulla: lyhyet vinkit siitä, miten kannattaa pelata (maalivahti tärkeä, tasapaino, kultasuonet). Hyvä idea meillekin.
 
 Lisäys suunnitelmaan:
-7. Arviot sumennettuina oletuksena, napautus paljastaa (korvaa helppo tila -valintaruudun). Arvon selitys napautuksella.
+7. ✅ Arviot sumennettuina oletuksena, napautus paljastaa (korvaa helppo tila -valintaruudun). Arvon selitys napautuksella.
 8. Välitön palaute: valittu kortti korostuu heti, lista päivittyy animaatiolla, ei viiveitä.
 9. Vinkkilaatikko ennen ensimmäistä draftia (3–4 vinkkiä).
 
