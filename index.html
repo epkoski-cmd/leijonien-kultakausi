@@ -471,7 +471,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     showModal(`<div class="label">Tervetuloa</div>
       <h2 id="modalTitle">Leijonien <span class="gold">kultakausi</span></h2>
       <p>Kokoa kaikkien aikojen Leijonat. Joka kierroksella sinulle arvotaan yksi Suomen turnausjoukkue, josta valitset yhden pelaajan.</p>
-      <p>Kuuden kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö 22–0:aan?</b></p>`,
+      <p>Kuuden draft-kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö täydelliseen 22–0-mestaruuskauteen?</b></p>`,
       'Aloita', () => { store.set('lkk-seen-intro', '1'); render(); });
   }
   const TIPS = `<ul class="tips">
@@ -483,7 +483,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     </ul>`;
   function showTips(first) {
     showModal(`<div class="label">${first ? 'Ensimmäinen valinta' : 'Ohjeet'}</div><h2 id="modalTitle">Näin kokoat joukkueen</h2>${TIPS}`,
-      first ? 'Selvä, valitaan' : 'Sulje', () => { if (first) store.set('lkk-seen-tips', '1'); });
+      first ? 'Selvä, aloita draft' : 'Sulje', () => { if (first) store.set('lkk-seen-tips', '1'); });
   }
   function afterDrawShown() {
     if (S.phase !== 'draft') return;

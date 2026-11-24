@@ -119,3 +119,11 @@ Lisäys suunnitelmaan:
 - Ottelu kerrallaan: tuloskortin alareunaan edistymispalkki (ottelun kello), maalit ilmestyvät siinä tahdissa kuin ne syntyvät. Konfetti Suomen voitosta.
 - Äänet: alkupilli, Suomen maalista fanfaari, vastustajan maalista buuaus, tappiosta "oooh"-huokaus, voitosta taputus ja juhlinta. Huom.: äänet voivat alkaa vasta pelaajan ensimmäisen napautuksen jälkeen (selainten sääntö), ja mykistysnappi tarvitaan. Äänitiedostot pitää tehdä itse tai hankkia vapailla lisensseillä.
 - Kaksi lätkäukkoa ottelukortin vieressä: kalistelevat mailoja, maalista toinen tuulettaa ja toinen lyyhistyy. Peliasut maiden lippujen väreissä (ei oikeita joukkueiden logoja).
+
+## 12. Katkeava vihjeteksti pelaajakortissa (lisätty 2026-11-24, myöhemmin)
+Esim. "Lauri Korpikoski ✦ Sukupolvi Phoenixin kahden …": vihje ei mahdu korttiin, eikä käyttäjä näe loppua. Nyt koko teksti näkyy vain hiiren alla (title), puhelimessa ei ollenkaan.
+Käydään läpi vaihtoehdot, kun on aika:
+- Vihje toiselle riville nimen alle (kortti korkeammaksi)
+- Kortin napautus tai pitkä painallus avaa lisätiedot (vihje, aikakausi, arvio)
+- Lyhyemmät vihjeet tai ✦-merkki pelkäksi tähdeksi, jolloin vihjeelle jää tilaa
+- Leveällä näytöllä yksi sarake kahden sijaan

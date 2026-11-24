@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="9c67c00">
+<meta name="lkk-version" content="adab65d">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -416,7 +416,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.33 · 9c67c00</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.42 · adab65d</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1049,7 +1049,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     showModal(`<div class="label">Tervetuloa</div>
       <h2 id="modalTitle">Leijonien <span class="gold">kultakausi</span></h2>
       <p>Kokoa kaikkien aikojen Leijonat. Joka kierroksella sinulle arvotaan yksi Suomen turnausjoukkue, josta valitset yhden pelaajan.</p>
-      <p>Kuuden kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö 22–0:aan?</b></p>`,
+      <p>Kuuden draft-kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö täydelliseen 22–0-mestaruuskauteen?</b></p>`,
       'Aloita', () => { store.set('lkk-seen-intro', '1'); render(); });
   }
   const TIPS = `<ul class="tips">
@@ -1061,7 +1061,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     </ul>`;
   function showTips(first) {
     showModal(`<div class="label">${first ? 'Ensimmäinen valinta' : 'Ohjeet'}</div><h2 id="modalTitle">Näin kokoat joukkueen</h2>${TIPS}`,
-      first ? 'Selvä, valitaan' : 'Sulje', () => { if (first) store.set('lkk-seen-tips', '1'); });
+      first ? 'Selvä, aloita draft' : 'Sulje', () => { if (first) store.set('lkk-seen-tips', '1'); });
   }
   function afterDrawShown() {
     if (S.phase !== 'draft') return;
