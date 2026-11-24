@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="26ac68c">
+<meta name="lkk-version" content="be04a59">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -385,7 +385,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.53 · 26ac68c</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.58 · be04a59</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1403,7 +1403,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div class="actions">
           ${done
             ? `<button class="btn primary" id="toSummary">Katso kauden yhteenveto</button>`
-            : `<button class="btn primary" id="nextGame">${S.shown ? 'Seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi loput</button>`}
+            : `<button class="btn primary" id="nextGame">${S.shown ? 'Pelaa seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi kausi loppuun</button>`}
         </div>
         ${S.openGame !== null && S.openGame < S.shown - 1 ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
         ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown, { newestFirst: true, latest: S.shown - 1 })}</div>` : ''}

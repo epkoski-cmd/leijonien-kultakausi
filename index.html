@@ -825,7 +825,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div class="actions">
           ${done
             ? `<button class="btn primary" id="toSummary">Katso kauden yhteenveto</button>`
-            : `<button class="btn primary" id="nextGame">${S.shown ? 'Seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi loput</button>`}
+            : `<button class="btn primary" id="nextGame">${S.shown ? 'Pelaa seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi kausi loppuun</button>`}
         </div>
         ${S.openGame !== null && S.openGame < S.shown - 1 ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
         ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown, { newestFirst: true, latest: S.shown - 1 })}</div>` : ''}
