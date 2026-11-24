@@ -142,6 +142,7 @@ Tehty tänään: yhden napautuksen valinta, pieni kiinteä kaukalo puhelimessa, 
 
 Seuraavaksi (ehdotus):
 1. Ennätyskauden kortti "Oma ennätys" -napista (kohta 13)
+   + Analytiikka: GoatCounterin tapahtumat (event) pelatuista kausista, esim. "kausi-pelattu" (ja tarvittaessa "draft-aloitettu", "jakokuva-tehty"). GoatCounter ei tunnista yksittäisiä käyttäjiä, joten saadaan kokonaismäärät, ei käyttäjäkohtaista lukua. Kausia per käynti = kausi-pelattu / sivun käynnit. Vain GitHub Pages -versiossa.
 2. "Katso pistepörssi" -nappi yhteenvetoon (kohta 11)
 3. Lisää kultasuonia: SM-liigan dynastiat valikoituna ja lähteistä tarkistettuna
 4. Tunnelma: ottelun kello, maalit oikeassa tahdissa, konfetti (kohta 11)
