@@ -382,10 +382,10 @@
 
   // Kausi: Euro Hockey Tour 4 × 3 ottelua, MM-alkusarja 7, pudotuspelit 3 = 22 ottelua
   const STAGES = [
-    { id: 'eht1', label: 'EHT · Suomi' },
-    { id: 'eht2', label: 'EHT · Sveitsi' },
-    { id: 'eht3', label: 'EHT · Ruotsi' },
-    { id: 'eht4', label: 'EHT · Tšekki' },
+    { id: 'eht1', label: 'EHT 1/4 · Turnaus Suomessa' },
+    { id: 'eht2', label: 'EHT 2/4 · Turnaus Sveitsissä' },
+    { id: 'eht3', label: 'EHT 3/4 · Turnaus Ruotsissa' },
+    { id: 'eht4', label: 'EHT 4/4 · Turnaus Tšekissä' },
     { id: 'mm', label: 'MM-alkusarja' },
     { id: 'po', label: 'MM-pudotuspelit' },
   ];
