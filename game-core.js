@@ -287,17 +287,21 @@
   const SYNERGIES = [
     { name: 'Teemu & Saku', m: ['Teemu Selänne', 'Saku Koivu'], b: 0.8 },
     { name: 'Koivun veljekset', m: ['Saku Koivu', 'Mikko Koivu'], b: 0.8 },
+    { name: 'Ruudun veljekset', m: ['Tuomo Ruutu', 'Jarkko Ruutu'], b: 0.8 },
+    { name: 'Granlundin veljekset', m: ['Mikael Granlund', 'Markus Granlund'], b: 0.8 },
+    { name: 'Isä ja poika Kapanen', m: ['Sami Kapanen', 'Kasperi Kapanen'], b: 0.8 },
     { name: 'Kultaketju 1995', m: ['Saku Koivu', 'Jere Lehtinen', 'Ville Peltonen'], b: 0.8 },
     { name: 'Oilersin dynastia', m: ['Jari Kurri', 'Esa Tikkanen', 'Reijo Ruotsalainen'], b: 0.8 },
     { name: 'Dallasin suomalaiset', m: ['Roope Hintz', 'Miro Heiskanen', 'Esa Lindell', 'Jere Lehtinen', 'Juha Lind'], b: 0.6 },
-    { name: 'Torinon olympiahopea 2006', m: ['Antero Niittymäki', 'Teemu Selänne', 'Saku Koivu', 'Olli Jokinen', 'Kimmo Timonen', 'Toni Lydman', 'Niklas Hagman'], b: 0.6 },
     { name: 'Floridan mestarit', m: ['Aleksander Barkov', 'Anton Lundell', 'Niko Mikkola'], b: 0.6 },
-    { name: 'MM-kulta 2011', m: ['Mikko Koivu', 'Mikael Granlund', 'Jarkko Immonen'], b: 0.6 },
     { name: 'Carolinan kaksikko', m: ['Sebastian Aho', 'Teuvo Teräväinen'], b: 0.6 },
     { name: 'Coloradon mestarit 2022', m: ['Mikko Rantanen', 'Artturi Lehkonen'], b: 0.6 },
-    { name: 'MM-kulta 2019', m: ['Marko Anttila', 'Kaapo Kakko', 'Kevin Lankinen', 'Mikko Lehtonen', 'Harri Pesonen'], b: 0.6 },
-    { name: 'Pekingin olympiakulta', m: ['Valtteri Filppula', 'Harri Säteri', 'Marko Anttila', 'Sakari Manninen', 'Mikko Lehtonen'], b: 0.6 },
   ];
+
+  // Vain kultajoukkueet: muuten bonus tulisi lähes jokaiselle kentälle
+  const MEDAL_CHEM = { kulta: { b: 0.7, word: 'kultajoukkue' } };
+  const MEDAL_MIN = 3;
+  const CHEM_CAP = 2.5;
 
   function evaluateTeam(lineup) {
     // lineup: { slotId: player }
@@ -317,15 +321,29 @@
       const hit = syn.m.filter((m) => names.includes(m));
       if (hit.length >= 2) chem.push({ name: syn.name, b: syn.b + 0.2 * (hit.length - 2), who: hit });
     }
+    // Mitalijoukkue: vähintään kolme pelaajaa samasta mitalin voittaneesta turnausjoukkueesta (vain paras lasketaan)
+    let medal = null;
+    for (const t of TOURNAMENTS) {
+      if (!MEDAL_CHEM[t.res]) continue;
+      const hit = t.roster.filter((n) => names.includes(n));
+      if (hit.length < MEDAL_MIN) continue;
+      const b = MEDAL_CHEM[t.res].b + 0.2 * (hit.length - MEDAL_MIN);
+      if (!medal || b > medal.b) medal = { name: `${t.label} · ${MEDAL_CHEM[t.res].word}`, b, who: hit, kind: 'medal' };
+    }
+    if (medal) chem.push(medal);
     const eraCount = {};
     for (const p of Object.values(lineup)) for (const e of p.e) eraCount[e] = (eraCount[e] || 0) + 1;
     let bestEra = null;
     for (const [e, c] of Object.entries(eraCount)) if (!bestEra || c > bestEra[1]) bestEra = [e, c];
-    if (bestEra && bestEra[1] >= 4) {
-      chem.push({ name: 'Saman sukupolven joukkue (' + ERAS[bestEra[0]] + ')', b: bestEra[1] === 6 ? 1.0 : bestEra[1] === 5 ? 0.7 : 0.4, who: [] });
+    // Sukupolvi: koko kenttä samalta aikakaudelta (harvinainen)
+    if (bestEra && bestEra[1] === 6) {
+      const who = Object.values(lineup).map((p) => p.n);
+      chem.push({ name: 'Saman sukupolven kenttä (' + ERAS[bestEra[0]] + ')', b: 0.8, who, kind: 'era' });
     }
-    const chemTotal = chem.reduce((a, c) => a + c.b, 0);
-    return { base, chem, chemTotal, total: base + chemTotal, rows };
+    // Katto: kultasuonista saa yhteensä enintään CHEM_CAP
+    const raw = chem.reduce((a, c) => a + c.b, 0);
+    const chemTotal = Math.min(raw, CHEM_CAP);
+    return { base, chem, chemTotal, chemRaw: raw, capped: raw > CHEM_CAP, total: base + chemTotal, rows };
   }
 
   const OPPONENTS = [
@@ -566,7 +584,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);

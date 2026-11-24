@@ -23,6 +23,7 @@
   --bronze: #a0622f;
   --board: #0d1b2e;
   --board-ink: #f2f6fb;
+  --v1: #d9a21b; --v2: #2a9d8f; --v3: #e76f51; --v4: #8e6bd8; --v5: #3a86ff; --v6: #43aa8b;
   --f-display: 'Saira Extra Condensed', 'Arial Narrow', sans-serif;
   --f-body: 'Barlow', system-ui, sans-serif;
   --f-data: 'Barlow Condensed', 'Arial Narrow', sans-serif;
@@ -310,6 +311,11 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .clock .best-box { font: inherit; color: inherit; cursor: pointer; background: #16263d; border: 1px solid #253a58; border-radius: 4px; padding: 6px 10px; text-align: center; min-width: 64px; }
 .clock .best-box:hover { border-color: #ffd34d; }
 .clock span { white-space: nowrap; }
+.slot { position: relative; }
+.vdots { position: absolute; top: 4px; right: 5px; display: flex; gap: 3px; }
+.vdots i, .vdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--panel); }
+.vdot { margin-right: 6px; vertical-align: 0; }
+.chip.cap { border-style: dashed; color: var(--muted); border-color: var(--line); background: none; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -520,7 +526,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>→</span> Valitse pelaaja ja napauta hänen kortistaan paikka, jolle hän menee.</li>
       <li><span>MV</span> Maalivahti vaikuttaa joukkueen vahvuuteen eniten.</li>
       <li><span>⇄</span> Pelaaja on vahvin omalla paikallaan. Sivupaikka tai väärä rooli heikentää.</li>
-      <li><span>✦</span> Kultasuoni: entiset joukkuekaverit ja saman sukupolven pelaajat saavat bonusta.</li>
+      <li><span>✦</span> Kultasuoni: veljekset, mitalijoukkueen kaverit, seurakaverit ja saman sukupolven pelaajat saavat bonusta. Kaukalossa samanväriset pisteet näyttävät, ketkä kuuluvat samaan kultasuoneen.</li>
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
     </ul>`;
   function showTips(first) {
@@ -541,7 +547,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const tip = document.createElement('div');
     tip.className = 'coach';
     tip.setAttribute('role', 'note');
-    tip.innerHTML = `<b>✦ Kultasuoni!</b> ${esc(card.dataset.n || '')} on pelannut samassa joukkueessa tai samalla aikakaudella kuin joku valitsemistasi. Yhdessä he saavat bonusta joukkueen vahvuuteen.`;
+    tip.innerHTML = `<b>✦ Kultasuoni!</b> ${esc(card.dataset.n || '')} muodostaisi kultasuonen jonkun valitsemasi kanssa: esimerkiksi joukkuekaverit, veljekset tai sama sukupolvi. Yhdessä he saavat bonusta joukkueen vahvuuteen.`;
     card.after(tip);
     card.classList.add('coach-target');
     setTimeout(() => document.addEventListener('pointerdown', () => {
@@ -787,13 +793,19 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     });
   }
 
+  // Kultasuonten värit: sama väri kaukalon pisteissä ja kemiamerkeissä
+  const VEIN = (i) => `var(--v${(i % 6) + 1})`;
   function renderRink() {
     const lp = lineupPlayers();
+    const ev = G.evaluateTeam(lp);
+    const veinsOf = (n) => ev.chem.map((c, i) => (c.who.includes(n) ? i : -1)).filter((i) => i >= 0);
     const slotHtml = (s) => {
       const p = lp[s.id];
       if (p) {
         const pen = G.fitPenalty(p, s.pos);
-        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}" disabled><span class="label">${s.short}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
+        const v = veinsOf(p.n);
+        const dots = v.length ? `<span class="vdots" aria-hidden="true">${v.map((i) => `<i style="background:${VEIN(i)}"></i>`).join('')}</span>` : '';
+        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}${v.length ? ' veined' : ''}" disabled>${dots}<span class="label">${s.short}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
           ${pen ? `<span class="era pen">−${pen} ${pen <= 4 ? 'sivupaikka' : 'väärä rooli'}</span>` : ''}</button>`;
       }
       return `<button class="slot" disabled><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span></button>`;
@@ -805,10 +817,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <div class="row g">${sl('G')}</div>`;
 
     const filled = Object.keys(S.lineup).length;
-    const ev = G.evaluateTeam(lp);
     const showNum = ratingsOn() || S.phase !== 'draft';
     $('#strength').textContent = filled === 0 ? '–' : showNum ? (filled === 6 ? ev.total.toFixed(1) : (ev.base / G.SLOTS.filter((s) => S.lineup[s.id]).reduce((a, s) => a + s.w, 0)).toFixed(1) + (filled < 6 ? ' (kesken)' : '')) : '?';
-    $('#chips').innerHTML = ev.chem.map((c) => `<span class="chip" title="${esc(c.who.join(', '))}">${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('');
+    $('#chips').innerHTML = ev.chem.map((c, i) => `<span class="chip" title="${esc(c.who.join(', '))}"><i class="vdot" style="background:${VEIN(i)}"></i>${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('') +
+      (ev.capped ? `<span class="chip cap" title="Kultasuonista saa yhteensä enintään +${G.CHEM_CAP.toFixed(1)}">Katto: yhteensä +${G.CHEM_CAP.toFixed(1)}</span>` : '');
   }
 
   function place(name, slotId) {
