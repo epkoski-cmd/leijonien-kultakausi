@@ -1,0 +1,964 @@
+<title>Leijonien kultakausi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@600;800&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: kaukalon tulostaulu ylhäällä, draft vasemmalla ja kentällinen kaukalokaaviona oikealla; puhelimella pinottuna */
+:root {
+  --ice: #eef3f8;
+  --panel: #ffffff;
+  --line: #cdd8e4;
+  --ink: #0d1b2e;
+  --muted: #5a6b80;
+  --blue: #1a4d9c;
+  --blue-soft: #dde7f5;
+  --red: #c8283a;
+  --amber: #c98a12;
+  --win: #1f7a4d;
+  --gold: #b88a1c;
+  --silver: #8a96a3;
+  --bronze: #a0622f;
+  --board: #0d1b2e;
+  --board-ink: #f2f6fb;
+  --f-display: 'Saira Extra Condensed', 'Arial Narrow', sans-serif;
+  --f-body: 'Barlow', system-ui, sans-serif;
+  --f-data: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ice: #0b1422; --panel: #121e30; --line: #24344b; --ink: #e6edf6; --muted: #8c9db3;
+  --blue: #6f9fe6; --blue-soft: #1a2c47; --red: #ef5b6b; --amber: #e3a83a; --win: #45b37c;
+  --gold: #dcb24a; --silver: #b3bfcc; --bronze: #cf8a52; --board: #060c16; --board-ink: #f2f6fb; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ice: #0b1422; --panel: #121e30; --line: #24344b; --ink: #e6edf6; --muted: #8c9db3;
+  --blue: #6f9fe6; --blue-soft: #1a2c47; --red: #ef5b6b; --amber: #e3a83a; --win: #45b37c;
+  --gold: #dcb24a; --silver: #b3bfcc; --bronze: #cf8a52; --board: #060c16; --board-ink: #f2f6fb; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--ice); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.board {
+  background: var(--board); color: var(--board-ink);
+  margin-top: calc(-1 * env(safe-area-inset-top, 0px));
+  padding-top: calc(env(safe-area-inset-top, 0px) + 22px); padding-bottom: 18px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.board .wrap { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 28px; }
+.brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(44px, 9vw, 76px); line-height: .85; letter-spacing: .01em; margin: 0; text-transform: uppercase; }
+h1 .score { color: #ffd34d; font-variant-numeric: tabular-nums; }
+.tag { font-family: var(--f-data); font-size: 15px; color: #a9b9cf; max-width: 34ch; }
+.clock { display: flex; gap: 6px; font-family: var(--f-data); }
+.clock div { background: #16263d; border: 1px solid #253a58; border-radius: 4px; padding: 6px 10px; text-align: center; min-width: 64px; }
+.clock b { display: block; font-family: var(--f-display); font-size: 26px; line-height: 1; color: #ffd34d; font-variant-numeric: tabular-nums; }
+.clock span { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #a9b9cf; }
+
+main.wrap { padding-block: 22px 48px; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (max-width: 820px) { main.wrap { grid-template-columns: minmax(0, 1fr); } .rinkcol { order: -1; } }
+
+.label { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h2 { font-family: var(--f-display); font-weight: 800; font-size: 34px; line-height: 1; margin: 2px 0 0; text-transform: uppercase; text-wrap: balance; }
+
+/* Arvonta */
+.spin { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+.spin-era { min-width: 0; }
+.spin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 2px solid var(--ink); background: transparent; padding: 8px 14px; border-radius: 3px; font-family: var(--f-data); font-weight: 600; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.toggle input { accent-color: var(--blue); width: 16px; height: 16px; }
+.rolling h2 { color: var(--muted); }
+
+.group { margin-top: 18px; }
+.group-head {
+  display: grid; grid-template-columns: 1em auto 1fr; align-items: baseline; gap: 8px; width: 100%;
+  background: none; border: 0; border-bottom: 1px solid var(--line); padding: 4px 0 6px; margin-bottom: 8px; text-align: left;
+}
+.group-head:hover .label { color: var(--ink); }
+.group-head .chev { color: var(--muted); font-size: 13px; }
+.group-head .count { opacity: .7; margin-left: 4px; }
+.gstatus { justify-self: end; font-size: 13px; color: var(--blue); font-weight: 600; min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.list[hidden] { display: none; }
+.syn {
+  flex: none; font-family: var(--f-data); font-weight: 600; font-size: 12px; line-height: 1.3;
+  padding: 1px 7px; border-radius: 99px; background: color-mix(in srgb, var(--gold) 18%, var(--panel));
+  color: var(--gold); border: 1px solid var(--gold); white-space: nowrap; max-width: 55%; overflow: hidden; text-overflow: ellipsis;
+}
+.toast {
+  position: fixed; z-index: 20; left: 50%; transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: min(92vw, 520px);
+  background: var(--board); color: var(--board-ink); border: 2px solid var(--gold); border-radius: 6px;
+  padding: 10px 16px; font-size: 15px; box-shadow: 0 8px 24px rgba(0,0,0,.25); text-align: center;
+  animation: toast-in .25s ease-out;
+}
+.toast b { color: #ffd34d; font-family: var(--f-display); font-size: 20px; text-transform: uppercase; margin-right: 6px; }
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 10px); } }
+.group:has(.list[hidden]) .group-head { margin-bottom: 0; }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 4px 6px; }
+.pl {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; text-align: left;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; min-width: 0; min-height: 34px;
+}
+.pl:hover:not(:disabled) { border-color: var(--blue); }
+.pl[aria-pressed="true"] { border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); background: var(--blue-soft); }
+.pl:disabled { opacity: .38; cursor: not-allowed; }
+.pos { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .05em; min-width: 32px; padding-inline: 4px !important; white-space: nowrap; text-align: center; padding: 3px 0; border-radius: 3px; background: var(--blue-soft); color: var(--blue); }
+.pos.G { background: var(--ink); color: var(--panel); }
+.pl-main { min-width: 0; display: flex; align-items: baseline; gap: 8px; overflow: hidden; }
+.pl-name { flex: none; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+.pl-hint { flex: 1 1 auto; min-width: 0; font-size: 12.5px; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rating { font-family: var(--f-display); font-size: 19px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--blue); }
+.pos { font-size: 11px; padding: 2px 0; }
+.hide-ratings .rating { display: none; }
+
+/* Kaukalo */
+.rinkcol { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 820px) { .rinkcol { position: static; } }
+.rink {
+  position: relative; background: var(--panel); border: 3px solid var(--ink); border-radius: 46px 46px 14px 14px;
+  padding: 16px 12px 10px; display: grid; gap: 6px; overflow: hidden;
+}
+.rink::before { content: ""; position: absolute; left: 0; right: 0; top: 44%; height: 3px; background: var(--blue); opacity: .5; }
+.rink::after { content: ""; position: absolute; left: 0; right: 0; bottom: 56px; height: 2px; background: var(--red); opacity: .5; }
+.row { position: relative; z-index: 1; display: grid; gap: 6px; }
+.row.f { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.row.d { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 8%; margin-top: 10px; }
+.row.g { grid-template-columns: minmax(0, 1fr); padding: 0 28%; margin-top: 8px; }
+.slot {
+  min-height: 44px; border: 2px dashed var(--line); border-radius: 5px; background: var(--ice);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3px 4px; gap: 0; min-width: 0;
+}
+.slot .label { font-size: 10px; letter-spacing: .1em; }
+.slot .who { font-weight: 600; font-size: 13px; line-height: 1.15; overflow-wrap: anywhere; }
+.slot .era { display: none; }
+.slot .era.pen { display: block; font-size: 11px; color: var(--amber); font-weight: 600; }
+.slot.filled { border-style: solid; border-color: var(--ink); background: var(--panel); }
+.slot.target { border-color: var(--blue); border-style: solid; background: var(--blue-soft); }
+.slot.target.warn { border-color: var(--amber); }
+.slot.target.bad { border-color: var(--red); }
+.slot .fit { font-family: var(--f-data); font-size: 12px; font-weight: 600; }
+.slot.target .fit { color: var(--blue); } .slot.warn .fit { color: var(--amber); } .slot.bad .fit { color: var(--red); }
+.slot:disabled { cursor: default; }
+.rink-foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; gap: 10px; flex-wrap: wrap; }
+.strength { font-family: var(--f-display); font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-family: var(--f-data); font-size: 13px; font-weight: 600; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); }
+.note { font-size: 12.5px; color: var(--muted); margin-top: 14px; max-width: 60ch; }
+.hint-row { margin-top: 10px; font-size: 13.5px; color: var(--muted); min-height: 1.4em; }
+
+/* Tulokset */
+.result { display: grid; gap: 18px; }
+.verdict h2 { font-size: clamp(38px, 7vw, 54px); }
+.verdict p { margin: 6px 0 0; color: var(--muted); font-size: 16px; }
+.record { font-family: var(--f-display); font-weight: 800; font-size: clamp(64px, 14vw, 112px); line-height: .9; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.record .l { color: var(--red); } .record .o { color: var(--amber); }
+.legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.strip { display: grid; grid-template-columns: repeat(41, minmax(0, 1fr)); gap: 3px; }
+.strip span { aspect-ratio: 1 / 1.6; border-radius: 2px; background: var(--line); transition: background .15s; }
+.strip .W { background: var(--win); } .strip .L { background: var(--red); } .strip .O { background: var(--amber); }
+.stages { display: grid; gap: 12px; }
+.stage-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.stage-rec { font-family: var(--f-data); font-weight: 600; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.gms { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
+.gm { display: grid; gap: 1px; padding: 6px 8px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--line); font-variant-numeric: tabular-nums; transition: border-color .2s, opacity .2s; }
+.gm.pending { opacity: .35; }
+.gm.W { border-left-color: var(--win); } .gm.L { border-left-color: var(--red); } .gm.O { border-left-color: var(--amber); }
+.gm-round { font-family: var(--f-data); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.gm-opp { font-weight: 600; font-size: 14px; line-height: 1.2; }
+.gm-res { font-family: var(--f-display); font-weight: 800; font-size: 20px; line-height: 1.05; }
+.gm.W .gm-res { color: var(--win); } .gm.L .gm-res { color: var(--red); } .gm.O .gm-res { color: var(--amber); }
+.gm-res small { font-family: var(--f-data); font-size: 12px; font-weight: 600; }
+.gm { text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.gm:hover { border-color: var(--blue); }
+.gm[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--blue); }
+.game-card { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 5px; padding: 12px 14px; display: grid; gap: 8px; }
+.game-card.W { border-left-color: var(--win); } .game-card.L { border-left-color: var(--red); } .game-card.O { border-left-color: var(--amber); }
+.gc-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.gc-tag { font-family: var(--f-data); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+.game-card.W .gc-tag { color: var(--win); } .game-card.L .gc-tag { color: var(--red); } .game-card.O .gc-tag { color: var(--amber); }
+.gc-score { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 18px; font-weight: 600; }
+.gc-score b { font-family: var(--f-display); font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.gc-score small { font-family: var(--f-data); font-size: 15px; }
+.goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.gl { display: grid; grid-template-columns: 3.2em 1fr; gap: 8px; align-items: baseline; font-size: 15px; color: var(--muted); }
+.gl.fin { color: var(--ink); }
+.gl-score { font-family: var(--f-display); font-weight: 800; font-size: 18px; font-variant-numeric: tabular-nums; }
+.gl-as { color: var(--muted); }
+.gl-ot { font-family: var(--f-data); font-weight: 600; font-size: 12px; text-transform: uppercase; color: var(--amber); }
+.gl-none { margin: 0; color: var(--muted); }
+.next-up { display: flex; flex-direction: column; gap: 2px; }
+.next-up b { font-size: 20px; }
+.small-rec { font-size: clamp(48px, 10vw, 72px); }
+.stats { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; }
+.stats th { font-family: var(--f-data); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.stats th:first-child, .stats td:first-child { text-align: left; }
+.stats td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.stats tr:last-child td { border-bottom: 0; }
+.stats tr.lead td { color: var(--gold); font-weight: 600; }
+.gk-line { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+.gl-depth { font-weight: 500; color: var(--muted); }
+.gc-pens { margin: 0; font-size: 13.5px; color: var(--muted); }
+.stats tr.depth td { color: var(--muted); }
+.stats tr.sub td { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--ice); }
+.awards { display: grid; }
+.aw-list, .kings { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.aw { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; padding: 8px 12px; background: var(--panel); border: 1px solid var(--gold); border-radius: 5px; }
+.aw.mvp { background: color-mix(in srgb, var(--gold) 16%, var(--panel)); border-width: 2px; }
+.aw-star { color: var(--gold); font-size: 22px; text-align: center; }
+.aw > span:last-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.aw-title { font-family: var(--f-data); font-weight: 600; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); width: 100%; }
+.aw b { font-size: 16px; }
+.aw-note { font-size: 13.5px; color: var(--muted); }
+.aw-none { margin: 0; color: var(--muted); }
+.allstar { margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.as-chip { font-size: 13.5px; font-weight: 600; padding: 2px 8px; border: 1px solid var(--line); border-radius: 99px; background: var(--panel); }
+.kings { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+.kings li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 6px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; }
+.kings .label { width: 100%; }
+.share-box { display: grid; gap: 8px; }
+.share-img { width: 100%; max-width: 540px; border-radius: 8px; border: 1px solid var(--line); display: block; }
+.share-help { margin: 0; font-size: 14px; color: var(--muted); }
+.reveal { display: grid; gap: 18px; }
+.reveal[hidden] { display: none; }
+.reveal.pop { animation: pop .45s ease-out; }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } }
+.playing { margin: 6px 0 0; font-family: var(--f-data); font-weight: 600; font-size: 16px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.gm.pending > * { visibility: hidden; }
+.actions[hidden] { display: none; }
+.res-badge { display: inline-block; vertical-align: middle; font-family: var(--f-data); font-weight: 600; font-size: 14px; letter-spacing: .08em; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); text-transform: uppercase; }
+.res-badge.kulta { color: var(--gold); border-color: var(--gold); }
+.res-badge.hopea { color: var(--silver); border-color: var(--silver); }
+.res-badge.pronssi { color: var(--bronze); border-color: var(--bronze); }
+.mode-switch { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.mode-switch .label { margin-right: 4px; }
+.seg { border: 1px solid var(--line); background: var(--panel); padding: 5px 12px; border-radius: 99px; font-family: var(--f-data); font-weight: 600; font-size: 14px; }
+.seg[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
+.site-foot { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
+.po { display: grid; gap: 6px; }
+.po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
+.po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
+.po-row.win .res { color: var(--win); } .po-row.loss .res { color: var(--red); }
+.medal { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 6px; border: 2px solid var(--ink); background: var(--panel); }
+.disc { width: 44px; height: 44px; border-radius: 50%; flex: none; display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 20px; color: #fff; box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+.disc.gold { background: var(--gold); } .disc.silver { background: var(--silver); } .disc.bronze { background: var(--bronze); } .disc.none { background: var(--line); color: var(--muted); }
+.medal b { font-family: var(--f-display); font-size: 24px; text-transform: uppercase; display: block; line-height: 1; }
+.medal span { color: var(--muted); font-size: 13.5px; }
+.perfect { border-color: var(--gold); background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 22%, var(--panel)), var(--panel)); }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.copied { font-size: 13px; color: var(--win); align-self: center; }
+textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); color: var(--ink); }
+
+.slot .ls { display: none; }
+
+/* Puhelin: tiiviimpi otsikko, isompi pienin teksti */
+@media (max-width: 600px) {
+  .board { padding-bottom: 12px; padding-top: calc(env(safe-area-inset-top, 0px) + 14px); }
+  .board .wrap { flex-wrap: nowrap; align-items: center; }
+  .tag { display: none; }
+  h1 { font-size: clamp(30px, 9.5vw, 42px); }
+  .clock div { min-width: 52px; padding: 4px 8px; }
+  .clock b { font-size: 22px; }
+  .clock span { font-size: 12px; letter-spacing: .06em; }
+  main.wrap { padding-block: 14px 40px; gap: 16px; }
+  .label { font-size: 13px; letter-spacing: .1em; }
+  .slot .lf { display: none; }
+  .slot .ls { display: inline; }
+  .slot .label { font-size: 13px; }
+  .slot .who { font-size: 14.5px; }
+  .slot .fit, .slot .era.pen { font-size: 13px; }
+  .slot { min-height: 50px; }
+  .rink-foot { margin-top: 8px; align-items: center; }
+  .strength { font-size: 26px; }
+  .toggle { font-size: 14px; }
+  .note { display: none; }
+  .pos { font-size: 12.5px; min-width: 36px; }
+  .pl { min-height: 40px; }
+  .pl-name { font-size: 16px; }
+  .pl-hint { font-size: 14px; }
+  .gstatus { font-size: 14px; }
+  .hint-row { font-size: 15px; }
+  .legend, .medal span { font-size: 14px; }
+  .chip { font-size: 14px; }
+  .gms { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kings li { padding: 6px 8px; }
+  .gm-round { font-size: 12px; }
+  .gm-opp { font-size: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<header class="board">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Leijonien <span class="score">kultakausi</span></h1>
+      <p class="tag">Draftaa kaikkien aikojen Leijonat arvotuista turnausjoukkueista. Kestääkö joukkue koko 22 ottelun kauden ilman tappiota?</p>
+    </div>
+    <div class="clock" aria-label="Tilanne">
+      <div><b id="roundNo">1/6</b><span>Kierros</span></div>
+      <div><b id="bestRec">–</b><span>Paras</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <section id="draftCol" aria-live="polite"></section>
+  <aside class="rinkcol">
+    <div class="rink" id="rink"></div>
+    <div class="rink-foot">
+      <div>
+        <div class="label">Joukkueen vahvuus</div>
+        <div class="strength" id="strength">?</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="showRatings"> Näytä arviot (helppo tila)</label>
+    </div>
+    <div class="chips" id="chips"></div>
+    <p class="note">Arviot ovat pelin tekijän suuntaa-antavia näkemyksiä pelaajien huippuvuosista. Kemiabonuksia saa joukkuekavereista ja saman sukupolven pelaajista.</p>
+  </aside>
+</main>
+
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä.</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="game-core.js"></script>
+<script>
+(function () {
+  const G = window.Leijonat;
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+
+  let S;
+  function fresh() {
+    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, selected: null, lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+  }
+
+  function start(data) {
+    S = data && data.S ? data.S : fresh();
+    if (!S.groupOpen) S.groupOpen = {};
+    if (S.result && (!S.result.played || !S.result.mmAwards || !S.result.depth)) { S.phase = 'ready'; S.result = null; }
+    if (S.openGame === undefined) S.openGame = null;
+    if (!S.mode) { S.mode = 'aika'; S.draw = S.era || null; S.drawn = []; }
+    if (S.phase === 'draft' && !S.draw) S.draw = rollDraw();
+    const sr = store.get('l820-ratings') === '1';
+    $('#showRatings').checked = sr;
+    applyRatings();
+    render();
+  }
+
+  function rollEra(exclude) {
+    const keys = Object.keys(G.ERAS).filter((k) => k !== exclude);
+    // ei samaa aikakautta kolmesti peräkkäin
+    let k;
+    do { k = keys[Math.floor(Math.random() * keys.length)]; }
+    while (S && S.eraHistory.length >= 2 && S.eraHistory.slice(-2).every((e) => e === k) && keys.length > 1);
+    return k;
+  }
+
+  // Arvonta: turnaus (Suomen kokoonpano) tai aikakausi
+  function rollDraw(exclude) {
+    if (S.mode === 'aika') return rollEra(exclude);
+    let left = G.TOURNAMENTS.filter((t) => t.id !== exclude && !S.drawn.includes(t.id));
+    if (!left.length) left = G.TOURNAMENTS.filter((t) => t.id !== exclude);
+    return left[Math.floor(Math.random() * left.length)].id;
+  }
+  const drawPool = () => S.mode === 'aika'
+    ? G.PLAYERS.filter((p) => p.e.includes(S.draw))
+    : G.TOURNAMENTS.find((t) => t.id === S.draw).roster.map((n) => G.PLAYERS.find((p) => p.n === n)).filter(Boolean);
+  const RES_LABEL = { kulta: 'Kulta', hopea: 'Hopea', pronssi: 'Pronssi', 'välierä': 'Välierä' };
+
+  const playerByName = (n) => G.PLAYERS.find((p) => p.n === n);
+  const lineupPlayers = () => { const o = {}; for (const [k, n] of Object.entries(S.lineup)) o[k] = playerByName(n); return o; };
+  const openSlots = () => G.SLOTS.filter((s) => !S.lineup[s.id]);
+  const taken = (p) => Object.values(S.lineup).includes(p.n);
+  const placeable = (p) => openSlots().some((s) => G.fitPenalty(p, s.pos) !== null);
+  const ratingsOn = () => $('#showRatings').checked;
+
+  function applyRatings() { document.body.classList.toggle('hide-ratings', !ratingsOn()); }
+
+  function render() {
+    $('#roundNo').textContent = S.phase === 'draft' ? Math.min(S.round, 6) + '/6' : 'Valmis';
+    const best = store.get('lkk-best');
+    $('#bestRec').textContent = best || '–';
+    renderRink();
+    if (S.phase === 'draft') renderDraft();
+    else if (S.phase === 'ready') renderReady();
+    else if (S.phase === 'step') renderStep();
+    else renderResult();
+  }
+
+  // Kultasuoni: mitkä kemiabonukset syntyvät tai kasvavat, jos pelaaja lisätään kokoonpanoon
+  const shortChem = (c) => c.name.startsWith('Saman sukupolven') ? 'Sukupolvi' : c.name;
+  function chemGains(before, afterLineup) {
+    const cur = {};
+    for (const c of before) cur[c.name] = c.b;
+    return G.evaluateTeam(afterLineup).chem.filter((c) => !(cur[c.name] >= c.b - 1e-9));
+  }
+  function synBadge(p) {
+    const lp = lineupPlayers();
+    const gains = chemGains(G.evaluateTeam(lp).chem, { ...lp, X: p });
+    if (!gains.length) return '';
+    const full = gains.map((c) => `${c.name} +${c.b.toFixed(1)}`).join(', ');
+    return `<span class="syn" title="Kultasuoni: ${esc(full)}">✦ ${esc(gains.map(shortChem).join(', '))}</span>`;
+  }
+  let toastTimer;
+  function toast(html) {
+    const t = $('#toast');
+    t.innerHTML = html;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  }
+
+  function renderDraft() {
+    const pool = drawPool();
+    const tour = S.mode === 'turnaus' ? G.TOURNAMENTS.find((t) => t.id === S.draw) : null;
+    const canSwitch = S.round === 1 && !Object.keys(S.lineup).length;
+    const groups = [['G', 'Maalivahdit'], ['D', 'Puolustajat'], ['C', 'Keskushyökkääjät'], ['W', 'Laiturit']];
+    const GROUP_POS = { G: ['G'], D: ['D'], C: ['C'], W: ['LW', 'RW'] };
+    const sel = S.selected;
+    let html = `
+      <div class="spin">
+        <div class="spin-era">
+          <div class="label">Kierros ${S.round} · arvottu ${tour ? 'turnaus' : 'aikakausi'}</div>
+          <h2 id="eraTitle">${tour ? esc(tour.label) : esc(G.ERAS[S.draw])}${tour && tour.res ? ` <span class="res-badge ${tour.res === 'välierä' ? '' : tour.res}">${RES_LABEL[tour.res]}</span>` : ''}</h2>
+        </div>
+        <div class="spin-actions">
+          <button class="btn" id="reroll" ${S.rerolls ? '' : 'disabled'}>Arvo uusi ${tour ? 'turnaus' : 'aikakausi'} (${S.rerolls})</button>
+        </div>
+      </div>
+      ${canSwitch ? `<div class="mode-switch" role="group" aria-label="Arvontatapa">
+        <span class="label">Arvonta</span>
+        <button class="seg" data-mode="turnaus" aria-pressed="${S.mode === 'turnaus'}">Turnaus</button>
+        <button class="seg" data-mode="aika" aria-pressed="${S.mode === 'aika'}">Aikakausi</button>
+      </div>` : ''}
+      <div class="hint-row" id="hintRow">${sel ? 'Valitse kaukalosta paikka pelaajalle <b>' + esc(sel) + '</b>.' : tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.'}</div>`;
+    for (const [key, label] of groups) {
+      const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
+        .sort((a, b) => a.n.localeCompare(b.n, 'fi'));
+      if (!list.length) continue;
+      const slotsOfGroup = G.SLOTS.filter((s) => GROUP_POS[key].includes(s.pos));
+      const full = slotsOfGroup.every((s) => S.lineup[s.id]);
+      const collapsed = key in S.groupOpen ? !S.groupOpen[key] : full;
+      const chosen = slotsOfGroup.filter((s) => S.lineup[s.id]).map((s) => S.lineup[s.id]);
+      const status = full ? 'Valittu: ' + chosen.join(', ') : chosen.length ? chosen.length + '/' + slotsOfGroup.length + ' valittu' : '';
+      html += `<div class="group">
+        <button class="group-head" data-g="${key}" aria-expanded="${!collapsed}">
+          <span class="chev" aria-hidden="true">${collapsed ? '▸' : '▾'}</span>
+          <span class="label">${label} <span class="count">${list.length}</span></span>
+          <span class="gstatus">${esc(status)}</span>
+        </button>
+        <div class="list" ${collapsed ? 'hidden' : ''}>`;
+      for (const p of list) {
+        const dis = taken(p) || !placeable(p);
+        const anyFwd = ['C', 'LW', 'RW'].includes(p.p) && p.a.length === 2;
+        const posTxt = anyFwd ? 'H' : G.POS_LABEL[p.p] + (p.a.length ? '/' + p.a.map((x) => G.POS_LABEL[x]).join('/') : '');
+        html += `<button class="pl" data-n="${esc(p.n)}" title="${esc(p.n + ' – ' + p.h)}" aria-pressed="${sel === p.n}" ${dis ? 'disabled' : ''}>
+          <span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${esc(taken(p) ? 'Jo joukkueessa' : p.h)}</span></span>
+          <span class="rating">${p.r}</span>
+        </button>`;
+      }
+      html += `</div></div>`;
+    }
+    $('#draftCol').innerHTML = html;
+    $('#reroll').onclick = () => {
+      if (!S.rerolls) return;
+      S.rerolls--; S.selected = null;
+      S.draw = rollDraw(S.draw);
+      render();
+    };
+    document.querySelectorAll('.seg').forEach((b) => b.onclick = () => {
+      if (S.mode === b.dataset.mode) return;
+      S.mode = b.dataset.mode; store.set('lkk-mode', S.mode);
+      S.drawn = []; S.selected = null; S.groupOpen = {};
+      S.draw = rollDraw();
+      render();
+    });
+    document.querySelectorAll('.group-head').forEach((b) => b.onclick = () => {
+      S.groupOpen[b.dataset.g] = b.getAttribute('aria-expanded') !== 'true';
+      render();
+    });
+    document.querySelectorAll('.pl').forEach((b) => b.onclick = () => {
+      S.selected = S.selected === b.dataset.n ? null : b.dataset.n;
+      render();
+    });
+  }
+
+  function renderRink() {
+    const lp = lineupPlayers();
+    const sel = S.selected && playerByName(S.selected);
+    const slotHtml = (s) => {
+      const p = lp[s.id];
+      if (p) {
+        const pen = G.fitPenalty(p, s.pos);
+        return `<button class="slot filled" disabled><span class="label">${s.short}</span><span class="who">${esc(p.n)}</span>
+          ${pen ? `<span class="era pen">−${pen} ${pen <= 4 ? 'sivupaikka' : 'väärä rooli'}</span>` : ''}</button>`;
+      }
+      if (sel && S.phase === 'draft') {
+        const pen = G.fitPenalty(sel, s.pos);
+        if (pen !== null) {
+          const cls = pen === 0 ? '' : pen <= 4 ? 'warn' : 'bad';
+          const txt = pen === 0 ? 'Oma paikka' : '−' + pen + (pen <= 4 ? ' sivupaikka' : ' väärä rooli');
+          return `<button class="slot target ${cls}" data-slot="${s.id}"><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span><span class="fit">${txt}</span></button>`;
+        }
+      }
+      return `<button class="slot" disabled><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span></button>`;
+    };
+    const sl = (id) => slotHtml(G.SLOTS.find((s) => s.id === id));
+    $('#rink').innerHTML = `
+      <div class="row f">${sl('LW')}${sl('C')}${sl('RW')}</div>
+      <div class="row d">${sl('D1')}${sl('D2')}</div>
+      <div class="row g">${sl('G')}</div>`;
+    document.querySelectorAll('.slot[data-slot]').forEach((b) => b.onclick = () => place(b.dataset.slot));
+
+    const filled = Object.keys(S.lineup).length;
+    const ev = G.evaluateTeam(lp);
+    const showNum = ratingsOn() || S.phase !== 'draft';
+    $('#strength').textContent = filled === 0 ? '–' : showNum ? (filled === 6 ? ev.total.toFixed(1) : (ev.base / G.SLOTS.filter((s) => S.lineup[s.id]).reduce((a, s) => a + s.w, 0)).toFixed(1) + (filled < 6 ? ' (kesken)' : '')) : '?';
+    $('#chips').innerHTML = ev.chem.map((c) => `<span class="chip" title="${esc(c.who.join(', '))}">${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('');
+  }
+
+  function place(slotId) {
+    if (!S.selected) return;
+    const before = G.evaluateTeam(lineupPlayers()).chem;
+    S.lineup[slotId] = S.selected;
+    const gains = chemGains(before, lineupPlayers());
+    if (gains.length) {
+      toast(`<b>Kultasuoni!</b> ${gains.map((c) => `${esc(c.name)} +${c.b.toFixed(1)}`).join(' · ')}`);
+    }
+    if (S.mode === 'aika') S.eraHistory.push(S.draw);
+    S.drawn.push(S.draw);
+    S.selected = null;
+    S.groupOpen = {};
+    S.round++;
+    if (S.round > 6) { S.phase = 'ready'; S.draw = null; }
+    else S.draw = rollDraw();
+    render();
+    if (window.matchMedia('(max-width: 820px)').matches && S.phase === 'draft') $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderReady() {
+    $('#draftCol').innerHTML = `
+      <div class="result">
+        <div class="verdict">
+          <div class="label">Kokoonpano valmis</div>
+          <h2>Kausi alkaa</h2>
+          <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
+        </div>
+        <div class="actions">
+          <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
+          <button class="btn" id="playAll">Simuloi koko kausi</button>
+          <button class="btn" id="restart">Aloita alusta</button>
+        </div>
+      </div>`;
+    $('#playStep').onclick = () => startSeason('step');
+    $('#playAll').onclick = () => startSeason('all');
+    $('#restart').onclick = restart;
+  }
+
+  const MEDAL_RANK = { gold: 3, silver: 2, bronze: 1 };
+  function startSeason(mode) {
+    const lp = lineupPlayers();
+    const ev = G.evaluateTeam(lp);
+    const skaters = ev.rows.filter((row) => row.slot.pos !== 'G').map((row) => ({ n: row.player.n, eff: row.eff, pos: row.slot.pos }));
+    const gk = ev.rows.find((row) => row.slot.pos === 'G');
+    const depth = G.pickDepth(Math.random, Object.values(lp));
+    S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth);
+    S.result.rating = ev.total;
+    S.openGame = null;
+    if (mode === 'step') { S.phase = 'step'; S.shown = 0; }
+    else finishSeason(true);
+    render();
+    $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function finishSeason(animate) {
+    const r = S.result;
+    S.phase = 'result';
+    S.animate = animate;
+    S.openGame = null;
+    const score = r.W * 10 + (MEDAL_RANK[r.medal] || 0);
+    const prev = store.get('lkk-bestScore');
+    if (prev === null || score > +prev) {
+      store.set('lkk-bestScore', String(score));
+      store.set('lkk-best', `${r.W}–${r.L}–${r.OTL}`);
+    }
+  }
+
+  function restart() { S = fresh(); S.draw = rollDraw(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+  const MEDAL = {
+    gold: ['gold', 'MM-kulta', 'Leijonat voitti finaalin.'],
+    silver: ['silver', 'MM-hopea', 'Finaalissa jäi vielä yksi maali.'],
+    bronze: ['bronze', 'MM-pronssi', 'Pronssiottelu voitettu.'],
+  };
+  const stageLabel = (g) => g.round ? 'MM · ' + g.round : G.STAGES.find((s) => s.id === g.stage).label;
+  const surname = (n) => n.split(' ').slice(1).join(' ') || n;
+  const record = (games) => {
+    const w = games.filter((g) => g.win).length, o = games.filter((g) => !g.win && g.ot).length;
+    return [w, games.length - w - o, o];
+  };
+  const recHtml = ([w, l, o]) => `${w}–<span class="l">${l}</span>–<span class="o">${o}</span>`;
+
+  const isDepth = (n) => !!(S.result && S.result.depth && S.result.depth.includes(n));
+  function gameDetail(g, idx) {
+    const goals = (g.goals || []).map((x) => x.fin
+      ? `<li class="gl fin"><span class="gl-score">${x.f}–${x.a}</span><span><b${isDepth(x.s) ? ' class="gl-depth"' : ''}>${esc(surname(x.s))}</b>${x.as.length ? ` <span class="gl-as">(${esc(x.as.map(surname).join(', '))})</span>` : ''}${x.ot ? ' <span class="gl-ot">ja</span>' : ''}</span></li>`
+      : `<li class="gl"><span class="gl-score">${x.f}–${x.a}</span><span class="gl-opp">${esc(g.opp)}${x.ot ? ' <span class="gl-ot">ja</span>' : ''}</span></li>`).join('');
+    const c = g.win ? 'W' : g.ot ? 'O' : 'L';
+    return `<div class="game-card ${c}">
+      <div class="gc-head"><span class="label">Ottelu ${idx + 1} · ${esc(stageLabel(g))}</span><span class="gc-tag">${g.win ? 'Voitto' : g.ot ? 'Jatkoaikatappio' : 'Tappio'}</span></div>
+      <div class="gc-score"><span>Suomi – ${esc(g.opp)}</span><b>${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</b></div>
+      ${goals ? `<ol class="goals">${goals}</ol>` : '<p class="gl-none">Ei maaleja.</p>'}
+      ${g.pens && g.pens.length ? `<p class="gc-pens">Jäähyt: ${g.pens.map((x) => `${esc(surname(x.n))} ${x.min} min`).join(', ')}</p>` : ''}
+    </div>`;
+  }
+
+  function stagesHtml(r, games) {
+    return G.STAGES.map((st) => {
+      const gs = games.filter((g) => g.stage === st.id);
+      if (!gs.length) return '';
+      const chips = gs.map((g) => {
+        const i = r.games.indexOf(g);
+        const c = g.win ? 'W' : g.ot ? 'O' : 'L';
+        return `<button class="gm" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">
+          ${g.round ? `<span class="gm-round">${esc(g.round)}</span>` : ''}
+          <span class="gm-opp">${esc(g.opp)}</span>
+          <span class="gm-res">${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</span></button>`;
+      }).join('');
+      const w = gs.filter((g) => g.win).length;
+      const extra = st.id === 'mm' && gs.length === 7 ? ` · ${r.groupPts} p` : '';
+      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div><div class="gms">${chips}</div></div>`;
+    }).join('');
+  }
+
+  function bindChips(rerender) {
+    document.querySelectorAll('#stages .gm').forEach((b) => b.onclick = () => {
+      const i = +b.dataset.i;
+      S.openGame = S.openGame === i ? null : i;
+      rerender();
+      const d = $('#gameDetail');
+      if (d && S.openGame !== null) d.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
+  const scoring = (games) => G.seasonStats(games).sort((a, b) => b.p - a.p || b.g - a.g);
+
+  function scoringHtml(games) {
+    const lp = lineupPlayers();
+    const rows = scoring(games);
+    for (const sl of G.SLOTS) if (sl.pos !== 'G' && lp[sl.id] && !rows.find((x) => x.n === lp[sl.id].n)) rows.push({ n: lp[sl.id].n, g: 0, a: 0, p: 0, pim: 0 });
+    const ga = games.reduce((a, g) => a + g.a, 0);
+    const so = games.filter((g) => g.a === 0).length;
+    return `<div>
+      <div class="label" style="margin-bottom:6px">Pistepörssi · koko kausi</div>
+      <table class="stats"><thead><tr><th>Pelaaja</th><th>M</th><th>S</th><th>P</th><th>J</th></tr></thead><tbody>
+      ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${esc(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
+      <tr class="sub"><td colspan="5">Muut kentät · pelin valitsemat</td></tr>
+      ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${esc(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="gk-line">Maalivahti ${esc(lp.G.n)}: päästetyt ${games.length ? (ga / games.length).toFixed(2) : '0'} / ottelu · nollapelit ${so}</p>
+    </div>`;
+  }
+
+  function kings(games) {
+    const st = G.seasonStats(games).filter((x) => !isDepth(x.n));
+    const top = (key, label, unit) => {
+      const best = st.slice().sort((a, b) => b[key] - a[key] || b.p - a.p)[0];
+      return best && best[key] ? { label, n: best.n, v: `${best[key]} ${unit}` } : null;
+    };
+    return [top('g', 'Maalikuningas', 'maalia'), top('a', 'Syöttökuningas', 'syöttöä'), top('p', 'Pistekuningas', 'pistettä'), top('pim', 'Jäähykuningas', 'min')].filter(Boolean);
+  }
+
+  function awardsHtml(r) {
+    const A = r.mmAwards;
+    const list = A.awards.map((a) => `<li class="aw${a.id === 'mvp' ? ' mvp' : ''}"><span class="aw-star" aria-hidden="true">★</span><span><span class="aw-title">${esc(a.title)}</span><b>${esc(a.n)}</b><span class="aw-note">${esc(a.note)}</span></span></li>`).join('');
+    const stars = A.allstar.length
+      ? `<p class="allstar"><span class="label">Tähdistökenttä</span> ${A.allstar.map((x) => `<span class="as-chip">${x.pos} ${esc(x.n)}</span>`).join(' ')}</p>`
+      : '';
+    const k = kings(r.games).map((x) => `<li><span class="label">${x.label}</span><b>${esc(x.n)}</b><span class="aw-note">${esc(x.v)}</span></li>`).join('');
+    return `<div class="awards">
+      <div class="label" style="margin-bottom:6px">MM-kisojen palkinnot</div>
+      ${list ? `<ul class="aw-list">${list}</ul>` : `<p class="aw-none">Tänä vuonna ei yksilöpalkintoja suomalaisille.</p>`}
+      ${stars}
+      <div class="label" style="margin:12px 0 6px">Joukkueen kuninkaat · koko kausi</div>
+      <ul class="kings">${k}</ul>
+    </div>`;
+  }
+
+  function renderStep() {
+    const r = S.result;
+    const shown = r.games.slice(0, S.shown);
+    const last = shown[shown.length - 1];
+    const next = r.games[S.shown];
+    const done = S.shown >= r.games.length;
+    $('#roundNo').textContent = `${S.shown}/${r.games.length}`;
+    $('#draftCol').innerHTML = `
+      <div class="result">
+        <div class="verdict">
+          <div class="label">Kausi käynnissä · voitot–tappiot–jatkoaikatappiot</div>
+          <div class="record small-rec">${recHtml(record(shown))}</div>
+        </div>
+        ${last ? gameDetail(last, S.shown - 1) : ''}
+        <div class="next-up">
+          ${done
+            ? `<span class="label">Kausi pelattu</span>`
+            : `<span class="label">Seuraavaksi · ${esc(stageLabel(next))}</span><b>Suomi – ${esc(next.opp)}</b>`}
+        </div>
+        <div class="actions">
+          ${done
+            ? `<button class="btn primary" id="toSummary">Katso kauden yhteenveto</button>`
+            : `<button class="btn primary" id="nextGame">${S.shown ? 'Seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi loput</button>`}
+        </div>
+        ${S.openGame !== null && S.openGame < S.shown - 1 ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
+        ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown)}</div>` : ''}
+      </div>`;
+    shown.length && document.querySelectorAll('#stages .gm').forEach((c) => c.classList.add(c.dataset.c));
+    bindChips(render);
+    if (done) $('#toSummary').onclick = () => { finishSeason(false); render(); $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    else {
+      $('#nextGame').onclick = () => { S.shown++; S.openGame = null; render(); $('#draftCol').scrollIntoView({ block: 'start' }); };
+      $('#simRest').onclick = () => { S.shown = r.games.length; finishSeason(false); render(); $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    }
+  }
+
+  function renderResult() {
+    const r = S.result;
+    const v = G.verdict(r);
+    const lastPo = r.games.filter((g) => g.stage === 'po').pop();
+    const m = r.medal ? MEDAL[r.medal]
+      : ['none', 'Ei mitalia', !r.advanced ? 'MM-alkusarjasta ei päästy jatkoon.' : lastPo.round === 'Puolivälierä' ? 'Puolivälierä oli päätepiste.' : 'Pronssiottelu hävittiin.'];
+    $('#draftCol').innerHTML = `
+      <div class="result">
+        <div class="verdict">
+          <div class="label">Kausi · voitot–tappiot–jatkoaikatappiot</div>
+          <div class="record" id="rec">${S.animate ? recHtml([0, 0, 0]) : recHtml([r.W, r.L, r.OTL])}</div>
+          <p class="playing" id="playing" ${S.animate ? '' : 'hidden'}>Kausi käynnissä…</p>
+        </div>
+        <div class="reveal" id="reveal" ${S.animate ? 'hidden' : ''}>
+          <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p></div>
+          ${r.perfect ? `<div class="medal perfect"><span class="disc gold">22</span><div><b>Täydellinen kausi</b><span>Kaikki 22 ottelua voitettu.</span></div></div>` : ''}
+          <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
+          ${awardsHtml(r)}
+          ${scoringHtml(r.games)}
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:6px">Ottelut · avaa maalintekijät napauttamalla</div>
+          <div class="stages" id="stages">${stagesHtml(r, r.games)}</div>
+        </div>
+        ${S.openGame !== null ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
+        <div class="legend"><span><i style="background:var(--win)"></i>Voitto</span><span><i style="background:var(--red)"></i>Tappio</span><span><i style="background:var(--amber)"></i>Jatkoaikatappio</span></div>
+        <div class="actions" id="resActions" ${S.animate ? 'hidden' : ''}>
+          <button class="btn primary" id="again">Uusi draft</button>
+          <button class="btn" id="mkImg">Tee jakokuva</button>
+          <button class="btn" id="copy">Kopioi tulos</button>
+          <span class="copied" id="copied" hidden>Kopioitu</span>
+        </div>
+        <textarea class="share" id="shareText" rows="6" hidden readonly></textarea>
+        <div id="shareImgBox" class="share-box" hidden></div>
+      </div>`;
+    $('#again').onclick = restart;
+    $('#copy').onclick = copyResult;
+    $('#mkImg').onclick = showShareImage;
+    bindChips(render);
+    animateResult(r);
+  }
+
+  function animateResult(r) {
+    const cells = [...document.querySelectorAll('#stages .gm')];
+    const rec = $('#rec');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!S.animate || reduce) {
+      S.animate = false;
+      cells.forEach((c) => c.classList.add(c.dataset.c));
+      rec.innerHTML = recHtml([r.W, r.L, r.OTL]);
+      return;
+    }
+    S.animate = false;
+    cells.forEach((c) => c.classList.add('pending'));
+    let i = 0, w = 0, l = 0, o = 0;
+    const t = setInterval(() => {
+      const cell = cells[i];
+      const c = cell.dataset.c;
+      cell.classList.remove('pending'); cell.classList.add(c);
+      if (c === 'W') w++; else if (c === 'L') l++; else o++;
+      rec.innerHTML = recHtml([w, l, o]);
+      if (++i >= cells.length) {
+        clearInterval(t);
+        setTimeout(() => {
+          $('#playing').hidden = true;
+          $('#reveal').hidden = false;
+          $('#resActions').hidden = false;
+          $('#reveal').classList.add('pop');
+          $('#reveal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+      }
+    }, 110);
+  }
+
+  // Jakokuva: 1080 × 1350 (4:5), kiinteät värit teemasta riippumatta
+  function rrect(x, X, Y, w, h, r) {
+    x.beginPath();
+    x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r);
+    x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath();
+  }
+  function fitFont(x, text, weight, size, family, maxW) {
+    let s = size;
+    do { x.font = `${weight} ${s}px ${family}`; s -= 2; } while (x.measureText(text).width > maxW && s > 12);
+  }
+  async function makeShareImage() {
+    try {
+      await Promise.all([
+        document.fonts.load('800 80px "Saira Extra Condensed"'),
+        document.fonts.load('600 30px "Barlow"'),
+        document.fonts.load('600 30px "Barlow Condensed"'),
+      ]);
+    } catch (e) {}
+    const r = S.result, lp = lineupPlayers(), v = G.verdict(r);
+    const W = 1080, H = 1350, PAD = 64;
+    const C = { bg: '#0d1b2e', panel: '#13243b', line: '#2a4262', gold: '#ffd34d', ink: '#f2f6fb', muted: '#9fb2c9',
+      win: '#45b37c', red: '#ef5b6b', amber: '#e3a83a', blue: '#6f9fe6', medal: { gold: '#dcb24a', silver: '#b3bfcc', bronze: '#cf8a52' } };
+    const D = "'Saira Extra Condensed', 'Arial Narrow', sans-serif";
+    const B = "'Barlow', system-ui, sans-serif";
+    const BC = "'Barlow Condensed', 'Arial Narrow', sans-serif";
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const x = c.getContext('2d');
+    x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+    x.textBaseline = 'alphabetic';
+
+    // Otsikko
+    x.font = `800 92px ${D}`;
+    x.fillStyle = C.ink; x.fillText('LEIJONIEN', PAD, 130);
+    const lw = x.measureText('LEIJONIEN ').width;
+    x.fillStyle = C.gold; x.fillText('KULTAKAUSI', PAD + lw, 130);
+    x.fillStyle = C.gold; x.fillRect(PAD, 156, W - PAD * 2, 4);
+
+    // Tulos
+    x.font = `600 28px ${BC}`; x.fillStyle = C.muted;
+    x.fillText('KAUSI · VOITOT – TAPPIOT – JATKOAIKATAPPIOT', PAD, 214);
+    x.font = `800 210px ${D}`;
+    let px = PAD;
+    for (const [t, col] of [[String(r.W), C.ink], ['–', C.ink], [String(r.L), C.red], ['–', C.ink], [String(r.OTL), C.amber]]) {
+      x.fillStyle = col; x.fillText(t, px, 400); px += x.measureText(t).width;
+    }
+    fitFont(x, v.title.toUpperCase(), 800, 76, D, W - PAD * 2 - 230);
+    x.fillStyle = C.ink; x.fillText(v.title.toUpperCase(), PAD, 486);
+
+    // Mitali
+    const mx = W - PAD - 90, my = 320;
+    x.beginPath(); x.arc(mx, my, 90, 0, Math.PI * 2);
+    x.fillStyle = r.medal ? C.medal[r.medal] : C.line; x.fill();
+    x.lineWidth = 8; x.strokeStyle = 'rgba(255,255,255,.35)'; x.stroke();
+    x.font = `800 96px ${D}`; x.textAlign = 'center'; x.fillStyle = r.medal ? '#fff' : C.muted;
+    x.fillText(r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–', mx, my + 34);
+    x.font = `600 30px ${BC}`; x.fillStyle = C.ink;
+    x.fillText(r.medal ? MEDAL[r.medal][1].toUpperCase() : 'EI MITALIA', mx, my + 136);
+    x.textAlign = 'left';
+
+    // Ottelunauha
+    const sy = 528, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
+    for (let i = 0; i < n; i++) {
+      const g = r.games[i];
+      x.fillStyle = !g ? C.panel : g.win ? C.win : g.ot ? C.amber : C.red;
+      rrect(x, PAD + i * (cw + gap), sy, cw, 44, 5); x.fill();
+    }
+
+    // Kaukalo
+    const ry = 610, rh = 430, rw = W - PAD * 2;
+    rrect(x, PAD, ry, rw, rh, 60); x.fillStyle = C.panel; x.fill();
+    x.lineWidth = 5; x.strokeStyle = C.ink; x.stroke();
+    x.save(); rrect(x, PAD, ry, rw, rh, 60); x.clip();
+    x.fillStyle = C.blue; x.globalAlpha = .6; x.fillRect(PAD, ry + 190, rw, 5);
+    x.fillStyle = C.red; x.fillRect(PAD, ry + rh - 112, rw, 3); x.globalAlpha = 1;
+    x.restore();
+    const box = (slotId, bx, by, bw) => {
+      const sl = G.SLOTS.find((s) => s.id === slotId), p = lp[slotId];
+      rrect(x, bx, by, bw, 116, 10); x.fillStyle = C.bg; x.fill();
+      x.lineWidth = 3; x.strokeStyle = C.gold; x.stroke();
+      x.textAlign = 'center';
+      x.font = `600 24px ${BC}`; x.fillStyle = C.gold; x.fillText(sl.short, bx + bw / 2, by + 32);
+      const parts = p.n.split(' '), last = parts.slice(1).join(' ') || p.n;
+      fitFont(x, last, 700, 40, B, bw - 20); x.fillStyle = C.ink; x.fillText(last, bx + bw / 2, by + 76);
+      fitFont(x, parts[0], 500, 24, B, bw - 20); x.fillStyle = C.muted; x.fillText(parts[0], bx + bw / 2, by + 104);
+      x.textAlign = 'left';
+    };
+    const fw = (rw - 80) / 3;
+    box('LW', PAD + 20, ry + 40, fw); box('C', PAD + 40 + fw, ry + 40, fw); box('RW', PAD + 60 + fw * 2, ry + 40, fw);
+    const dw = fw * 1.1;
+    box('D1', W / 2 - dw - 12, ry + 170, dw); box('D2', W / 2 + 12, ry + 170, dw);
+    box('G', W / 2 - fw / 2, ry + 300, fw);
+
+    // Palkinnot ja pistekuningas
+    let ay = 1110;
+    const aw = r.mmAwards.awards.slice(0, 3);
+    if (r.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
+    for (const a of aw.slice(0, 3)) {
+      x.font = `800 40px ${D}`; x.fillStyle = C.gold; x.fillText('★', PAD, ay);
+      x.font = `600 28px ${BC}`; const t = a.title.toUpperCase();
+      x.fillText(t, PAD + 48, ay - 4);
+      const tw = x.measureText(t + '  ').width;
+      fitFont(x, a.n, 600, 34, B, W - PAD * 2 - 48 - tw); x.fillStyle = C.ink; x.fillText(a.n, PAD + 48 + tw, ay - 2);
+      ay += 54;
+    }
+    const top = scoring(r.games).filter((x) => !isDepth(x.n))[0];
+    x.font = `500 28px ${B}`; x.fillStyle = C.muted;
+    const foot = (top ? `Pistekuningas ${top.n} ${top.g}+${top.a}   ·   ` : '') + `Vahvuus ${r.rating.toFixed(1)}`;
+    x.fillText(foot, PAD, H - 64);
+    x.font = `600 24px ${BC}`; x.textAlign = 'right'; x.fillStyle = C.gold;
+    x.fillText('LEIJONIEN KULTAKAUSI · FANIPELI', W - PAD, H - 28);
+    x.textAlign = 'left';
+    return c.toDataURL('image/png');
+  }
+
+  async function showShareImage() {
+    const boxEl = $('#shareImgBox');
+    boxEl.hidden = false;
+    boxEl.innerHTML = '<p class="aw-note">Piirretään kuvaa…</p>';
+    try {
+      const url = await makeShareImage();
+      const touch = window.matchMedia('(pointer: coarse)').matches;
+      boxEl.innerHTML = `<img class="share-img" src="${url}" alt="Jakokuva: ykköskenttä ja kauden tulos">
+        <p class="share-help">${touch ? 'Paina kuvaa pitkään ja valitse <b>Tallenna kuva</b> tai <b>Jaa</b>.' : 'Klikkaa kuvaa hiiren oikealla ja valitse <b>Tallenna kuva nimellä</b> tai <b>Kopioi kuva</b>.'}</p>`;
+      boxEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {
+      boxEl.innerHTML = '<p class="aw-note">Kuvan piirtäminen epäonnistui tässä selaimessa. Kopioi tulos -teksti toimii silti.</p>';
+    }
+  }
+
+  function shareText() {
+    const r = S.result, lp = lineupPlayers();
+    const order = ['LW', 'C', 'RW', 'D1', 'D2', 'G'];
+    const medal = r.medal ? MEDAL[r.medal][1] : 'ei mitalia';
+    const top = scoring(r.games).filter((x) => !isDepth(x.n))[0];
+    return `Leijonien kultakausi: ${r.W}–${r.L}–${r.OTL}${r.perfect ? ' · TÄYDELLINEN KAUSI 22–0' : ''} · ${medal}\n` +
+      order.map((id) => `${G.SLOTS.find((s) => s.id === id).short} ${lp[id].n}`).join('\n') +
+      (top ? `\nPistekuningas ${top.n} ${top.g}+${top.a}` : '') +
+      (r.mmAwards.awards.length ? '\n' + r.mmAwards.awards.map((a) => `★ ${a.title}: ${a.n}`).join('\n') : '') +
+      `\nVahvuus ${r.rating.toFixed(1)}`;
+  }
+
+  function copyResult() {
+    const txt = shareText();
+    const done = () => { $('#copied').hidden = false; };
+    const fallback = () => { const ta = $('#shareText'); ta.value = txt; ta.hidden = false; ta.select(); };
+    try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
+  }
+
+  $('#showRatings').addEventListener('change', () => { store.set('l820-ratings', ratingsOn() ? '1' : '0'); applyRatings(); render(); });
+
+  window.claude?.hot?.snapshot?.(() => ({ S }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
