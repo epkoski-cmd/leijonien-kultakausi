@@ -290,6 +290,7 @@
     { name: 'Ruudun veljekset', m: ['Tuomo Ruutu', 'Jarkko Ruutu'], b: 0.8 },
     { name: 'Granlundin veljekset', m: ['Mikael Granlund', 'Markus Granlund'], b: 0.8 },
     { name: 'Isä ja poika Kapanen', m: ['Sami Kapanen', 'Kasperi Kapanen'], b: 0.8 },
+    { name: 'Isä ja poika Hagman', m: ['Matti Hagman', 'Niklas Hagman'], b: 0.8 },
     { name: 'Kultaketju 1995', m: ['Saku Koivu', 'Jere Lehtinen', 'Ville Peltonen'], b: 0.8 },
     { name: 'Oilersin dynastia', m: ['Jari Kurri', 'Esa Tikkanen', 'Reijo Ruotsalainen'], b: 0.8 },
     { name: 'Dallasin suomalaiset', m: ['Roope Hintz', 'Miro Heiskanen', 'Esa Lindell', 'Jere Lehtinen', 'Juha Lind'], b: 0.6 },
