@@ -133,3 +133,6 @@ Käydään läpi vaihtoehdot, kun on aika:
 - Olympialaiset 2022 -joukkueessa ei ole yhtään yli 90 pisteen pelaajaa, mutta joukkue voitti kultaa. Yhteispeli ratkaisee. Idea: saman turnausjoukkueen pelaajat saavat kemiabonuksen ("Pekingin kultajoukkue"), jolloin vähemmän tähtiä sisältävä mutta yhtenäinen kenttä voi pärjätä.
 - Toistettavuus: helpossa tilassa valitsee usein samat tähdet, ja maajoukkuepelaajia on vähän. Pitää validoida, käykö peli tylsäksi. 38-0-0 tarjoaa eri sarjoja (liigat, MM-kisat). Meille vaihtoehtoja: Liiga-seurojen kaikkien aikojen joukkueet, eri maat (kohta 5), päivittäinen haaste (kaikille sama arvonta), sumennetut arviot (kohta 9).
 - Oma ennätys -napista näkyviin ennätyskauden kortti (kokoonpano, tulos, mitali, palkinnot). Ei vaadi palvelinta: kauden tiedot voi tallentaa selaimeen samoin kuin ennätyksen, ja jakokuvan voi piirtää uudelleen. Näkyy vain samalla laitteella.
+
+## 14. Kauden yhteenveto puhelimessa (toive 2026-11-24)
+Yhteenveto on pitkä vieritettävä. "Uusi draft" voisi leijua koko ajan näkyvissä: sama kiinteä alapalkki kuin ottelu kerrallaan -tilassa, napit esim. "Uusi draft" ja "Jaa tulos" (jakokuva). Liittyy kohdan 11 ajatukseen siirtää Uusi draft ja lisätä "Katso pistepörssi".

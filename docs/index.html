@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="944d337">
+<meta name="lkk-version" content="6628bb9">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -442,7 +442,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 23.10 · 944d337</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 23.15 · 6628bb9</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1621,7 +1621,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (!isPhone() || !card) { $('#draftCol').scrollIntoView({ block: 'start' }); return; }
     const bar = $('#stepBar');
     const r = card.getBoundingClientRect();
-    let dy = r.bottom - (window.innerHeight - (bar ? bar.offsetHeight : 0) - 12);
+    // Pelattujen otteluiden otsikko ja kortin yläreuna pilkistävät palkin yläpuolella
+    const peek = document.querySelector('#stages .gms');
+    const anchor = peek ? peek.getBoundingClientRect().top + 22 : r.bottom;
+    let dy = anchor - (window.innerHeight - (bar ? bar.offsetHeight : 0) - 4);
     if (r.top - dy < 8) dy = r.top - 8;
     window.scrollBy({ top: dy, behavior: 'smooth' });
   }

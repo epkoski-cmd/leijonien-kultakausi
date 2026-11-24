@@ -1043,7 +1043,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (!isPhone() || !card) { $('#draftCol').scrollIntoView({ block: 'start' }); return; }
     const bar = $('#stepBar');
     const r = card.getBoundingClientRect();
-    let dy = r.bottom - (window.innerHeight - (bar ? bar.offsetHeight : 0) - 12);
+    // Pelattujen otteluiden otsikko ja kortin yläreuna pilkistävät palkin yläpuolella
+    const peek = document.querySelector('#stages .gms');
+    const anchor = peek ? peek.getBoundingClientRect().top + 22 : r.bottom;
+    let dy = anchor - (window.innerHeight - (bar ? bar.offsetHeight : 0) - 4);
     if (r.top - dy < 8) dy = r.top - 8;
     window.scrollBy({ top: dy, behavior: 'smooth' });
   }
