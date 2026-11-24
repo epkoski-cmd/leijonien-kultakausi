@@ -81,7 +81,7 @@ Omat havainnot nhl82.ca:sta:
 
 Suunnitelma omaan peliin:
 1. ✅ Yhden napautuksen valinta: paikkanapit kortissa, yksi sopiva paikka -> koko kortti riittää. Valittu paikka välähtää kaukalossa.
-2. Arvonta-animaatio (turnaus/aikakausi pyörii kuin ruletti) samassa näkymässä, ei sivunvaihtoja. ✅ Osa: puhelimessa pieni kaukalo pysyy ylhäällä ja lista vierii sen alla (versio d6e328a).
+2. ✅ Arvonta-animaatio (turnaus/aikakausi pyörii kuin ruletti) samassa näkymässä, ei sivunvaihtoja. Ensimmäisellä kierroksella selittävä lause. Lisäksi: puhelimessa pieni kaukalo pysyy ylhäällä ja lista vierii sen alla (versio d6e328a).
 3. Kumoa viimeisin valinta.
 4. Kierrosotsikko + edistymispallot: "Kierros 2/6 · Valitse yksi pelaaja".
 5. Arvio-luku selitetään (esim. "Taso 0–100") tai näytetään tähdillä; helppo tila pois ensinäkymästä asetuksiin.
