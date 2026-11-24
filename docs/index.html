@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="adab65d">
+<meta name="lkk-version" content="0284ba3">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -307,6 +307,9 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .coach-target { border-color: var(--gold) !important; box-shadow: 0 0 0 2px var(--gold); }
 @keyframes coachpulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 45%, transparent); } }
 .clock b { white-space: nowrap; }
+.clock .best-box { font: inherit; color: inherit; cursor: pointer; background: #16263d; border: 1px solid #253a58; border-radius: 4px; padding: 6px 10px; text-align: center; min-width: 64px; }
+.clock .best-box:hover { border-color: #ffd34d; }
+.clock span { white-space: nowrap; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -331,6 +334,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   h1 { font-size: clamp(30px, 9.5vw, 42px); }
   .clock div { min-width: 52px; padding: 4px 8px; }
   .clock b { font-size: 20px; }
+  .clock .best-box { padding: 4px 8px; min-width: 0; }
   .clock div { min-width: 0; }
   .clock span { font-size: 12px; letter-spacing: .06em; }
   main.wrap { padding-block: 14px 40px; gap: 16px; }
@@ -395,7 +399,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     </div>
     <div class="clock" aria-label="Tilanne">
       <div><b id="roundNo">1/6</b><span id="roundLbl">Kierros</span></div>
-      <div><b id="bestRec">–</b><span>Paras</span></div>
+      <button class="best-box" id="bestBox" title="Paras kausisi tällä laitteella"><b id="bestRec">–</b><span>Paras kausi</span></button>
     </div>
   </div>
 </header>
@@ -416,7 +420,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.42 · adab65d</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.43 · 0284ba3</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1137,6 +1141,12 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#roundLbl').textContent = S.phase === 'draft' ? 'Kierros' : S.phase === 'ready' ? 'Draft' : 'Kausi';
     const best = store.get('lkk-best');
     $('#bestRec').textContent = best || '–';
+    $('#bestBox').onclick = () => {
+      const b = store.get('lkk-best');
+      if (!b) { toast('Paras kausisi tallentuu tähän, kun olet pelannut ensimmäisen kauden.'); return; }
+      const [w, l, o] = b.split('–');
+      toast(`<b>Paras kausi</b><br>${w} voittoa, ${l} tappiota, ${o} jatkoaikatappiota. Tallentuu vain tälle laitteelle.`);
+    };
     renderRink();
     if (S.phase === 'draft') renderDraft();
     else if (S.phase === 'ready') renderReady();
