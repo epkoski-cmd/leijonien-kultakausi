@@ -1,4 +1,5 @@
 <title>Leijonien kultakausi</title>
+<meta name="lkk-version" content="cd0eb0b">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -255,6 +256,16 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .seg { border: 1px solid var(--line); background: var(--panel); padding: 5px 12px; border-radius: 99px; font-family: var(--f-data); font-weight: 600; font-size: 14px; }
 .seg[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
 .site-foot { padding-block: 0 32px; font-size: 12.5px; color: var(--muted); }
+.ver { white-space: nowrap; }
+.update-bar {
+  position: fixed; z-index: 30; left: 0; right: 0; top: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
+  background: var(--board); color: var(--board-ink); border-bottom: 2px solid #ffd34d; font-weight: 600;
+}
+.update-bar[hidden] { display: none; }
+.update-bar .btn { border-color: var(--board-ink); color: var(--board-ink); padding: 6px 12px; }
+.update-bar .btn.primary { background: #ffd34d; border-color: #ffd34d; color: #0d1b2e; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -339,7 +350,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä.</footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.25 · cd0eb0b</span></footer>
+<div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -1556,6 +1568,27 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const fallback = () => { const ta = $('#shareText'); ta.value = txt; ta.hidden = false; ta.select(); };
     try { navigator.clipboard.writeText(txt).then(done, fallback); } catch (e) { fallback(); }
   }
+
+  // Uuden version tarkistus (vain GitHub Pagesissa): verrataan sivun versioleimaa palvelimen versioon
+  const MY_VERSION = document.querySelector('meta[name="lkk-version"]')?.content || '';
+  let updateDismissed = false, lastCheck = 0;
+  async function checkUpdate() {
+    if (!/github\.io$/.test(location.hostname) || updateDismissed || !MY_VERSION) return;
+    if (Date.now() - lastCheck < 60000) return;
+    lastCheck = Date.now();
+    try {
+      const res = await fetch(location.pathname, { cache: 'reload' });
+      const html = await res.text();
+      const m = html.match(/name="lkk-version" content="([^"]+)"/);
+      if (m && m[1] !== MY_VERSION) $('#updateBar').hidden = false;
+    } catch (e) {}
+  }
+  $('#updateBtn').onclick = () => location.reload();
+  $('#updateLater').onclick = () => { updateDismissed = true; $('#updateBar').hidden = true; };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
+  window.addEventListener('pageshow', checkUpdate);
+  setInterval(checkUpdate, 5 * 60000);
+  checkUpdate();
 
   $('#showRatings').addEventListener('change', () => { store.set('l820-ratings', ratingsOn() ? '1' : '0'); applyRatings(); render(); });
 
