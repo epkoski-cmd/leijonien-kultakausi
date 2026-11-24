@@ -275,6 +275,10 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gc-more:hover { text-decoration: underline; }
 .gm-detail { margin-top: 8px; animation: pop .3s ease-out; }
 .st-era { display: block; font-size: 12.5px; font-weight: 400; color: var(--muted); line-height: 1.2; }
+.stats tr.gk-head th { border-top: 2px solid var(--gold); color: var(--gold); background: color-mix(in srgb, var(--gold) 8%, var(--panel)); }
+.stats tr.gk-row td { background: color-mix(in srgb, var(--gold) 8%, var(--panel)); font-weight: 600; }
+.stages.anim .stage-rec { visibility: hidden; }
+.stage[hidden] { display: none; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -781,14 +785,18 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     for (const sl of G.SLOTS) if (sl.pos !== 'G' && lp[sl.id] && !rows.find((x) => x.n === lp[sl.id].n)) rows.push({ n: lp[sl.id].n, g: 0, a: 0, p: 0, pim: 0 });
     const ga = games.reduce((a, g) => a + g.a, 0);
     const so = games.filter((g) => g.a === 0).length;
+    const wins = games.filter((g) => g.win).length;
+    const gaa = games.length ? (ga / games.length).toFixed(2) : '–';
     return `<div>
       <div class="label" style="margin-bottom:6px">Pistepörssi · koko kausi</div>
       <table class="stats"><thead><tr><th>Pelaaja</th><th>M</th><th>S</th><th>P</th><th>J</th></tr></thead><tbody>
       ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
+      <tr class="gk-head"><th>Maalivahti</th><th title="Ottelut">O</th><th title="Voitot">V</th><th title="Päästetyt maalit ottelua kohden">PM/O</th><th title="Nollapelit">NP</th></tr>
+      <tr class="gk-row"><td>${nameCell(lp.G.n)}</td><td>${games.length}</td><td>${wins}</td><td><b>${gaa}</b></td><td><b>${so}</b></td></tr>
       <tr class="sub"><td colspan="5">Muut kentät · pelin valitsemat</td></tr>
       ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
       </tbody></table>
-      <p class="gk-line">Maalivahti ${esc(lp.G.n)}: päästetyt ${games.length ? (ga / games.length).toFixed(2) : '0'} / ottelu · nollapelit ${so}</p>
+      <p class="gk-line">M = maalit, S = syötöt, P = pisteet, J = jäähyminuutit · O = ottelut, V = voitot, PM/O = päästetyt maalit ottelua kohden, NP = nollapelit</p>
     </div>`;
   }
 
@@ -908,17 +916,23 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     }
     S.animate = false;
     cells.forEach((c) => c.classList.add('pending'));
+    // Ei paljasteta etukäteen turnausten tuloksia eikä sitä, montako vaihetta kausi kestää
+    const box = $('#stages');
+    box.classList.add('anim');
+    box.querySelectorAll('.stage').forEach((st) => { st.hidden = true; });
     let i = 0, w = 0, l = 0, o = 0;
     const t = setInterval(() => {
       const cell = cells[i];
       const c = cell.dataset.c;
       cell.classList.remove('pending'); cell.classList.add(c);
+      cell.closest('.stage').hidden = false;
       if (c === 'W') w++; else if (c === 'L') l++; else o++;
       rec.innerHTML = recHtml([w, l, o]);
       if (++i >= cells.length) {
         clearInterval(t);
         setTimeout(() => {
           $('#playing').hidden = true;
+          box.classList.remove('anim');
           $('#reveal').hidden = false;
           $('#resActions').hidden = false;
           $('#reveal').classList.add('pop');
