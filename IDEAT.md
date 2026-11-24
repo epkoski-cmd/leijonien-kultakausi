@@ -136,3 +136,13 @@ Käydään läpi vaihtoehdot, kun on aika:
 
 ## 14. Kauden yhteenveto puhelimessa (toive 2026-11-24) ✅ tehty (versio c91c627)
 Yhteenveto on pitkä vieritettävä. "Uusi draft" voisi leijua koko ajan näkyvissä: sama kiinteä alapalkki kuin ottelu kerrallaan -tilassa, napit esim. "Uusi draft" ja "Jaa tulos" (jakokuva). Liittyy kohdan 11 ajatukseen siirtää Uusi draft ja lisätä "Katso pistepörssi".
+
+## Tilanne 24.11.2026 illalla (versio 46c9837)
+Tehty tänään: yhden napautuksen valinta, pieni kiinteä kaukalo puhelimessa, arvonta-animaatio, perehdytys (esittely, vinkit, kultasuoni-ohje, ?-nappi), kumoa, sumennetut arviot, ottelukortin tiivistelmä, alapalkit puhelimessa (ottelut ja yhteenveto), maalivahdin osio pistepörssiin, versionumero ja päivitysilmoitus, kultasuonet: veljekset, isä–poika (Kapanen, Hagman), kultajoukkueet, väripisteet ja katto.
+
+Seuraavaksi (ehdotus):
+1. Ennätyskauden kortti "Oma ennätys" -napista (kohta 13)
+2. "Katso pistepörssi" -nappi yhteenvetoon (kohta 11)
+3. Lisää kultasuonia: SM-liigan dynastiat valikoituna ja lähteistä tarkistettuna
+4. Tunnelma: ottelun kello, maalit oikeassa tahdissa, konfetti (kohta 11)
+5. Pelaajatietojen tarkistus ennen laajempaa jakoa
