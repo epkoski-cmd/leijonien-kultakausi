@@ -21,7 +21,9 @@ out = out.replace('__LKK_VERSION__', version).replace('__LKK_VERSION_LABEL__', l
 assert '__LKK_VERSION' not in out
 (d / 'leijonat.html').write_text(out)
 
-page = '<!doctype html>\n<html lang="fi">\n<head>\n<meta charset="utf-8">\n' + out + '\n</html>\n'
+# Kävijälaskuri (GoatCounter, ei evästeitä) vain GitHub Pages -versioon
+GOATCOUNTER = '<script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>\n'
+page = '<!doctype html>\n<html lang="fi">\n<head>\n<meta charset="utf-8">\n' + GOATCOUNTER + out + '\n</html>\n'
 (d / 'docs').mkdir(exist_ok=True)
 (d / 'docs' / 'index.html').write_text(page)
 print('ok', len(out), label)
