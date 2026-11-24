@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="4c2e902">
+<meta name="lkk-version" content="706c3ee">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,6 +193,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gm { text-align: left; cursor: pointer; font: inherit; color: inherit; }
 .gm:hover { border-color: var(--blue); }
 .gm[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--blue); }
+.gm.latest { outline: 2px solid #ffd34d; outline-offset: 1px; animation: slotin .6s ease-out; }
 .game-card { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 5px; padding: 12px 14px; display: grid; gap: 8px; }
 .game-card.W { border-left-color: var(--win); } .game-card.L { border-left-color: var(--red); } .game-card.O { border-left-color: var(--amber); }
 .gc-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
@@ -328,7 +329,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <p class="tag">Draftaa kaikkien aikojen Leijonat arvotuista turnausjoukkueista. Kestääkö joukkue koko 22 ottelun kauden ilman tappiota?</p>
     </div>
     <div class="clock" aria-label="Tilanne">
-      <div><b id="roundNo">1/6</b><span>Kierros</span></div>
+      <div><b id="roundNo">1/6</b><span id="roundLbl">Kierros</span></div>
       <div><b id="bestRec">–</b><span>Paras</span></div>
     </div>
   </div>
@@ -350,7 +351,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.25 · 4c2e902</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 21.34 · 706c3ee</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1004,6 +1005,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   function render() {
     $('#roundNo').textContent = S.phase === 'draft' ? Math.min(S.round, 6) + '/6' : 'Valmis';
+    $('#roundLbl').textContent = S.phase === 'draft' ? 'Kierros' : S.phase === 'ready' ? 'Draft' : 'Kausi';
     const best = store.get('lkk-best');
     $('#bestRec').textContent = best || '–';
     renderRink();
@@ -1238,14 +1240,16 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     </div>`;
   }
 
-  function stagesHtml(r, games) {
-    return G.STAGES.map((st) => {
+  // opts.newestFirst: käynnissä oleva turnaus ylimmäksi; opts.latest: korostettavan ottelun indeksi
+  function stagesHtml(r, games, opts = {}) {
+    const stages = opts.newestFirst ? G.STAGES.slice().reverse() : G.STAGES;
+    return stages.map((st) => {
       const gs = games.filter((g) => g.stage === st.id);
       if (!gs.length) return '';
       const chips = gs.map((g) => {
         const i = r.games.indexOf(g);
         const c = g.win ? 'W' : g.ot ? 'O' : 'L';
-        return `<button class="gm" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">
+        return `<button class="gm${opts.latest === i ? ' latest' : ''}" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">
           ${g.round ? `<span class="gm-round">${esc(g.round)}</span>` : ''}
           <span class="gm-opp">${esc(g.opp)}</span>
           <span class="gm-res">${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</span></button>`;
@@ -1316,7 +1320,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const last = shown[shown.length - 1];
     const next = r.games[S.shown];
     const done = S.shown >= r.games.length;
-    $('#roundNo').textContent = `${S.shown}/${r.games.length}`;
+    $('#roundNo').textContent = `${S.shown}/${G.SEASON_GAMES}`;
+    $('#roundLbl').textContent = 'Ottelu';
     $('#draftCol').innerHTML = `
       <div class="result">
         <div class="verdict">
@@ -1335,7 +1340,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
             : `<button class="btn primary" id="nextGame">${S.shown ? 'Seuraava ottelu' : 'Pelaa ensimmäinen ottelu'}</button><button class="btn" id="simRest">Simuloi loput</button>`}
         </div>
         ${S.openGame !== null && S.openGame < S.shown - 1 ? `<div id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : ''}
-        ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown)}</div>` : ''}
+        ${shown.length ? `<div class="stages" id="stages">${stagesHtml(r, shown, { newestFirst: true, latest: S.shown - 1 })}</div>` : ''}
       </div>`;
     shown.length && document.querySelectorAll('#stages .gm').forEach((c) => c.classList.add(c.dataset.c));
     bindChips(render);
