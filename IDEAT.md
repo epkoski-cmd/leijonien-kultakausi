@@ -49,6 +49,8 @@ Pelaajan pitää huomata, kun synergia syntyy (Koivun veljekset, Edmontonin dyna
 - **Työmäärä:** pieni.
 
 ## 8. Neljä ketjua ja varapelaajat / pakotetut huonot valinnat
+
+Käyttäjän idea: manager-moodi (koko joukkue: neljä kenttää, kaksi maalivahtia, varamiehet). Loukkaantumiset pakottaisivat nostamaan varamiehiä, ja kenttiä/pelipaikkoja voisi muuttaa kesken kauden. Riski: siirrytään manager-pelin puolelle ja draftin nopeus katoaa. Jos tehdään, oma pelimuoto, ja kauden aikaiset muutokset rajattuja (esim. vaihto vain turnausten välissä).
 Turnausarvonta tehty (versio 16): 15 turnausta, kokoonpanot `data/tournaments.py`. Välivaihe tehty (versio 15): peli valitsee automaattisesti muut kentät (6 hyökkääjää, 3 puolustajaa) samoilta aikakausilta, ja ne tekevät noin 38 % maaleista. Neljän ketjun draft voisi korvata tämän myöhemmin.
 **Hyödyt:** syvyys alkaa merkitä, ja pakko valita myös heikompia pelaajia. Valinnoista tulee vaikeampia ja kiinnostavampia.
 **Haitat:** draft venyy noin 20–22 kierrokseen, puhelimella kenttäkaavio vie paljon tilaa, ja jokaiselle aikakaudelle tarvitaan enemmän pelaajia.
@@ -66,3 +68,34 @@ Saman tunteen kuin 38-0-0:ssa (heikko joukkue tai täytetyt paikat) saa kevyemmi
 5. Turnausarvonta tai kaksi kenttää
 6. Kieliversiot
 7. Maavalinta ja Team World
+
+## 9. Käytettävyys: draftin virta uusiksi (havainnot nhl82.ca:sta, 2026-11-24)
+Ystävän palaute: ei ymmärrä, että ensin valitaan pelaaja ja sitten paikka.
+
+Omat havainnot nhl82.ca:sta:
+- Arvonta pyörii kuin ruletti, jolloin ymmärtää että jotain arvotaan. Animaatio on tärkeä.
+- Pelaajan valinta: kortin napautus välähdyttää pelaajan sopivat paikat keltaisena, ja paikka valitaan kortin omista napeista. Selkeä.
+- Kaikki/pelipaikka-suodatin ja "vaihda joukkue/aikakausi kerran" saivat empimään: kannattaako käyttää?
+- Turha edestakaisin kulku: valinnan jälkeen palataan alkuruutuun, spinneri pyörii itsestään ja lista aukeaa taas. Parempi: lista kerroksena perusnäkymän päällä tai arvonta samassa näkymässä.
+- Pelimuoto (Toughest Team) selvisi vasta tuloksesta. Tilastot (PIM) näyttivät "hyvyyspisteiltä" asteikolla 0–100. Luvun merkitys pitää kertoa.
+
+Suunnitelma omaan peliin:
+1. ✅ Yhden napautuksen valinta: paikkanapit kortissa, yksi sopiva paikka -> koko kortti riittää. Valittu paikka välähtää kaukalossa.
+2. Arvonta-animaatio (turnaus/aikakausi pyörii kuin ruletti) samassa näkymässä, ei sivunvaihtoja.
+3. Kumoa viimeisin valinta.
+4. Kierrosotsikko + edistymispallot: "Kierros 2/6 · Valitse yksi pelaaja".
+5. Arvio-luku selitetään (esim. "Taso 0–100") tai näytetään tähdillä; helppo tila pois ensinäkymästä asetuksiin.
+6. Uudelleenarvonta selitetään lyhyesti ("1 käyttökerta koko draftissa").
+
+Lisähavainnot (Classic, IceIQ, Dynasty tips):
+- IceIQ sumentaa arvot sen sijaan että piilottaisi ne. Pelaaja tietää, että arvot ovat olemassa ja ne voi avata. Parempi kuin meidän "Näytä arviot" -valintaruutu.
+- Pisteluku (esim. Palffy 91) näytti asteikolta 0–100, vaikka se oli kauden pisteet. Luvun merkitys pitää selittää napauttamalla tai hiirellä.
+- Hitaus on suurin ongelma: pelaajaa piti klikata 3–5 kertaa, valintaa ei korostettu, ja suodattimen vaihto kesti sekunteja. Tuntui rikkinäiseltä. Meillä data on sivulla itsessään, joten kaiken pitää tapahtua heti.
+- Listan päivittymisestä tarvitaan pieni animaatio, jotta näkee että suodatin toimi.
+- Pelkät maali- ja pistetilastot eivät kerro, onko puolustaja hyvä puolustamaan. Meidän yksi arvio kattaa kokonaisuuden, mutta sen pitää näkyä ymmärrettävästi (esim. taso + rooli).
+- "Dynasty tips" etusivulla: lyhyet vinkit siitä, miten kannattaa pelata (maalivahti tärkeä, tasapaino, kultasuonet). Hyvä idea meillekin.
+
+Lisäys suunnitelmaan:
+7. Arviot sumennettuina oletuksena, napautus paljastaa (korvaa helppo tila -valintaruudun). Arvon selitys napautuksella.
+8. Välitön palaute: valittu kortti korostuu heti, lista päivittyy animaatiolla, ei viiveitä.
+9. Vinkkilaatikko ennen ensimmäistä draftia (3–4 vinkkiä).

@@ -100,12 +100,28 @@ h2 { font-family: var(--f-display); font-weight: 800; font-size: 34px; line-heig
 .group:has(.list[hidden]) .group-head { margin-bottom: 0; }
 .list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 4px 6px; }
 .pl {
-  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; text-align: left;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 8px; text-align: left;
   background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 4px 8px; min-width: 0; min-height: 34px;
 }
-.pl:hover:not(:disabled) { border-color: var(--blue); }
-.pl[aria-pressed="true"] { border-color: var(--blue); box-shadow: inset 0 0 0 2px var(--blue); background: var(--blue-soft); }
-.pl:disabled { opacity: .38; cursor: not-allowed; }
+.pl { font: inherit; color: inherit; }
+.pl.one { cursor: pointer; }
+.pl.one:hover, .pl.multi:hover { border-color: var(--blue); }
+.pl.one:active { background: var(--blue-soft); }
+.pl.off { opacity: .38; }
+.pl-opts { display: flex; gap: 4px; flex: none; }
+.opt { font-family: var(--f-data); font-weight: 600; font-size: 13px; letter-spacing: .04em; white-space: nowrap; padding: 4px 9px; min-height: 30px; display: inline-flex; align-items: center; border: 1px solid var(--blue); border-radius: 4px; color: var(--blue); background: var(--panel); }
+button.opt { cursor: pointer; }
+button.opt:hover { background: var(--blue); color: #fff; }
+.pl.one .opt { background: var(--blue); color: #fff; }
+.opt.warn { border-color: var(--amber); color: var(--amber); }
+.pl.one .opt.warn { background: var(--amber); color: #fff; }
+.opt.bad { border-color: var(--red); color: var(--red); }
+.pl.one .opt.bad { background: var(--red); color: #fff; }
+.pl.flash .opt { animation: optflash .6s ease-out 2; }
+@keyframes optflash { 50% { background: #ffd34d; border-color: #ffd34d; color: #0d1b2e; } }
+.slot.just { animation: slotin .7s ease-out; }
+@keyframes slotin { 0% { transform: scale(.85); background: #ffd34d; } 100% { transform: scale(1); } }
+.t-ok { color: #45b37c; font-weight: 700; }
 .pos { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .05em; min-width: 32px; padding-inline: 4px !important; white-space: nowrap; text-align: center; padding: 3px 0; border-radius: 3px; background: var(--blue-soft); color: var(--blue); }
 .pos.G { background: var(--ink); color: var(--panel); }
 .pl-main { min-width: 0; display: flex; align-items: baseline; gap: 8px; overflow: hidden; }
@@ -340,7 +356,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   let S;
   function fresh() {
-    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, selected: null, lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
   }
 
   function start(data) {
@@ -378,6 +394,20 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const RES_LABEL = { kulta: 'Kulta', hopea: 'Hopea', pronssi: 'Pronssi', 'välierä': 'Välierä' };
 
   const playerByName = (n) => G.PLAYERS.find((p) => p.n === n);
+  // Vapaat paikat, joille pelaajan voi laittaa
+  function placeOptions(p) {
+    const opts = [], seen = new Set();
+    for (const sl of G.SLOTS) {
+      if (S.lineup[sl.id] || seen.has(sl.pos)) continue;
+      const pen = G.fitPenalty(p, sl.pos);
+      if (pen === null) continue;
+      seen.add(sl.pos);
+      opts.push({ slot: sl, pen });
+    }
+    // Näytetään paras saatavilla oleva taso: omat paikat, muuten sivupaikat, muuten väärä rooli
+    const best = Math.min(...opts.map((o) => o.pen));
+    return opts.filter((o) => o.pen === best);
+  }
   const lineupPlayers = () => { const o = {}; for (const [k, n] of Object.entries(S.lineup)) o[k] = playerByName(n); return o; };
   const openSlots = () => G.SLOTS.filter((s) => !S.lineup[s.id]);
   const taken = (p) => Object.values(S.lineup).includes(p.n);
@@ -426,7 +456,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const canSwitch = S.round === 1 && !Object.keys(S.lineup).length;
     const groups = [['G', 'Maalivahdit'], ['D', 'Puolustajat'], ['C', 'Keskushyökkääjät'], ['W', 'Laiturit']];
     const GROUP_POS = { G: ['G'], D: ['D'], C: ['C'], W: ['LW', 'RW'] };
-    const sel = S.selected;
     let html = `
       <div class="spin">
         <div class="spin-era">
@@ -442,7 +471,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <button class="seg" data-mode="turnaus" aria-pressed="${S.mode === 'turnaus'}">Turnaus</button>
         <button class="seg" data-mode="aika" aria-pressed="${S.mode === 'aika'}">Aikakausi</button>
       </div>` : ''}
-      <div class="hint-row" id="hintRow">${sel ? 'Valitse kaukalosta paikka pelaajalle <b>' + esc(sel) + '</b>.' : tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.'}</div>`;
+      <div class="hint-row" id="hintRow">${tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.'} Napauta paikkaa pelaajan kortissa.</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
         .sort((a, b) => a.n.localeCompare(b.n, 'fi'));
@@ -463,25 +492,29 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const dis = taken(p) || !placeable(p);
         const anyFwd = ['C', 'LW', 'RW'].includes(p.p) && p.a.length === 2;
         const posTxt = anyFwd ? 'H' : G.POS_LABEL[p.p] + (p.a.length ? '/' + p.a.map((x) => G.POS_LABEL[x]).join('/') : '');
-        html += `<button class="pl" data-n="${esc(p.n)}" title="${esc(p.n + ' – ' + p.h)}" aria-pressed="${sel === p.n}" ${dis ? 'disabled' : ''}>
-          <span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
+        const opts = dis ? [] : placeOptions(p);
+        const one = opts.length === 1;
+        const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
           <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${esc(taken(p) ? 'Jo joukkueessa' : p.h)}</span></span>
-          <span class="rating">${p.r}</span>
-        </button>`;
+          <span class="rating">${p.r}</span>`;
+        const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
+        if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
+        else if (one) html += `<button class="pl one" data-n="${esc(p.n)}" data-slot="${opts[0].slot.id}" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts">${optHtml('span')}</span></button>`;
+        else html += `<div class="pl multi" data-n="${esc(p.n)}" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts">${optHtml('button')}</span></div>`;
       }
       html += `</div></div>`;
     }
     $('#draftCol').innerHTML = html;
     $('#reroll').onclick = () => {
       if (!S.rerolls) return;
-      S.rerolls--; S.selected = null;
+      S.rerolls--;
       S.draw = rollDraw(S.draw);
       render();
     };
     document.querySelectorAll('.seg').forEach((b) => b.onclick = () => {
       if (S.mode === b.dataset.mode) return;
       S.mode = b.dataset.mode; store.set('lkk-mode', S.mode);
-      S.drawn = []; S.selected = null; S.groupOpen = {};
+      S.drawn = []; S.groupOpen = {};
       S.draw = rollDraw();
       render();
     });
@@ -489,29 +522,23 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       S.groupOpen[b.dataset.g] = b.getAttribute('aria-expanded') !== 'true';
       render();
     });
-    document.querySelectorAll('.pl').forEach((b) => b.onclick = () => {
-      S.selected = S.selected === b.dataset.n ? null : b.dataset.n;
-      render();
+    document.querySelectorAll('.pl.one, .opt[data-slot]').forEach((b) => b.onclick = (e) => {
+      e.stopPropagation();
+      place(b.dataset.n, b.dataset.slot);
+    });
+    document.querySelectorAll('.pl.multi').forEach((card) => card.onclick = () => {
+      card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
     });
   }
 
   function renderRink() {
     const lp = lineupPlayers();
-    const sel = S.selected && playerByName(S.selected);
     const slotHtml = (s) => {
       const p = lp[s.id];
       if (p) {
         const pen = G.fitPenalty(p, s.pos);
-        return `<button class="slot filled" disabled><span class="label">${s.short}</span><span class="who">${esc(p.n)}</span>
+        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}" disabled><span class="label">${s.short}</span><span class="who">${esc(p.n)}</span>
           ${pen ? `<span class="era pen">−${pen} ${pen <= 4 ? 'sivupaikka' : 'väärä rooli'}</span>` : ''}</button>`;
-      }
-      if (sel && S.phase === 'draft') {
-        const pen = G.fitPenalty(sel, s.pos);
-        if (pen !== null) {
-          const cls = pen === 0 ? '' : pen <= 4 ? 'warn' : 'bad';
-          const txt = pen === 0 ? 'Oma paikka' : '−' + pen + (pen <= 4 ? ' sivupaikka' : ' väärä rooli');
-          return `<button class="slot target ${cls}" data-slot="${s.id}"><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span><span class="fit">${txt}</span></button>`;
-        }
       }
       return `<button class="slot" disabled><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span></button>`;
     };
@@ -520,7 +547,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <div class="row f">${sl('LW')}${sl('C')}${sl('RW')}</div>
       <div class="row d">${sl('D1')}${sl('D2')}</div>
       <div class="row g">${sl('G')}</div>`;
-    document.querySelectorAll('.slot[data-slot]').forEach((b) => b.onclick = () => place(b.dataset.slot));
 
     const filled = Object.keys(S.lineup).length;
     const ev = G.evaluateTeam(lp);
@@ -529,22 +555,23 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#chips').innerHTML = ev.chem.map((c) => `<span class="chip" title="${esc(c.who.join(', '))}">${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('');
   }
 
-  function place(slotId) {
-    if (!S.selected) return;
+  function place(name, slotId) {
+    if (!name || S.lineup[slotId]) return;
     const before = G.evaluateTeam(lineupPlayers()).chem;
-    S.lineup[slotId] = S.selected;
+    S.lineup[slotId] = name;
+    S.justPlaced = slotId;
+    const sl = G.SLOTS.find((x) => x.id === slotId);
     const gains = chemGains(before, lineupPlayers());
-    if (gains.length) {
-      toast(`<b>Kultasuoni!</b> ${gains.map((c) => `${esc(c.name)} +${c.b.toFixed(1)}`).join(' · ')}`);
-    }
+    toast(`<span class="t-ok">✓</span> ${esc(name)} · ${esc(sl.label.toLowerCase())}` +
+      (gains.length ? `<br><b>Kultasuoni!</b> ${gains.map((c) => `${esc(c.name)} +${c.b.toFixed(1)}`).join(' · ')}` : ''));
     if (S.mode === 'aika') S.eraHistory.push(S.draw);
     S.drawn.push(S.draw);
-    S.selected = null;
     S.groupOpen = {};
     S.round++;
     if (S.round > 6) { S.phase = 'ready'; S.draw = null; }
     else S.draw = rollDraw();
     render();
+    S.justPlaced = null;
     if (window.matchMedia('(max-width: 820px)').matches && S.phase === 'draft') $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
