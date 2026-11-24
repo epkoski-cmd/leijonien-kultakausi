@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="2cad838">
+<meta name="lkk-version" content="17da4bb">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -420,7 +420,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.46 · 2cad838</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.57 · 17da4bb</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1372,7 +1372,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     S.phase = 'draft';
     S.groupOpen = {};
     S.spin = false;
-    toast(`↶ Kumottu: ${esc(h.name)}`);
+    toast(`↶ Kumottu: ${esc(h.name)}<br>Palattiin kierrokselle ${S.round}/6`);
     render();
   }
 

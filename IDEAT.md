@@ -127,3 +127,9 @@ Käydään läpi vaihtoehdot, kun on aika:
 - Kortin napautus tai pitkä painallus avaa lisätiedot (vihje, aikakausi, arvio)
 - Lyhyemmät vihjeet tai ✦-merkki pelkäksi tähdeksi, jolloin vihjeelle jää tilaa
 - Leveällä näytöllä yksi sarake kahden sijaan
+
+## 13. Havainnot ja ideat (2026-11-24 ilta)
+- Kumoa toimii monta kertaa, mikä yllätti ja sekoitti: ei tiennyt, millä kierroksella on. Vaihtoehdot: ilmoitus kertoo kierroksen ("Kumottu: X · palattiin kierrokselle 4/6"), tai kumoa vain kerran per kierros.
+- Olympialaiset 2022 -joukkueessa ei ole yhtään yli 90 pisteen pelaajaa, mutta joukkue voitti kultaa. Yhteispeli ratkaisee. Idea: saman turnausjoukkueen pelaajat saavat kemiabonuksen ("Pekingin kultajoukkue"), jolloin vähemmän tähtiä sisältävä mutta yhtenäinen kenttä voi pärjätä.
+- Toistettavuus: helpossa tilassa valitsee usein samat tähdet, ja maajoukkuepelaajia on vähän. Pitää validoida, käykö peli tylsäksi. 38-0-0 tarjoaa eri sarjoja (liigat, MM-kisat). Meille vaihtoehtoja: Liiga-seurojen kaikkien aikojen joukkueet, eri maat (kohta 5), päivittäinen haaste (kaikille sama arvonta), sumennetut arviot (kohta 9).
+- Oma ennätys -napista näkyviin ennätyskauden kortti (kokoonpano, tulos, mitali, palkinnot). Ei vaadi palvelinta: kauden tiedot voi tallentaa selaimeen samoin kuin ennätyksen, ja jakokuvan voi piirtää uudelleen. Näkyy vain samalla laitteella.
