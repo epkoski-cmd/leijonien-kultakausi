@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="53759ed">
+<meta name="lkk-version" content="9c67c00">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -287,6 +287,22 @@ button.opt:hover { background: var(--blue); color: #fff; }
 #eraTitle.landed { animation: landed .45s ease-out; }
 @keyframes landed { 0% { transform: scale(1.08); color: #ffd34d; } 100% { transform: scale(1); } }
 .revealed .group, .revealed .hint-row { animation: pop .35s ease-out; }
+.modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px; background: rgba(6, 12, 22, .62); backdrop-filter: blur(2px); }
+.modal[hidden] { display: none; }
+.modal-card { background: var(--panel); color: var(--ink); border: 2px solid var(--gold); border-radius: 10px; padding: 22px 22px 18px; max-width: 440px; width: 100%; display: grid; gap: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.4); animation: pop .3s ease-out; max-height: calc(100vh - 32px); overflow-y: auto; }
+.modal-card h2 { font-size: 34px; margin: 0; }
+.modal-card .gold { color: var(--gold); }
+.modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.modal-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
+.tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 15.5px; line-height: 1.4; }
+.tips li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; }
+.tips li span { text-align: center; color: var(--gold); font-weight: 700; font-family: var(--f-data); font-size: 14px; }
+.help-btn { padding: 8px 13px; }
+.coach { grid-column: 1 / -1; background: color-mix(in srgb, var(--gold) 16%, var(--panel)); border: 2px solid var(--gold); border-radius: 6px; padding: 9px 12px; font-size: 14.5px; line-height: 1.4; animation: coachpulse 1s ease-in-out 2; }
+.coach b { color: var(--gold); }
+.coach-target { border-color: var(--gold) !important; box-shadow: 0 0 0 2px var(--gold); }
+@keyframes coachpulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 45%, transparent); } }
+.clock b { white-space: nowrap; }
 .po { display: grid; gap: 6px; }
 .po-row { display: grid; grid-template-columns: 7.5em 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-variant-numeric: tabular-nums; }
 .po-row .res { font-family: var(--f-display); font-size: 22px; font-weight: 800; }
@@ -310,7 +326,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   .tag { display: none; }
   h1 { font-size: clamp(30px, 9.5vw, 42px); }
   .clock div { min-width: 52px; padding: 4px 8px; }
-  .clock b { font-size: 22px; }
+  .clock b { font-size: 20px; }
+  .clock div { min-width: 0; }
   .clock span { font-size: 12px; letter-spacing: .06em; }
   main.wrap { padding-block: 14px 40px; gap: 16px; }
   .label { font-size: 13px; letter-spacing: .1em; }
@@ -395,10 +412,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.12 · 53759ed</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. <span class="ver">Versio 24.11.2026 klo 22.33 · 9c67c00</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden><div class="modal-card" id="modalCard"></div></div>
 
 <script>
 // Leijonien kultakausi — pelaajadata ja simulaatio (ei DOM-riippuvuuksia, testattavissa nodella)
@@ -980,9 +998,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const G = window.Leijonat;
   const $ = (s) => document.querySelector(s);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // localStorage, ja jos se ei ole käytettävissä, muisti tämän sivulatauksen ajan
+  const mem = {};
   const store = {
-    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    get(k) { try { const v = localStorage.getItem(k); return v === null && k in mem ? mem[k] : v; } catch (e) { return k in mem ? mem[k] : null; } },
+    set(k, v) { mem[k] = v; try { localStorage.setItem(k, v); } catch (e) {} },
   };
 
   let S;
@@ -1000,7 +1020,66 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const sr = store.get('l820-ratings') === '1';
     $('#showRatings').checked = sr;
     applyRatings();
+    if (!store.get('lkk-seen-intro') && S.phase === 'draft' && !Object.keys(S.lineup).length) showIntro();
     render();
+  }
+
+  // Perehdytys: esittely, vinkit ja kultasuonen ohje. Selain muistaa näytetyt (localStorage).
+  let modalOpen = false;
+  function showModal(html, btnLabel, onClose) {
+    modalOpen = true;
+    $('#modalCard').innerHTML = html + `<div class="modal-actions"><button class="btn primary" id="modalOk">${btnLabel}</button></div>`;
+    $('#modal').hidden = false;
+    const close = () => {
+      $('#modal').hidden = true;
+      modalOpen = false;
+      document.removeEventListener('keydown', onKey);
+      onClose && onClose();
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    $('#modalOk').onclick = close;
+    setTimeout(() => $('#modalOk').focus(), 30);
+  }
+  function showIntro() {
+    showModal(`<div class="label">Tervetuloa</div>
+      <h2 id="modalTitle">Leijonien <span class="gold">kultakausi</span></h2>
+      <p>Kokoa kaikkien aikojen Leijonat. Joka kierroksella sinulle arvotaan yksi Suomen turnausjoukkue, josta valitset yhden pelaajan.</p>
+      <p>Kuuden kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö 22–0:aan?</b></p>`,
+      'Aloita', () => { store.set('lkk-seen-intro', '1'); render(); });
+  }
+  const TIPS = `<ul class="tips">
+      <li><span>→</span> Valitse pelaaja ja napauta hänen kortistaan paikka, jolle hän menee.</li>
+      <li><span>MV</span> Maalivahti vaikuttaa joukkueen vahvuuteen eniten.</li>
+      <li><span>⇄</span> Pelaaja on vahvin omalla paikallaan. Sivupaikka tai väärä rooli heikentää.</li>
+      <li><span>✦</span> Kultasuoni: entiset joukkuekaverit ja saman sukupolven pelaajat saavat bonusta.</li>
+      <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
+    </ul>`;
+  function showTips(first) {
+    showModal(`<div class="label">${first ? 'Ensimmäinen valinta' : 'Ohjeet'}</div><h2 id="modalTitle">Näin kokoat joukkueen</h2>${TIPS}`,
+      first ? 'Selvä, valitaan' : 'Sulje', () => { if (first) store.set('lkk-seen-tips', '1'); });
+  }
+  function afterDrawShown() {
+    if (S.phase !== 'draft') return;
+    if (!store.get('lkk-seen-tips')) { showTips(true); return; }
+    synCoach();
+  }
+  // Kultasuoni-ohje ensimmäisen ✦-merkin kohdalle; pysyy kunnes pelaaja napauttaa jotain
+  function synCoach() {
+    if (store.get('lkk-seen-syn')) return;
+    const badge = [...document.querySelectorAll('.syn')].find((b) => b.offsetParent);
+    if (!badge || document.querySelector('.coach')) return;
+    const card = badge.closest('.pl');
+    const tip = document.createElement('div');
+    tip.className = 'coach';
+    tip.setAttribute('role', 'note');
+    tip.innerHTML = `<b>✦ Kultasuoni!</b> ${esc(card.dataset.n || '')} on pelannut samassa joukkueessa tai samalla aikakaudella kuin joku valitsemistasi. Yhdessä he saavat bonusta joukkueen vahvuuteen.`;
+    card.after(tip);
+    card.classList.add('coach-target');
+    setTimeout(() => document.addEventListener('pointerdown', () => {
+      store.set('lkk-seen-syn', '1');
+      tip.remove(); card.classList.remove('coach-target');
+    }, { once: true, capture: true }), 50);
   }
 
   function rollEra(exclude) {
@@ -1093,7 +1172,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   let spinning = false;
   function spinDraw() {
     const col = $('#draftCol'), title = $('#eraTitle'), lbl = $('#spinLabel');
-    if (!col || !title || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!col || !title || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { afterDrawShown(); return; }
     const names = S.mode === 'turnaus' ? G.TOURNAMENTS.map((t) => t.label) : Object.values(G.ERAS);
     const final = title.innerHTML, finalLbl = lbl.textContent;
     spinning = true;
@@ -1116,6 +1195,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         col.classList.remove('spinning');
         col.classList.add('revealed');
         spinning = false;
+        afterDrawShown();
       }
     };
     tick();
@@ -1135,6 +1215,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         </div>
         <div class="spin-actions">
           <button class="btn" id="reroll" ${S.rerolls ? '' : 'disabled'}>Arvo uusi ${tour ? 'turnaus' : 'aikakausi'} (${S.rerolls})</button>
+          <button class="btn help-btn" id="helpBtn" aria-label="Ohjeet ja vinkit">?</button>
         </div>
       </div>
       ${canSwitch ? `<div class="mode-switch" role="group" aria-label="Arvontatapa">
@@ -1178,7 +1259,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       html += `</div></div>`;
     }
     $('#draftCol').innerHTML = html;
-    if (S.spin) { S.spin = false; spinDraw(); }
+    if (S.spin && modalOpen) { $('#draftCol').classList.add('spinning'); $('#eraTitle').textContent = '…'; }
+    else if (S.spin) { S.spin = false; spinDraw(); }
+    else if (!spinning && !modalOpen) afterDrawShown();
+    $('#helpBtn').onclick = () => showTips(false);
     $('#reroll').onclick = () => {
       if (!S.rerolls || spinning) return;
       S.rerolls--;

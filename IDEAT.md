@@ -106,3 +106,16 @@ Lisäys suunnitelmaan:
 - Ongelma: peli alkaa suoraan pelaajanvalintanäkymästä ilman arvontaa tai johdantoa, joten ei ymmärrä mistä on kyse.
 - Opetus meille: ensimmäisellä kierroksella pitää kertoa mitä tapahtuu (arvonta-animaatio + yksi lause: "Sinulle arvottiin Suomen MM 1995 -joukkue. Valitse siitä yksi pelaaja.").
   Arvion selitys yhdellä rivillä listan yläpuolelle on hyvä malli kohtaan 7.
+
+## 10. Perehdytys uudelle pelaajalle (lisätty 2026-11-24, tälle päivälle) ✅ tehty (versio 9c67c00)
+- Ensimmäisellä käynnillä esittely-ikkuna: mikä peli on ja tavoite (puhelimessa otsikon selite ei näy). Selain muistaa (localStorage), että se on näytetty; uusi laite, yksityinen selaus tai selaintietojen tyhjennys näyttää sen uudelleen.
+- Ensimmäisen arvonnan jälkeen lyhyet vinkit: valitse pelaaja haluamallesi paikalle, maalivahti painaa eniten, pelaaja on vahvin omalla paikallaan. Korvaa erillisen vinkkilaatikon (kohta 9, nro 9).
+- Kultasuoni selitetään vasta, kun ✦-merkki näkyy ensimmäistä kertaa.
+- Vinkit saa myöhemmin auki ?-napista.
+- Pieni bugi: puhelimessa "Paras"-laatikon tulos (esim. 21–1–0) rivittyy kolmelle riville.
+
+## 11. Myöhemmin: tunnelma ja tulossivu (lisätty 2026-11-24)
+- Tulossivulla "Uusi draft" siirretään "Joukkueen kuninkaat" -osion alle, ja sen vasemmalle "Katso pistepörssi" -nappi, joka avaa pistepörssin samalla animaatiolla kuin otteluiden tiedot.
+- Ottelu kerrallaan: tuloskortin alareunaan edistymispalkki (ottelun kello), maalit ilmestyvät siinä tahdissa kuin ne syntyvät. Konfetti Suomen voitosta.
+- Äänet: alkupilli, Suomen maalista fanfaari, vastustajan maalista buuaus, tappiosta "oooh"-huokaus, voitosta taputus ja juhlinta. Huom.: äänet voivat alkaa vasta pelaajan ensimmäisen napautuksen jälkeen (selainten sääntö), ja mykistysnappi tarvitaan. Äänitiedostot pitää tehdä itse tai hankkia vapailla lisensseillä.
+- Kaksi lätkäukkoa ottelukortin vieressä: kalistelevat mailoja, maalista toinen tuulettaa ja toinen lyyhistyy. Peliasut maiden lippujen väreissä (ei oikeita joukkueiden logoja).
