@@ -165,3 +165,12 @@ Lähtötilanne (laskettu 25.11.2026):
 - Joukkueet ovat osin lähes samoja: MM 2022 ja olympialaiset 2022 jakavat 17 pelaajaa 25:stä, World Cup 2004 ja olympialaiset 2006 17/24, olympialaiset 2006 ja 2010 15/23.
 
 Keskusteltavaksi: lisää turnauksia (muut MM-kisat 1980-luvulta alkaen), muistivaraus viime drafteista (ei samoja turnauksia peräkkäin), sama pelaaja vain kerran per draft näkyvissä, tai yhden tähden turnauskohtainen "versio" (esim. Selänne 1998 vs. 2014 eri arviolla).
+
+Päätökset ja tehty (25.11.2026):
+- Vain oikeasti pelatut, lähteistä tarkistetut kokoonpanot kelpaavat jatkossakin. Edetään hitaasti.
+- Käyttäjää häiritsivät eniten tutut turnaukset. Lisäksi Selänne ja muut tähdet ovat lähes aina saatavilla, jolloin muun valinta tuntuu kullan heittämiseltä. Tavoite: tähti ei saa olla 90 %:n varmuudella tarjolla.
+- ✅ Arvontamuisti korttipakkana: turnaukset jaetaan sekoitetusta pakasta, joka säilyy selaimessa draftista toiseen. Kaikki turnaukset tulevat vastaan ennen kuin mikään toistuu. Juuri nähdyt menevät uuden pakan loppuun. Kaksosjoukkueet (MM 2022 ja OL 2022, WC 2004 ja OL 2006) eivät tule samaan draftiin.
+- Simulaatio: peräkkäisten draftien yhteiset turnaukset 2,4 → 0. Joka toisen draftin yhteiset 2,4 → 3. Kolmen draftin aikana jaetaan 18 turnausta, joten 15 turnauksella vähintään 3 toistuu aina. Tämä korjaantuu vain lisäämällä joukkueita (25 joukkueella toistoa ei tarvitse olla ollenkaan).
+- Selänteen saatavuus ei muuttunut (98 %), koska hän on 6 joukkueessa 15:stä. Tarvitaan erillinen ratkaisu, ks. alla.
+
+Seuraavaksi: lisätään mitalijoukkueita kohti 25:tä, ja päätetään tähtien saatavuudesta.

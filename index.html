@@ -493,12 +493,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   let S;
   function fresh() {
-    return { round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], revealed: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], revealed: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
   }
 
   function start(data) {
     S = data && data.S ? data.S : fresh();
     if (!S.groupOpen) S.groupOpen = {};
+    if (!S.id) S.id = Date.now().toString(36);
     if (!S.history) { S.history = []; S.future = []; }
     if (S.result && (!S.result.played || !S.result.mmAwards || !S.result.depth)) { S.phase = 'ready'; S.result = null; }
     if (S.openGame === undefined) S.openGame = null;
@@ -578,11 +579,42 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   }
 
   // Arvonta: turnaus (Suomen kokoonpano) tai aikakausi
+  // Arvontamuisti korttipakkana: turnaukset jaetaan sekoitetusta pakasta, joten kaikki
+  // turnaukset tulevat vastaan ennen kuin mikään toistuu. Pakka säilyy selaimessa draftista toiseen.
+  // Uuden pakan loppuun sekoitetaan juuri nähdyt turnaukset, ja lähes samat joukkueet
+  // eivät tule samaan draftiin.
+  const TWINS = [['mm22', 'og22'], ['wc04', 'og06']];
+  function recentDrafts() {
+    try { const a = JSON.parse(store.get('lkk-recent')); return Array.isArray(a) ? a : []; } catch (e) { return []; }
+  }
+  function rememberDraw(id) {
+    const a = recentDrafts();
+    if (!a.length || a[0].id !== S.id) a.unshift({ id: S.id, t: [] });
+    if (!a[0].t.includes(id)) a[0].t.push(id);
+    store.set('lkk-recent', JSON.stringify(a.slice(0, 2)));
+  }
+  function loadDeck() {
+    const ok = new Set(G.TOURNAMENTS.map((t) => t.id));
+    try { const d = JSON.parse(store.get('lkk-deck')); return Array.isArray(d) ? d.filter((id) => ok.has(id)) : []; } catch (e) { return []; }
+  }
   function rollDraw(exclude) {
     if (S.mode === 'aika') return rollEra(exclude);
-    let left = G.TOURNAMENTS.filter((t) => t.id !== exclude && !S.drawn.includes(t.id));
-    if (!left.length) left = G.TOURNAMENTS.filter((t) => t.id !== exclude);
-    return left[Math.floor(Math.random() * left.length)].id;
+    const recent = recentDrafts();
+    const seenNow = (recent[0] && recent[0].id === S.id ? recent[0].t : []).concat(S.drawn, exclude ? [exclude] : []);
+    const twinTaken = (id) => TWINS.some((p) => p.includes(id) && p.some((o) => o !== id && S.drawn.includes(o)));
+    const fits = (id) => !seenNow.includes(id) && !twinTaken(id);
+    let deck = loadDeck();
+    if (!deck.some(fits)) {
+      const rec = new Set(recent.flatMap((d) => d.t));
+      const fresh = G.TOURNAMENTS.map((t) => t.id).filter((id) => !deck.includes(id));
+      deck = deck.concat(G.shuffle(Math.random, fresh.filter((id) => !rec.has(id))), G.shuffle(Math.random, fresh.filter((id) => rec.has(id))));
+    }
+    // Varalla: jos sääntöjä ei voi täyttää, kelpaa mikä tahansa tässä draftissa valitsematon
+    let id = deck.find(fits) || deck.find((x) => x !== exclude && !S.drawn.includes(x));
+    if (!id) { const left = G.TOURNAMENTS.filter((t) => t.id !== exclude); id = left[Math.floor(Math.random() * left.length)].id; }
+    store.set('lkk-deck', JSON.stringify(deck.filter((x) => x !== id)));
+    rememberDraw(id);
+    return id;
   }
   const drawPool = () => S.mode === 'aika'
     ? G.PLAYERS.filter((p) => p.e.includes(S.draw))
