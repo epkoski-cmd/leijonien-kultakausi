@@ -147,3 +147,10 @@ Seuraavaksi (ehdotus):
 3. Lisää kultasuonia: SM-liigan dynastiat valikoituna ja lähteistä tarkistettuna
 4. Tunnelma: ottelun kello, maalit oikeassa tahdissa, konfetti (kohta 11)
 5. Pelaajatietojen tarkistus ennen laajempaa jakoa
+
+## 15. Linkin esikatselukuva WhatsAppiin ja iMessageen (lisätty 2026-11-25)
+Kun linkin jakaa, viestiin tulee kuva, otsikko ja kuvaus. Tarvitaan:
+- Open Graph -tagit sivulle: og:title, og:description, og:image (absoluuttinen osoite), og:url.
+- Esikatselukuva 1200 × 630 PNG GitHub Pagesiin, esim. "LEIJONIEN KULTAKAUSI" ja kaukalokuvio pelin väreissä (piirretään samalla tekniikalla kuin jakokuva).
+- Sivun kuvake (favicon) ja apple-touch-icon (180 × 180), jotka näkyvät selaimen välilehdessä, kirjanmerkeissä ja kotivalikossa.
+Huom.: WhatsApp ja iMessage tallentavat esikatselun välimuistiin, joten jo jaetut linkit voivat näyttää vanhan esikatselun.
