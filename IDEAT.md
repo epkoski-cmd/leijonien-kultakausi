@@ -154,3 +154,14 @@ Kun linkin jakaa, viestiin tulee kuva, otsikko ja kuvaus. Tarvitaan:
 - Esikatselukuva 1200 × 630 PNG GitHub Pagesiin, esim. "LEIJONIEN KULTAKAUSI" ja kaukalokuvio pelin väreissä (piirretään samalla tekniikalla kuin jakokuva).
 - Sivun kuvake (favicon) ja apple-touch-icon (180 × 180), jotka näkyvät selaimen välilehdessä, kirjanmerkeissä ja kotivalikossa.
 Huom.: WhatsApp ja iMessage tallentavat esikatselun välimuistiin, joten jo jaetut linkit voivat näyttää vanhan esikatselun.
+
+## 16. Vaihtelu: samat turnaukset ja tähdet toistuvat (havainto 2026-11-25)
+Pelatessa tuntuu, että samat arvokisajoukkueet ja pelaajat tulevat melkein joka kerta. Keskustellaan, montako joukkuetta pitäisi olla ja miten vaihtelua saadaan.
+
+Lähtötilanne (laskettu 25.11.2026):
+- 15 turnausjoukkuetta (Kanada-cup 1981, 1987, 1991; MM 1995, 2007, 2011, 2016, 2019, 2022; olympialaiset 1998, 2006, 2010, 2014, 2022; World Cup 2004). Draftissa arvotaan 6 eri turnausta, eli joka draftissa näkyy 40 % kaikista.
+- 191 eri pelaajaa, 362 rosteripaikkaa. 104 pelaajaa on vain yhdessä joukkueessa.
+- Tähdet toistuvat: Selänne, Lehtinen, Peltonen, Mikko Koivu ja Kukkonen ovat kuudessa joukkueessa; Numminen, Saku Koivu, Timonen, Niko Kapanen ja Tuomo Ruutu viidessä. Kuuden joukkueen pelaaja tulee vastaan noin 98 %:ssa drafteista, viiden noin 96 %:ssa.
+- Joukkueet ovat osin lähes samoja: MM 2022 ja olympialaiset 2022 jakavat 17 pelaajaa 25:stä, World Cup 2004 ja olympialaiset 2006 17/24, olympialaiset 2006 ja 2010 15/23.
+
+Keskusteltavaksi: lisää turnauksia (muut MM-kisat 1980-luvulta alkaen), muistivaraus viime drafteista (ei samoja turnauksia peräkkäin), sama pelaaja vain kerran per draft näkyvissä, tai yhden tähden turnauskohtainen "versio" (esim. Selänne 1998 vs. 2014 eri arviolla).
