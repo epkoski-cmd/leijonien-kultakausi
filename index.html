@@ -917,8 +917,15 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // GoatCounter-tapahtuma (vain GitHub Pages -versiossa, jossa laskuriskripti on ladattu)
+  function track(path, title) {
+    try { window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path, title, event: true }); } catch (e) {}
+  }
+
   function finishSeason(animate) {
     const r = S.result;
+    track('kausi-pelattu', 'Kausi pelattu');
+    if (r.perfect) track('kausi-taydellinen', 'Täydellinen kausi 22–0');
     S.phase = 'result';
     S.animate = animate;
     S.openGame = null;
@@ -1376,6 +1383,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     boxEl.innerHTML = '<p class="aw-note">Piirretään kuvaa…</p>';
     try {
       const url = await makeShareImage(d);
+      track('jakokuva-tehty', 'Jakokuva tehty');
       const touch = window.matchMedia('(pointer: coarse)').matches;
       boxEl.innerHTML = `<img class="share-img" src="${url}" alt="Jakokuva: ykköskenttä ja kauden tulos">
         <p class="share-help">${touch ? 'Paina kuvaa pitkään ja valitse <b>Tallenna kuva</b> tai <b>Jaa</b>.' : 'Klikkaa kuvaa hiiren oikealla ja valitse <b>Tallenna kuva nimellä</b> tai <b>Kopioi kuva</b>.'}</p>`;

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="6817f3e">
+<meta name="lkk-version" content="8cc2549">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -477,7 +477,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 13.41 · 6817f3e</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 14.03 · 8cc2549</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1515,8 +1515,15 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#draftCol').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  // GoatCounter-tapahtuma (vain GitHub Pages -versiossa, jossa laskuriskripti on ladattu)
+  function track(path, title) {
+    try { window.goatcounter && window.goatcounter.count && window.goatcounter.count({ path, title, event: true }); } catch (e) {}
+  }
+
   function finishSeason(animate) {
     const r = S.result;
+    track('kausi-pelattu', 'Kausi pelattu');
+    if (r.perfect) track('kausi-taydellinen', 'Täydellinen kausi 22–0');
     S.phase = 'result';
     S.animate = animate;
     S.openGame = null;
@@ -1974,6 +1981,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     boxEl.innerHTML = '<p class="aw-note">Piirretään kuvaa…</p>';
     try {
       const url = await makeShareImage(d);
+      track('jakokuva-tehty', 'Jakokuva tehty');
       const touch = window.matchMedia('(pointer: coarse)').matches;
       boxEl.innerHTML = `<img class="share-img" src="${url}" alt="Jakokuva: ykköskenttä ja kauden tulos">
         <p class="share-help">${touch ? 'Paina kuvaa pitkään ja valitse <b>Tallenna kuva</b> tai <b>Jaa</b>.' : 'Klikkaa kuvaa hiiren oikealla ja valitse <b>Tallenna kuva nimellä</b> tai <b>Kopioi kuva</b>.'}</p>`;
