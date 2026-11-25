@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="f53e1bc">
+<meta name="lkk-version" content="a677d86">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -298,6 +298,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card h2 { font-size: 34px; margin: 0; }
 .modal-card .gold { color: var(--gold); }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.rest-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--amber); margin-right: 4px; }
 .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 /* Ennätyskauden kortti */
 .bc-rec { font-size: clamp(52px, 13vw, 76px); }
@@ -472,7 +473,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 14.58 · f53e1bc</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.23 · a677d86</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1134,6 +1135,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>⇄</span> Pelaaja on vahvin omalla paikallaan. Sivupaikka tai väärä rooli heikentää.</li>
       <li><span>✦</span> Kultasuoni: veljekset, mitalijoukkueen kaverit, seurakaverit ja saman sukupolven pelaajat saavat bonusta. Kaukalossa samanväriset pisteet näyttävät, ketkä kuuluvat samaan kultasuoneen.</li>
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
+      <li><span>zZ</span> Lepovuoro: edellisessä draftissa valitsemasi kuusi pelaajaa lepäävät seuraavan draftin.</li>
     </ul>`;
   function showTips(first) {
     showModal(`<div class="label">${first ? 'Ensimmäinen valinta' : 'Ohjeet'}</div><h2 id="modalTitle">Näin kokoat joukkueen</h2>${TIPS}`,
@@ -1241,6 +1243,23 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const lineupPlayers = () => { const o = {}; for (const [k, n] of Object.entries(S.lineup)) o[k] = playerByName(n); return o; };
   const openSlots = () => G.SLOTS.filter((s) => !S.lineup[s.id]);
   const taken = (p) => Object.values(S.lineup).includes(p.n);
+  // Lepovuoro: edellisen valmiin draftin kuusi pelaajaa eivät ole käytettävissä seuraavassa draftissa,
+  // jotta samat tähdet eivät ole valittavissa joka kerta
+  function restMemo() {
+    try { const m = JSON.parse(store.get('lkk-rest')); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; }
+  }
+  function resting() {
+    const m = restMemo();
+    const d = m.cur && m.cur.id !== S.id ? m.cur : m.prev && m.prev.id !== S.id ? m.prev : null;
+    return d ? d.names : [];
+  }
+  function rememberLineup() {
+    const m = restMemo();
+    if (m.cur && m.cur.id !== S.id) m.prev = m.cur;
+    m.cur = { id: S.id, names: Object.values(S.lineup) };
+    store.set('lkk-rest', JSON.stringify(m));
+  }
+  const isResting = (p) => resting().includes(p.n);
   const placeable = (p) => openSlots().some((s) => G.fitPenalty(p, s.pos) !== null);
   const ratingsOn = () => store.get('l820-ratings') === '1';
 
@@ -1376,13 +1395,14 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         </button>
         <div class="list" ${collapsed ? 'hidden' : ''}>`;
       for (const p of list) {
-        const dis = taken(p) || !placeable(p);
+        const rest = !taken(p) && isResting(p);
+        const dis = taken(p) || rest || !placeable(p);
         const anyFwd = ['C', 'LW', 'RW'].includes(p.p) && p.a.length === 2;
         const posTxt = anyFwd ? 'H' : G.POS_LABEL[p.p] + (p.a.length ? '/' + p.a.map((x) => G.POS_LABEL[x]).join('/') : '');
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
@@ -1476,7 +1496,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     S.history.push({ slot: slotId, name, draw: S.draw });
     S.groupOpen = {};
     S.round++;
-    if (S.round > 6) { S.phase = 'ready'; S.draw = null; }
+    if (S.round > 6) { S.phase = 'ready'; S.draw = null; rememberLineup(); }
     else if (S.future.length) { S.draw = S.future.pop(); S.spin = true; }
     else { S.draw = rollDraw(); S.spin = true; }
     render();

@@ -173,4 +173,9 @@ Päätökset ja tehty (25.11.2026):
 - Simulaatio: peräkkäisten draftien yhteiset turnaukset 2,4 → 0. Joka toisen draftin yhteiset 2,4 → 3. Kolmen draftin aikana jaetaan 18 turnausta, joten 15 turnauksella vähintään 3 toistuu aina. Tämä korjaantuu vain lisäämällä joukkueita (25 joukkueella toistoa ei tarvitse olla ollenkaan).
 - Selänteen saatavuus ei muuttunut (98 %), koska hän on 6 joukkueessa 15:stä. Tarvitaan erillinen ratkaisu, ks. alla.
 
-Seuraavaksi: lisätään mitalijoukkueita kohti 25:tä, ja päätetään tähtien saatavuudesta.
+- ✅ Lepovuoro (25.11.2026): edellisen valmiin draftin kuusi pelaajaa näkyvät seuraavassa draftissa harmaina merkinnällä "Lepovuorossa", eikä heitä voi valita. Ohjeissa on oma rivinsä.
+- Käyttäjän varsinainen toive on **turnauskohtainen huippukunto** (realismi): pelaajan arvio riippuu iästä ja kunnosta kyseisessä turnauksessa, esim. Selänne 1998 vs. 2014. Lepovuoro on välivaihe. Vaatii syntymävuodet ja ikäkäyrän tai arvion per turnaus.
+- Kultasuonet tarkistetaan nimistä, ei siitä turnauksesta, josta pelaaja valittiin. Kultaketju 1995 (Saku Koivu, Lehtinen, Peltonen) ja MM 1995 -kultajoukkue syntyvät, vaikka pelaajat tulisivat eri turnauksista (he ovat yhdessä myös OL 1998, WC 2004, OL 2006 ja OL 2010 -joukkueissa). Käyttäjän mielestä tämä on oikein: vuoden 1995 kuntoa ei vaadita. Kun huippukunto tulee, kultasuonet pysyvät nimipohjaisina.
+- Saman turnauksen toistumista samassa draftissa ei tarvita kultaketjun takia. Voidaan harkita myöhemmin pienellä todennäköisyydellä, jos halutaan muuten.
+
+Seuraavaksi: lisätään mitalijoukkueita kohti 25:tä, sitten turnauskohtainen huippukunto.
