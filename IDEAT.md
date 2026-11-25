@@ -178,4 +178,10 @@ Päätökset ja tehty (25.11.2026):
 - Kultasuonet tarkistetaan nimistä, ei siitä turnauksesta, josta pelaaja valittiin. Kultaketju 1995 (Saku Koivu, Lehtinen, Peltonen) ja MM 1995 -kultajoukkue syntyvät, vaikka pelaajat tulisivat eri turnauksista (he ovat yhdessä myös OL 1998, WC 2004, OL 2006 ja OL 2010 -joukkueissa). Käyttäjän mielestä tämä on oikein: vuoden 1995 kuntoa ei vaadita. Kun huippukunto tulee, kultasuonet pysyvät nimipohjaisina.
 - Saman turnauksen toistumista samassa draftissa ei tarvita kultaketjun takia. Voidaan harkita myöhemmin pienellä todennäköisyydellä, jos halutaan muuten.
 
-Seuraavaksi: lisätään mitalijoukkueita kohti 25:tä, sitten turnauskohtainen huippukunto.
+- ✅ Mitalijoukkueet lisätty (25.11.2026): 15 → 27 turnausta. Uudet: OL 1988 (hopea), MM 1992, 1994 (hopea), OL 1994 (pronssi), MM 1998, 1999 (hopea), MM 2000 (pronssi), MM 2001 (hopea), MM 2006, 2008 (pronssi), MM 2014, 2021 (hopea). Lähteet ja sivut on merkitty tiedostoon data/tournaments.py. 59 uutta pelaajaa karkeilla arvioilla (75–80), joita kannattaa tarkistaa.
+- Kaksosparit (yli 2/3 samoja pelaajia): MM 1994 / OL 1994, OL 1994 / MM 1995, MM 1994 / MM 1995, WC 2004 / OL 2006, MM 2022 / OL 2022.
+- Simulaatio (ahne paras valinta, 1500 draftia): keskivahvuus 89,0 → 88,4, MM-kulta 12 % → 10 %. Uudet joukkueet ovat vähemmän tähtivoittoisia, joten peli vaikeutui hieman. Ei viritetty.
+- Selänne on nyt 8 joukkueessa 27:stä ja silti tarjolla noin 91 %:ssa drafteista (ilman lepovuoroa). Turnauskohtainen huippukunto on edelleen se varsinainen ratkaisu.
+- Puuttuvia mitaleita/kisoja voi lisätä myöhemmin (esim. MM 2023–2026, World Cup 1996, OL 2018).
+
+Seuraavaksi: turnauskohtainen huippukunto.

@@ -585,7 +585,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   // turnaukset tulevat vastaan ennen kuin mikään toistuu. Pakka säilyy selaimessa draftista toiseen.
   // Uuden pakan loppuun sekoitetaan juuri nähdyt turnaukset, ja lähes samat joukkueet
   // eivät tule samaan draftiin.
-  const TWINS = [['mm22', 'og22'], ['wc04', 'og06']];
+  // Parit, joissa yli 2/3 samoja pelaajia
+  const TWINS = [['mm94', 'og94'], ['og94', 'mm95'], ['mm94', 'mm95'], ['wc04', 'og06'], ['mm22', 'og22']];
   function recentDrafts() {
     try { const a = JSON.parse(store.get('lkk-recent')); return Array.isArray(a) ? a : []; } catch (e) { return []; }
   }
