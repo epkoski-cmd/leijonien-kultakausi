@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="ccd8564">
+<meta name="lkk-version" content="b9253b2">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,6 +127,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .pos { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .05em; min-width: 32px; padding-inline: 4px !important; white-space: nowrap; text-align: center; padding: 3px 0; border-radius: 3px; background: var(--blue-soft); color: var(--blue); }
 .pos.G { background: var(--ink); color: var(--panel); }
 .pl-main { min-width: 0; display: flex; align-items: baseline; gap: 8px; overflow: hidden; }
+.pl-age { flex: none; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .pl-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .pl-hint { flex: 1 1 0; min-width: 0; font-size: 12.5px; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rating { font-family: var(--f-display); font-size: 19px; line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--blue); }
@@ -473,7 +474,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.34 · ccd8564</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.44 · b9253b2</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -726,6 +727,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     P('Niklas Friman', 'D', [], 76, ['20'], 'MM-kulta 2022, Olympiakulta 2022'),
     P('Valtteri Kemiläinen', 'D', [], 76, ['20'], 'Olympiakulta 2022'),
     // Mitalijoukkueiden lisäys 25.11.2026: vain kokoonpanoista löytyneet, karkeat arviot
+    P('Mikko Lehtonen (s. 1978)', 'D', [], 76, ['00'], 'MM-pronssi 2006'),
     P('Simo Saarinen', 'D', [], 76, ['80'], 'Olympiahopea 1988'),
     P('Jukka Virtanen', 'D', [], 75, ['80'], 'Olympiahopea 1988'),
     P('Timo Susi', 'RW', ['LW', 'C'], 76, ['80'], 'Olympiahopea 1988'),
@@ -787,6 +789,81 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     P('Janne Juvonen', 'G', [], 78, ['20'], 'MM-hopea 2021'),
   ];
 
+  // Syntymäajat turnauskohtaista kuntoa varten (lähde: Wikidata, haettu 2026-11-25)
+  const BORN = {
+    "Aki-Petteri Berg": '1977-07-28', "Aleksander Barkov": '1995-09-02', "Anssi Salmela": '1984-08-13', "Antero Niittymäki": '1980-06-18',
+    "Anton Lundell": '2001-10-03', "Antti Aalto": '1975-03-04', "Antti Laaksonen": '1973-10-03', "Antti Miettinen": '1980-07-03',
+    "Antti Niemi": '1983-08-29', "Antti Pihlström": '1984-10-22', "Antti Raanta": '1989-05-12', "Antti Törmänen": '1970-09-19',
+    "Antti-Jussi Niemi": '1977-09-22', "Ari Sulander": '1969-01-06', "Ari-Pekka Siekkinen": '1965-01-12', "Arto Javanainen": '1959-04-08',
+    "Arto Ruotanen": '1961-04-11', "Arttu Ilomäki": '1991-06-12', "Arttu Ruotsalainen": '1997-10-29', "Artturi Lehkonen": '1995-07-04',
+    "Atte Ohtamaa": '1987-11-06', "Axel Rindell": '2000-01-01', "Christian Ruuttu": '1964-02-20', "Eeli Tolvanen": '1999-04-22',
+    "Eetu Luostarinen": '1998-09-02', "Erik Haula": '1991-03-23', "Erik Hämäläinen": '1965-04-20', "Erkki Laine": '1957-09-13',
+    "Erkki Lehtonen": '1957-01-09', "Esa Keskinen": '1965-02-03', "Esa Lindell": '1994-05-23', "Esa Pirnes": '1977-04-01',
+    "Esa Tikkanen": '1965-01-25', "Frans Tuohimaa": '1991-08-19', "Fredrik Norrena": '1973-11-29', "Hannes Björninen": '1995-10-19',
+    "Hannes Hyvönen": '1975-08-29', "Hannu Järvenpää": '1963-05-19', "Hannu Kamppuri": '1957-07-01', "Hannu Lassila": '1954-02-25',
+    "Hannu Virta": '1963-03-22', "Harri Laurila": '1965-04-30', "Harri Pesonen": '1988-08-06', "Harri Säteri": '1989-12-29',
+    "Heikki Riihiranta": '1948-10-04', "Henri Jokiharju": '1999-06-17', "Iiro Järvi": '1965-03-23', "Iiro Pakarinen": '1991-08-25',
+    "Ilkka Sinisalo": '1958-07-10', "Jani Hakanpää": '1992-03-31', "Jani Lajunen": '1990-06-16', "Jani Rita": '1981-07-25',
+    "Janne Grönvall": '1973-07-17', "Janne Juvonen": '1994-10-03', "Janne Lahti": '1982-07-20', "Janne Laukkanen": '1970-03-19',
+    "Janne Niinimaa": '1975-05-22', "Janne Niskala": '1981-09-22', "Janne Ojanen": '1968-04-09', "Janne Pesonen": '1982-05-11',
+    "Jari Grönstrand": '1962-11-14', "Jari Kurri": '1960-05-18', "Jari Torkki": '1965-08-11', "Jari Viuhkola": '1980-02-27',
+    "Jarkko Immonen": '1982-04-19', "Jarkko Ruutu": '1975-08-23', "Jarkko Varvio": '1972-04-28', "Jarmo Kekäläinen": '1966-07-03',
+    "Jarmo Myllys": '1965-05-29', "Jarno Koskiranta": '1986-12-09', "Jere Innala": '1998-03-17', "Jere Karalahti": '1975-03-25',
+    "Jere Karjalainen": '1992-05-23', "Jere Lehtinen": '1973-06-24', "Jere Sallinen": '1990-10-26', "Jesperi Kotkaniemi": '2000-07-06',
+    "Jesse Joensuu": '1987-10-05', "Jesse Puljujärvi": '1998-05-07', "Joel Armia": '1993-05-31', "Joel Kiviranta": '1996-03-23',
+    "Joni Lius": '1971-03-04', "Joni Pitkänen": '1983-09-19', "Joonas Donskoi": '1992-04-13', "Joonas Korpisalo": '1994-04-28',
+    "Joonas Nättinen": '1991-01-03', "Jori Lehterä": '1987-12-23', "Jorma Sevon": '1958-02-07', "Jorma Valtonen": '1946-12-22',
+    "Jouko Narvanmaa": '1962-09-10', "Juha Huikari": '1960-01-08', "Juha Ikonen": '1970-06-07', "Juha Lind": '1974-01-02',
+    "Juha Riihijärvi": '1969-12-15', "Juha Tuohimaa": '1956-06-05', "Juha Ylönen": '1972-02-13', "Juhamatti Aaltonen": '1985-06-04',
+    "Juhani Tamminen": '1950-05-26', "Juhani Tyrväinen": '1990-09-11', "Juho Lammikko": '1996-01-29', "Jukka Hentunen": '1974-05-03',
+    "Jukka Porvari": '1954-01-19', "Jukka Seppo": '1968-01-22', "Jukka Tammi": '1962-04-10', "Jukka Virtanen": '1959-07-15',
+    "Jukka-Pekka Laamanen": '1976-10-04', "Jussi Jokinen": '1983-04-01', "Jussi Markkanen": '1975-05-08', "Jussi Olkinuora": '1990-11-04',
+    "Juuse Saros": '1995-04-19', "Juuso Hietanen": '1985-06-14', "Juuso Pärssinen": '2001-02-01', "Juuso Välimäki": '1998-10-06',
+    "Jyri Marttinen": '1982-09-01', "Jyrki Lumme": '1966-07-16', "Jyrki Välivaara": '1976-05-30', "Kaapo Kakko": '2001-02-13',
+    "Kai Rautio": '1964-07-22', "Kai Suikkanen": '1959-06-29', "Kaj Linna": '1971-01-24', "Kari Eloranta": '1956-02-29',
+    "Kari Jalonen": '1960-01-06', "Kari Laitinen": '1964-04-09', "Kari Lehtonen": '1983-11-16', "Kari Makkonen": '1955-01-20',
+    "Kari Martikainen": '1968-09-15', "Kari Takko": '1962-06-23', "Karri Rämö": '1986-07-01', "Kasperi Kapanen": '1996-07-23',
+    "Keijo Säilynoja": '1970-02-17', "Kevin Lankinen": '1995-04-28', "Kim Nousiainen": '2000-11-14', "Kimmo Rintanen": '1973-08-07',
+    "Kimmo Timonen": '1975-03-18', "Konsta Helenius": '2006-05-11', "Kristian Kuusela": '1983-02-19', "Lasse Kukkonen": '1981-09-18',
+    "Lasse Oksanen": '1942-12-07', "Lauri Korpikoski": '1986-07-28', "Leo Komarov": '1987-01-23', "Markku Kiimalainen": '1955-10-08',
+    "Markku Kyllönen": '1962-02-15', "Marko Anttila": '1985-05-27', "Marko Kiprusoff": '1972-02-06', "Marko Palo": '1967-09-26',
+    "Marko Tuomainen": '1972-04-25', "Markus Granlund": '1993-04-16', "Markus Ketterer": '1967-08-23', "Markus Mattsson": '1957-07-30',
+    "Matias Maccelli": '2000-10-14', "Matti Hagman": '1955-09-21', "Miika Koivisto": '1990-07-20', "Miikka Kiprusoff": '1976-10-26',
+    "Miikka Salomäki": '1993-03-09', "Mika Alatalo": '1971-06-11', "Mika Nieminen": '1966-01-01', "Mika Pyörälä": '1981-07-13',
+    "Mika Strömberg": '1970-02-28', "Mikael Granlund": '1992-02-26', "Mikael Ruohomaa": '1988-11-17', "Mikael Seppälä": '1994-03-08',
+    "Mikko Eloranta": '1972-08-24', "Mikko Jokela": '1980-03-04', "Mikko Koivu": '1983-03-12', "Mikko Koskinen": '1988-07-18',
+    "Mikko Lehtonen": '1994-01-16', "Mikko Lehtonen (s. 1978)": '1978-06-12', "Mikko Leinonen": '1955-07-15', "Mikko Luoma": '1976-06-22',
+    "Mikko Mäkelä": '1965-02-28', "Mikko Rantanen": '1996-10-29', "Miro Aaltonen": '1993-06-07', "Miro Heiskanen": '1999-07-18',
+    "Niklas Bäckström": '1978-02-13', "Niklas Friman": '1993-08-30', "Niklas Hagman": '1979-12-05', "Niko Hovinen": '1988-03-16',
+    "Niko Kapanen": '1978-04-29', "Niko Mikkola": '1996-04-27', "Niko Ojamäki": '1995-06-17', "Oliwer Kaski": '1995-09-04',
+    "Olli Jokinen": '1978-12-05', "Olli Määttä": '1994-08-22', "Olli Palola": '1988-04-08', "Ossi Väänänen": '1980-08-18',
+    "Pasi Huura": '1966-03-23', "Pasi Kuivalainen": '1972-07-15', "Pasi Nurminen": '1975-12-17', "Pasi Puistola": '1978-09-16',
+    "Pasi Sormunen": '1970-03-08', "Patrik Laine": '1998-04-19', "Pekka Arbelius": '1960-06-26', "Pekka Jormakka": '1990-09-14',
+    "Pekka Marjamäki": '1947-12-18', "Pekka Rautakallio": '1953-07-25', "Pekka Rinne": '1982-11-03', "Pekka Saravo": '1979-11-13',
+    "Pekka Tirkkonen": '1968-07-17', "Pekka Tuomisto": '1960-12-29', "Peter Tiivola": '1993-09-05', "Petri Kontiola": '1984-10-04',
+    "Petri Skriko": '1962-03-13', "Petri Varis": '1969-05-13', "Petri Vehanen": '1977-10-09', "Petteri Lindbohm": '1993-09-23',
+    "Petteri Nokelainen": '1986-01-16', "Petteri Nummelin": '1972-11-25', "Petteri Wirtanen": '1986-05-28', "Raimo Helminen": '1964-03-11',
+    "Raimo Hirvonen": '1957-07-20', "Raimo Summanen": '1962-03-02', "Rasmus Ristolainen": '1994-10-27', "Rauli Raitanen": '1970-01-14',
+    "Reijo Mikkolainen": '1964-05-14', "Reijo Ruotsalainen": '1960-04-01', "Riku Hahl": '1980-11-01', "Risto Siltanen": '1958-10-31',
+    "Roope Hintz": '1996-11-17', "Sakari Lindfors": '1966-04-27', "Sakari Manninen": '1992-02-10', "Sakari Salminen": '1988-05-31',
+    "Saku Koivu": '1974-11-23', "Saku Mäenalanen": '1994-05-29', "Sami Kapanen": '1973-06-14', "Sami Lepistö": '1984-10-17',
+    "Sami Salo": '1974-09-02', "Sami Vatanen": '1991-06-03', "Sean Bergenheim": '1984-02-08', "Sebastian Aho": '1997-07-26',
+    "Simo Saarinen": '1963-02-14', "Sinuhe Wallinheimo": '1972-03-09', "Tapio Levo": '1955-09-24', "Teemu Hartikainen": '1990-05-03',
+    "Teemu Lassila": '1983-03-26', "Teemu Pulkkinen": '1992-01-02', "Teemu Selänne": '1970-07-03', "Teemu Turunen": '1995-11-24',
+    "Teppo Numminen": '1968-07-03', "Tero Lehterä": '1972-04-21', "Teuvo Teräväinen": '1994-09-11', "Timo Blomqvist": '1961-01-23',
+    "Timo Jutila": '1963-12-24', "Timo Nummelin": '1948-09-07', "Timo Peltomaa": '1968-07-26', "Timo Pärssinen": '1977-01-19',
+    "Timo Saarikoski": '1969-07-17', "Timo Susi": '1959-01-25', "Tomi Kallio": '1977-01-27', "Tomi Sallinen": '1989-02-11',
+    "Tommi Huhtala": '1987-12-07', "Tommi Kivistö": '1991-06-07', "Tommi Santala": '1979-06-27', "Toni Lydman": '1977-09-25',
+    "Toni Mäkiaho": '1975-01-11', "Toni Rajala": '1991-03-29', "Toni Sihvonen": '1971-02-19', "Toni Söderholm": '1978-04-14',
+    "Tony Sund": '1995-08-04', "Tony Virta": '1972-06-28', "Topi Jaakola": '1983-11-15', "Tuomas Grönman": '1974-03-22',
+    "Tuomo Ruutu": '1983-02-16', "Tuukka Mäntylä": '1981-05-25', "Tuukka Rask": '1987-03-10', "Ukko-Pekka Luukkonen": '1999-03-09',
+    "Urho Vaakanainen": '1999-01-01', "Urpo Ylönen": '1943-05-25', "Valtteri Filppula": '1984-03-20', "Valtteri Kemiläinen": '1991-12-16',
+    "Valtteri Puustinen": '1999-06-04', "Veini Vehviläinen": '1997-02-13', "Veli-Matti Savinainen": '1986-01-05', "Veli-Pekka Ketola": '1948-03-28',
+    "Vesa Toskala": '1977-05-20', "Vesa Viitakoski": '1971-02-13', "Ville Heinola": '2001-03-02', "Ville Husso": '1995-02-06',
+    "Ville Koistinen": '1982-06-17', "Ville Lajunen": '1988-03-08', "Ville Leino": '1983-10-06', "Ville Nieminen": '1977-04-06',
+    "Ville Peltonen": '1973-05-24', "Ville Pokka": '1994-06-03', "Ville Siren": '1964-02-11', "Waltteri Immonen": '1967-04-03',
+  };
+
   // Suomen turnauskokoonpanot (lähde: Wikipedian kokoonpanotaulukot, tarkistettu 2026-11-24 ja 2026-11-25)
   const TOURNAMENTS = [
     { id: "cc81", label: "Kanada-cup 1981", year: 1981, res: "", roster: ["Hannu Lassila", "Markus Mattsson", "Raimo Hirvonen", "Juha Huikari", "Tapio Levo", "Timo Nummelin", "Pekka Rautakallio", "Reijo Ruotsalainen", "Risto Siltanen", "Juha Tuohimaa", "Pekka Arbelius", "Matti Hagman", "Kari Jalonen", "Arto Javanainen", "Veli-Pekka Ketola", "Markku Kiimalainen", "Jari Kurri", "Mikko Leinonen", "Kari Makkonen", "Jukka Porvari", "Jorma Sevon", "Ilkka Sinisalo"] },
@@ -804,7 +881,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     { id: "mm01", label: "MM 2001", year: 2001, res: "hopea", roster: ["Pasi Nurminen", "Miikka Kiprusoff", "Jarmo Myllys", "Marko Kiprusoff", "Petteri Nummelin", "Kimmo Timonen", "Sami Salo", "Ossi Väänänen", "Aki-Petteri Berg", "Antti-Jussi Niemi", "Janne Grönvall", "Raimo Helminen", "Antti Laaksonen", "Tomi Kallio", "Niko Kapanen", "Sami Kapanen", "Jukka Hentunen", "Timo Pärssinen", "Juha Lind", "Toni Sihvonen", "Kimmo Rintanen", "Tony Virta", "Juha Ylönen", "Jarkko Ruutu"] },
     { id: "wc04", label: "World Cup 2004", year: 2004, res: "hopea", roster: ["Miikka Kiprusoff", "Kari Lehtonen", "Vesa Toskala", "Aki-Petteri Berg", "Toni Lydman", "Janne Niinimaa", "Teppo Numminen", "Joni Pitkänen", "Sami Salo", "Kimmo Timonen", "Ossi Väänänen", "Mikko Eloranta", "Niklas Hagman", "Riku Hahl", "Jukka Hentunen", "Olli Jokinen", "Niko Kapanen", "Mikko Koivu", "Saku Koivu", "Antti Laaksonen", "Jere Lehtinen", "Ville Nieminen", "Ville Peltonen", "Jarkko Ruutu", "Tuomo Ruutu", "Teemu Selänne"] },
     { id: "og06", label: "Olympialaiset 2006", year: 2006, res: "hopea", roster: ["Fredrik Norrena", "Antero Niittymäki", "Niklas Bäckström", "Petteri Nummelin", "Kimmo Timonen", "Lasse Kukkonen", "Sami Salo", "Aki-Petteri Berg", "Teppo Numminen", "Toni Lydman", "Antti-Jussi Niemi", "Teemu Selänne", "Ville Nieminen", "Saku Koivu", "Olli Jokinen", "Niklas Hagman", "Ville Peltonen", "Mikko Koivu", "Antti Laaksonen", "Jukka Hentunen", "Jere Lehtinen", "Jussi Jokinen", "Jarkko Ruutu", "Niko Kapanen"] },
-    { id: "mm06", label: "MM 2006", year: 2006, res: "pronssi", roster: ["Petteri Nummelin", "Lasse Kukkonen", "Pekka Saravo", "Aki-Petteri Berg", "Mikko Luoma", "Tuukka Mäntylä", "Mikko Lehtonen", "Sean Bergenheim", "Olli Jokinen", "Tuomo Ruutu", "Ville Peltonen", "Antti Miettinen", "Mikko Koivu", "Tommi Santala", "Riku Hahl", "Jari Viuhkola", "Jukka Hentunen", "Jani Rita", "Jussi Jokinen", "Jarkko Ruutu", "Esa Pirnes", "Tomi Kallio", "Antero Niittymäki", "Fredrik Norrena", "Niklas Bäckström"] },
+    { id: "mm06", label: "MM 2006", year: 2006, res: "pronssi", roster: ["Petteri Nummelin", "Lasse Kukkonen", "Pekka Saravo", "Aki-Petteri Berg", "Mikko Luoma", "Tuukka Mäntylä", "Mikko Lehtonen (s. 1978)", "Sean Bergenheim", "Olli Jokinen", "Tuomo Ruutu", "Ville Peltonen", "Antti Miettinen", "Mikko Koivu", "Tommi Santala", "Riku Hahl", "Jari Viuhkola", "Jukka Hentunen", "Jani Rita", "Jussi Jokinen", "Jarkko Ruutu", "Esa Pirnes", "Tomi Kallio", "Antero Niittymäki", "Fredrik Norrena", "Niklas Bäckström"] },
     { id: "mm07", label: "MM 2007", year: 2007, res: "hopea", roster: ["Kari Lehtonen", "Fredrik Norrena", "Sinuhe Wallinheimo", "Aki-Petteri Berg", "Ville Koistinen", "Lasse Kukkonen", "Jukka-Pekka Laamanen", "Tuukka Mäntylä", "Petteri Nummelin", "Pekka Saravo", "Toni Söderholm", "Sean Bergenheim", "Jukka Hentunen", "Tomi Kallio", "Niko Kapanen", "Mikko Koivu", "Petri Kontiola", "Jere Lehtinen", "Antti Miettinen", "Timo Pärssinen", "Ville Peltonen", "Mika Pyörälä", "Jarkko Ruutu", "Tuomo Ruutu", "Jari Viuhkola"] },
     { id: "mm08", label: "MM 2008", year: 2008, res: "pronssi", roster: ["Sean Bergenheim", "Riku Hahl", "Hannes Hyvönen", "Mikko Jokela", "Jussi Jokinen", "Olli Jokinen", "Niko Kapanen", "Ville Koistinen", "Mikko Koivu", "Saku Koivu", "Sami Lepistö", "Mikko Luoma", "Antti-Jussi Niemi", "Janne Niskala", "Ville Peltonen", "Antti Pihlström", "Esa Pirnes", "Mika Pyörälä", "Tuomo Ruutu", "Anssi Salmela", "Teemu Selänne", "Ossi Väänänen", "Niklas Bäckström", "Karri Rämö", "Petri Vehanen"] },
     { id: "og10", label: "Olympialaiset 2010", year: 2010, res: "pronssi", roster: ["Niklas Bäckström", "Miikka Kiprusoff", "Antero Niittymäki", "Lasse Kukkonen", "Sami Lepistö", "Toni Lydman", "Janne Niskala", "Joni Pitkänen", "Sami Salo", "Kimmo Timonen", "Valtteri Filppula", "Niklas Hagman", "Jarkko Immonen", "Olli Jokinen", "Niko Kapanen", "Mikko Koivu", "Saku Koivu", "Jere Lehtinen", "Antti Miettinen", "Ville Peltonen", "Jarkko Ruutu", "Tuomo Ruutu", "Teemu Selänne"] },
@@ -921,8 +998,30 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   ];
   const opp = (n) => OPPONENTS.find((o) => o.n === n);
 
+  // Turnauskohtainen kunto: pelaajan arvio (r) on huipputaso, ja ikä turnauksen aikaan laskee sitä.
+  // Kenttäpelaajat ovat huipussaan 24–31-vuotiaina, maalivahdit 27–34-vuotiaina.
+  // Nuorempi: −1 / vuosi. Vanhempi: −(0,5·x + 0,06·x²), x = vuodet huippuiän yli.
+  function tournamentDate(t) {
+    // Olympialaiset helmikuussa, MM-kisat toukokuussa, Kanada-cup ja World Cup syyskuussa
+    const month = t.id.startsWith('og') ? 1 : /^(cc|wc)/.test(t.id) ? 8 : 4;
+    return Date.UTC(t.year, month, 15);
+  }
+  function formDelta(age, isG) {
+    const lo = isG ? 27 : 24, hi = isG ? 34 : 31;
+    if (age < lo) return -(lo - age);
+    if (age > hi) { const x = age - hi; return -(0.5 * x + 0.06 * x * x); }
+    return 0;
+  }
+  function inTournament(p, tid) {
+    const t = TOURNAMENTS.find((x) => x.id === tid);
+    if (!p || !t || !BORN[p.n]) return p;
+    const age = (tournamentDate(t) - Date.parse(BORN[p.n])) / (365.25 * 864e5);
+    return { ...p, r: Math.round(p.r + formDelta(age, p.p === 'G')), peak: p.r, age: Math.floor(age) };
+  }
+
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
-  const CONFIG = { spread: 3.0, offset: 2 };
+  // offset 2 → 0.4 (25.11.2026): turnauskunto laski keskivahvuutta 1,6, kullan todennäköisyys pidettiin ennallaan
+  const CONFIG = { spread: 3.0, offset: 0.4 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -1139,7 +1238,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1207,6 +1306,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>⇄</span> Pelaaja on vahvin omalla paikallaan. Sivupaikka tai väärä rooli heikentää.</li>
       <li><span>✦</span> Kultasuoni: veljekset, mitalijoukkueen kaverit, seurakaverit ja saman sukupolven pelaajat saavat bonusta. Kaukalossa samanväriset pisteet näyttävät, ketkä kuuluvat samaan kultasuoneen.</li>
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
+      <li><span>v</span> Turnauskunto: pelaajan taso riippuu iästä kyseisessä turnauksessa. Nuori lupaus ja veteraani ovat huippuaan heikompia.</li>
       <li><span>zZ</span> Lepovuoro: edellisessä draftissa valitsemasi kuusi pelaajaa lepäävät seuraavan draftin.</li>
     </ul>`;
   function showTips(first) {
@@ -1286,7 +1386,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   }
   const drawPool = () => S.mode === 'aika'
     ? G.PLAYERS.filter((p) => p.e.includes(S.draw))
-    : G.TOURNAMENTS.find((t) => t.id === S.draw).roster.map((n) => G.PLAYERS.find((p) => p.n === n)).filter(Boolean);
+    : G.TOURNAMENTS.find((t) => t.id === S.draw).roster.map((n) => G.inTournament(G.PLAYERS.find((p) => p.n === n), S.draw)).filter(Boolean);
   const RES_LABEL = { kulta: 'Kulta', hopea: 'Hopea', pronssi: 'Pronssi', 'välierä': 'Välierä' };
 
   const playerByName = (n) => G.PLAYERS.find((p) => p.n === n);
@@ -1313,7 +1413,15 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const best = Math.min(...opts.map((o) => o.pen));
     return opts.filter((o) => o.pen === best);
   }
-  const lineupPlayers = () => { const o = {}; for (const [k, n] of Object.entries(S.lineup)) o[k] = playerByName(n); return o; };
+  // Kokoonpanon pelaajat turnauskohtaisella arviolla: valintahistoria kertoo, mistä turnauksesta pelaaja tuli
+  const lineupPlayers = () => {
+    const o = {};
+    for (const [k, n] of Object.entries(S.lineup)) {
+      const h = (S.history || []).find((x) => x.slot === k && x.name === n);
+      o[k] = G.inTournament(playerByName(n), h && h.draw);
+    }
+    return o;
+  };
   const openSlots = () => G.SLOTS.filter((s) => !S.lineup[s.id]);
   const taken = (p) => Object.values(S.lineup).includes(p.n);
   // Lepovuoro: edellisen valmiin draftin kuusi pelaajaa eivät ole käytettävissä seuraavassa draftissa,
@@ -1449,7 +1557,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
       <div class="rating-info">${ratingsOn()
-        ? `<span>Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
         : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
@@ -1475,7 +1583,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;

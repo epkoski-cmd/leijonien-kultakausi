@@ -184,4 +184,7 @@ Päätökset ja tehty (25.11.2026):
 - Selänne on nyt 8 joukkueessa 27:stä ja silti tarjolla noin 91 %:ssa drafteista (ilman lepovuoroa). Turnauskohtainen huippukunto on edelleen se varsinainen ratkaisu.
 - Puuttuvia mitaleita/kisoja voi lisätä myöhemmin (esim. MM 2023–2026, World Cup 1996, OL 2018).
 
-Seuraavaksi: turnauskohtainen huippukunto.
+- ✅ Turnauskohtainen kunto (25.11.2026): syntymäajat Wikidatasta (kaikki 283), pelaajan arvio = huipputaso + ikäkäyrä turnauksen ajankohtana. Kenttäpelaajat huipussaan 24–31 v, maalivahdit 27–34 v; nuorempi −1/v, vanhempi −(0,5x + 0,06x²). Kortissa näkyy ikä. Aikakausiarvonnassa käytetään huipputasoa. Esim. Selänne: KC 1991 93, OL 1998 96, OL 2010 87, OL 2014 80.
+- MM 2006:n Mikko Lehtonen on eri henkilö (puolustaja, s. 1978) kuin 2019–2022 pelannut, ja hän on nyt oma pelaajansa.
+- Vaikeus: keskivahvuus laski 1,6, joten CONFIG.offset 2 → 0,4. Kullan todennäköisyys pysyi noin 8 %:ssa (ahne valinta, 2500 draftia).
+- Jatkoidea: poikkeuslista, jolla ikäkäyrää voi korjata perustellusti (esim. Selänne 2014 olympiaturnauksen paras pelaaja, Laine 2016). Peruste lähteestä, esim. tähdistökenttä tai pistepörssi.
