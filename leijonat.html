@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="c8358bd">
+<meta name="lkk-version" content="6817f3e">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -298,7 +298,19 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card h2 { font-size: 34px; margin: 0; }
 .modal-card .gold { color: var(--gold); }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
-.modal-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
+.modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+/* Ennätyskauden kortti */
+.bc-rec { font-size: clamp(52px, 13vw, 76px); }
+.bc-title { font-family: var(--f-display); font-weight: 800; font-size: 26px; text-transform: uppercase; line-height: 1.05; }
+.bc-strip { display: grid; grid-template-columns: repeat(22, 1fr); gap: 3px; }
+.bc-strip i { height: 14px; border-radius: 2px; background: var(--line); }
+.bc-strip i.W { background: var(--win); } .bc-strip i.L { background: var(--red); } .bc-strip i.O { background: var(--amber); }
+.bc-lineup { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, auto); grid-auto-flow: column; gap: 4px 12px; font-size: 15px; }
+.bc-lineup span { display: inline-block; min-width: 34px; color: var(--gold); font-family: var(--f-data); font-size: 13px; font-weight: 700; }
+.bc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 15px; }
+.bc-list .aw-star { color: var(--gold); margin-right: 6px; }
+.bc-foot { font-size: 13.5px; color: var(--muted); }
+.modal-card .share-img { width: 100%; height: auto; border-radius: 6px; }
 .tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 15.5px; line-height: 1.4; }
 .tips li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: start; }
 .tips li span { text-align: center; color: var(--gold); font-weight: 700; font-family: var(--f-data); font-size: 14px; }
@@ -460,7 +472,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 24.11.2026 klo 23.46 · c8358bd</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 13.41 · 6817f3e</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1093,9 +1105,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   // Perehdytys: esittely, vinkit ja kultasuonen ohje. Selain muistaa näytetyt (localStorage).
   let modalOpen = false;
-  function showModal(html, btnLabel, onClose) {
+  function showModal(html, btnLabel, onClose, extraBtns = '') {
     modalOpen = true;
-    $('#modalCard').innerHTML = html + `<div class="modal-actions"><button class="btn primary" id="modalOk">${btnLabel}</button></div>`;
+    $('#modalCard').innerHTML = html + `<div class="modal-actions">${extraBtns}<button class="btn primary" id="modalOk">${btnLabel}</button></div>`;
     $('#modal').hidden = false;
     const close = () => {
       $('#modal').hidden = true;
@@ -1212,9 +1224,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#bestBox').onclick = () => {
       const b = store.get('lkk-best');
       if (!b) { toast('Oma ennätyksesi tallentuu tähän, kun olet pelannut ensimmäisen kauden.'); return; }
+      const card = bestCard();
+      if (card) { showBestCard(card); return; }
       const [w, l, o] = b.split('–').map(Number);
       const n = (k, one, many) => `${k} ${k === 1 ? one : many}`;
-      toast(`<b>Oma ennätys</b><br>Paras kautesi tässä pelissä: ${n(w, 'voitto', 'voittoa')}, ${n(l, 'tappio', 'tappiota')}, ${n(o, 'jatkoaikatappio', 'jatkoaikatappiota')}. Tallentuu vain tälle laitteelle.`);
+      toast(`<b>Oma ennätys</b><br>Paras kautesi tässä pelissä: ${n(w, 'voitto', 'voittoa')}, ${n(l, 'tappio', 'tappiota')}, ${n(o, 'jatkoaikatappio', 'jatkoaikatappiota')}. Ennätyskauden kortti tallentuu, kun pelaat yhtä hyvän tai paremman kauden.`);
     };
     renderRink();
     if (S.phase === 'draft') renderDraft();
@@ -1503,10 +1517,55 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     S.openGame = null;
     const score = r.W * 10 + (MEDAL_RANK[r.medal] || 0);
     const prev = store.get('lkk-bestScore');
-    if (prev === null || score > +prev) {
+    // Tasaväkinen kausi tallentaa kortin, jos ennätys on tehty ennen korttien aikaa
+    if (prev === null || score > +prev || (score === +prev && !bestCard())) {
       store.set('lkk-bestScore', String(score));
       store.set('lkk-best', `${r.W}–${r.L}–${r.OTL}`);
+      store.set('lkk-bestCard', JSON.stringify(seasonCard()));
     }
+  }
+
+  // Kauden tiivistelmä tallennettavaksi: kaikki mitä ennätyskortti ja jakokuva tarvitsevat
+  function seasonCard() {
+    const r = S.result, lp = lineupPlayers();
+    const top = scoring(r.games).filter((x) => !isDepth(x.n))[0];
+    const lineup = {};
+    for (const sl of G.SLOTS) lineup[sl.id] = lp[sl.id].n;
+    return {
+      v: 1, W: r.W, L: r.L, OTL: r.OTL, medal: r.medal || null, perfect: !!r.perfect, rating: r.rating,
+      title: G.verdict(r).title, lineup,
+      games: r.games.map((g) => g.win ? 'W' : g.ot ? 'O' : 'L'),
+      awards: r.mmAwards.awards.map((a) => ({ title: a.title, n: a.n })),
+      top: top ? { n: top.n, g: top.g, a: top.a } : null,
+      date: new Date().toISOString().slice(0, 10),
+    };
+  }
+  function bestCard() {
+    try { const c = JSON.parse(store.get('lkk-bestCard')); return c && c.v === 1 ? c : null; } catch (e) { return null; }
+  }
+  function showBestCard(d) {
+    const [y, mo, da] = d.date.split('-').map(Number);
+    const medalTxt = d.medal ? MEDAL[d.medal][1] : 'Ei mitalia';
+    const strip = Array.from({ length: G.SEASON_GAMES }, (_, i) => `<i class="${d.games[i] || ''}"></i>`).join('');
+    const lineup = G.SLOTS.map((sl) => `<li><span>${sl.short}</span>${esc(d.lineup[sl.id])}</li>`).join('');
+    const items = [
+      ...(d.perfect ? [`<li><span class="aw-star" aria-hidden="true">★</span><b>Täydellinen kausi</b> 22–0</li>`] : []),
+      ...d.awards.map((a) => `<li><span class="aw-star" aria-hidden="true">★</span>${esc(a.title)}: <b>${esc(a.n)}</b></li>`),
+      ...(d.top ? [`<li><span class="aw-star" aria-hidden="true">★</span>Pistekuningas: <b>${esc(d.top.n)}</b> ${d.top.g}+${d.top.a}</li>`] : []),
+    ].join('');
+    showModal(`<div class="label">Oma ennätys · ${da}.${mo}.${y}</div>
+      <h2 id="modalTitle">Ennätys<span class="gold">kausi</span></h2>
+      <div class="record bc-rec">${recHtml([d.W, d.L, d.OTL])}</div>
+      <div class="bc-title">${esc(d.title)}</div>
+      <div class="bc-strip" aria-label="Kauden ottelut">${strip}</div>
+      <div class="medal"><span class="disc ${d.medal || 'none'}">${{ gold: '1', silver: '2', bronze: '3' }[d.medal] || '–'}</span><div><b>${medalTxt}</b></div></div>
+      <div class="label">Ykköskenttä</div>
+      <ul class="bc-lineup">${lineup}</ul>
+      ${items ? `<ul class="bc-list">${items}</ul>` : ''}
+      <p class="bc-foot">Vahvuus ${d.rating.toFixed(1)} · Tallessa vain tällä laitteella.</p>
+      <div id="bcImgBox" class="share-box" hidden></div>`,
+      'Sulje', null, `<button class="btn" id="bcImg">Tee jakokuva</button>`);
+    $('#bcImg').onclick = () => showShareImage(d, $('#bcImgBox'));
   }
 
   function restart() { S = fresh(); S.draw = rollDraw(); S.spin = true; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -1747,7 +1806,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       </div>`;
     $('#again').onclick = restart;
     $('#copy').onclick = copyResult;
-    $('#mkImg').onclick = showShareImage;
+    $('#mkImg').onclick = () => showShareImage(seasonCard(), $('#shareImgBox'));
     bindChips(render);
     bindExpand();
     animateResult(r);
@@ -1801,7 +1860,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     let s = size;
     do { x.font = `${weight} ${s}px ${family}`; s -= 2; } while (x.measureText(text).width > maxW && s > 12);
   }
-  async function makeShareImage() {
+  async function makeShareImage(d) {
     try {
       await Promise.all([
         document.fonts.load('800 80px "Saira Extra Condensed"'),
@@ -1809,7 +1868,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         document.fonts.load('600 30px "Barlow Condensed"'),
       ]);
     } catch (e) {}
-    const r = S.result, lp = lineupPlayers(), v = G.verdict(r);
     const W = 1080, H = 1350, PAD = 64;
     const C = { bg: '#0d1b2e', panel: '#13243b', line: '#2a4262', gold: '#ffd34d', ink: '#f2f6fb', muted: '#9fb2c9',
       win: '#45b37c', red: '#ef5b6b', amber: '#e3a83a', blue: '#6f9fe6', medal: { gold: '#dcb24a', silver: '#b3bfcc', bronze: '#cf8a52' } };
@@ -1834,28 +1892,28 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     x.fillText('KAUSI · VOITOT – TAPPIOT – JATKOAIKATAPPIOT', PAD, 214);
     x.font = `800 210px ${D}`;
     let px = PAD;
-    for (const [t, col] of [[String(r.W), C.ink], ['–', C.ink], [String(r.L), C.red], ['–', C.ink], [String(r.OTL), C.amber]]) {
+    for (const [t, col] of [[String(d.W), C.ink], ['–', C.ink], [String(d.L), C.red], ['–', C.ink], [String(d.OTL), C.amber]]) {
       x.fillStyle = col; x.fillText(t, px, 400); px += x.measureText(t).width;
     }
-    fitFont(x, v.title.toUpperCase(), 800, 76, D, W - PAD * 2 - 230);
-    x.fillStyle = C.ink; x.fillText(v.title.toUpperCase(), PAD, 486);
+    fitFont(x, d.title.toUpperCase(), 800, 76, D, W - PAD * 2 - 230);
+    x.fillStyle = C.ink; x.fillText(d.title.toUpperCase(), PAD, 486);
 
     // Mitali
     const mx = W - PAD - 90, my = 320;
     x.beginPath(); x.arc(mx, my, 90, 0, Math.PI * 2);
-    x.fillStyle = r.medal ? C.medal[r.medal] : C.line; x.fill();
+    x.fillStyle = d.medal ? C.medal[d.medal] : C.line; x.fill();
     x.lineWidth = 8; x.strokeStyle = 'rgba(255,255,255,.35)'; x.stroke();
-    x.font = `800 96px ${D}`; x.textAlign = 'center'; x.fillStyle = r.medal ? '#fff' : C.muted;
-    x.fillText(r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–', mx, my + 34);
+    x.font = `800 96px ${D}`; x.textAlign = 'center'; x.fillStyle = d.medal ? '#fff' : C.muted;
+    x.fillText(d.medal === 'gold' ? '1' : d.medal === 'silver' ? '2' : d.medal === 'bronze' ? '3' : '–', mx, my + 34);
     x.font = `600 30px ${BC}`; x.fillStyle = C.ink;
-    x.fillText(r.medal ? MEDAL[r.medal][1].toUpperCase() : 'EI MITALIA', mx, my + 136);
+    x.fillText(d.medal ? MEDAL[d.medal][1].toUpperCase() : 'EI MITALIA', mx, my + 136);
     x.textAlign = 'left';
 
     // Ottelunauha
     const sy = 528, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
     for (let i = 0; i < n; i++) {
-      const g = r.games[i];
-      x.fillStyle = !g ? C.panel : g.win ? C.win : g.ot ? C.amber : C.red;
+      const g = d.games[i];
+      x.fillStyle = !g ? C.panel : g === 'W' ? C.win : g === 'O' ? C.amber : C.red;
       rrect(x, PAD + i * (cw + gap), sy, cw, 44, 5); x.fill();
     }
 
@@ -1868,12 +1926,12 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     x.fillStyle = C.red; x.fillRect(PAD, ry + rh - 112, rw, 3); x.globalAlpha = 1;
     x.restore();
     const box = (slotId, bx, by, bw) => {
-      const sl = G.SLOTS.find((s) => s.id === slotId), p = lp[slotId];
+      const sl = G.SLOTS.find((s) => s.id === slotId), name = d.lineup[slotId];
       rrect(x, bx, by, bw, 116, 10); x.fillStyle = C.bg; x.fill();
       x.lineWidth = 3; x.strokeStyle = C.gold; x.stroke();
       x.textAlign = 'center';
       x.font = `600 24px ${BC}`; x.fillStyle = C.gold; x.fillText(sl.short, bx + bw / 2, by + 32);
-      const parts = p.n.split(' '), last = parts.slice(1).join(' ') || p.n;
+      const parts = name.split(' '), last = parts.slice(1).join(' ') || name;
       fitFont(x, last, 700, 40, B, bw - 20); x.fillStyle = C.ink; x.fillText(last, bx + bw / 2, by + 76);
       fitFont(x, parts[0], 500, 24, B, bw - 20); x.fillStyle = C.muted; x.fillText(parts[0], bx + bw / 2, by + 104);
       x.textAlign = 'left';
@@ -1886,8 +1944,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
     // Palkinnot ja pistekuningas
     let ay = 1110;
-    const aw = r.mmAwards.awards.slice(0, 3);
-    if (r.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
+    const aw = d.awards.slice(0, 3);
+    if (d.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
     for (const a of aw.slice(0, 3)) {
       x.font = `800 40px ${D}`; x.fillStyle = C.gold; x.fillText('★', PAD, ay);
       x.font = `600 28px ${BC}`; const t = a.title.toUpperCase();
@@ -1896,9 +1954,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       fitFont(x, a.n, 600, 34, B, W - PAD * 2 - 48 - tw); x.fillStyle = C.ink; x.fillText(a.n, PAD + 48 + tw, ay - 2);
       ay += 54;
     }
-    const top = scoring(r.games).filter((x) => !isDepth(x.n))[0];
+    const top = d.top;
     x.font = `500 28px ${B}`; x.fillStyle = C.muted;
-    const foot = (top ? `Pistekuningas ${top.n} ${top.g}+${top.a}   ·   ` : '') + `Vahvuus ${r.rating.toFixed(1)}`;
+    const foot = (top ? `Pistekuningas ${top.n} ${top.g}+${top.a}   ·   ` : '') + `Vahvuus ${d.rating.toFixed(1)}`;
     x.fillText(foot, PAD, H - 64);
     x.font = `600 24px ${BC}`; x.textAlign = 'right'; x.fillStyle = C.gold;
     x.fillText('LEIJONIEN KULTAKAUSI · FANIPELI', W - PAD, H - 28);
@@ -1906,12 +1964,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return c.toDataURL('image/png');
   }
 
-  async function showShareImage() {
-    const boxEl = $('#shareImgBox');
+  async function showShareImage(d, boxEl) {
     boxEl.hidden = false;
     boxEl.innerHTML = '<p class="aw-note">Piirretään kuvaa…</p>';
     try {
-      const url = await makeShareImage();
+      const url = await makeShareImage(d);
       const touch = window.matchMedia('(pointer: coarse)').matches;
       boxEl.innerHTML = `<img class="share-img" src="${url}" alt="Jakokuva: ykköskenttä ja kauden tulos">
         <p class="share-help">${touch ? 'Paina kuvaa pitkään ja valitse <b>Tallenna kuva</b> tai <b>Jaa</b>.' : 'Klikkaa kuvaa hiiren oikealla ja valitse <b>Tallenna kuva nimellä</b> tai <b>Kopioi kuva</b>.'}</p>`;

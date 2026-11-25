@@ -132,7 +132,7 @@ Käydään läpi vaihtoehdot, kun on aika:
 - Kumoa toimii monta kertaa, mikä yllätti ja sekoitti: ei tiennyt, millä kierroksella on. Vaihtoehdot: ilmoitus kertoo kierroksen ("Kumottu: X · palattiin kierrokselle 4/6"), tai kumoa vain kerran per kierros.
 - Olympialaiset 2022 -joukkueessa ei ole yhtään yli 90 pisteen pelaajaa, mutta joukkue voitti kultaa. Yhteispeli ratkaisee. Idea: saman turnausjoukkueen pelaajat saavat kemiabonuksen ("Pekingin kultajoukkue"), jolloin vähemmän tähtiä sisältävä mutta yhtenäinen kenttä voi pärjätä.
 - Toistettavuus: helpossa tilassa valitsee usein samat tähdet, ja maajoukkuepelaajia on vähän. Pitää validoida, käykö peli tylsäksi. 38-0-0 tarjoaa eri sarjoja (liigat, MM-kisat). Meille vaihtoehtoja: Liiga-seurojen kaikkien aikojen joukkueet, eri maat (kohta 5), päivittäinen haaste (kaikille sama arvonta), sumennetut arviot (kohta 9).
-- Oma ennätys -napista näkyviin ennätyskauden kortti (kokoonpano, tulos, mitali, palkinnot). Ei vaadi palvelinta: kauden tiedot voi tallentaa selaimeen samoin kuin ennätyksen, ja jakokuvan voi piirtää uudelleen. Näkyy vain samalla laitteella.
+- Oma ennätys -napista näkyviin ennätyskauden kortti (kokoonpano, tulos, mitali, palkinnot). Ei vaadi palvelinta: kauden tiedot voi tallentaa selaimeen samoin kuin ennätyksen, ja jakokuvan voi piirtää uudelleen. Näkyy vain samalla laitteella. ✅ tehty 25.11.2026: kortissa tulos, ottelunauha, mitali, ykköskenttä, palkinnot ja jakokuva.
 
 ## 14. Kauden yhteenveto puhelimessa (toive 2026-11-24) ✅ tehty (versio c91c627)
 Yhteenveto on pitkä vieritettävä. "Uusi draft" voisi leijua koko ajan näkyvissä: sama kiinteä alapalkki kuin ottelu kerrallaan -tilassa, napit esim. "Uusi draft" ja "Jaa tulos" (jakokuva). Liittyy kohdan 11 ajatukseen siirtää Uusi draft ja lisätä "Katso pistepörssi".
@@ -141,7 +141,7 @@ Yhteenveto on pitkä vieritettävä. "Uusi draft" voisi leijua koko ajan näkyvi
 Tehty tänään: yhden napautuksen valinta, pieni kiinteä kaukalo puhelimessa, arvonta-animaatio, perehdytys (esittely, vinkit, kultasuoni-ohje, ?-nappi), kumoa, sumennetut arviot, ottelukortin tiivistelmä, alapalkit puhelimessa (ottelut ja yhteenveto), maalivahdin osio pistepörssiin, versionumero ja päivitysilmoitus, kultasuonet: veljekset, isä–poika (Kapanen, Hagman), kultajoukkueet, väripisteet ja katto.
 
 Seuraavaksi (ehdotus):
-1. Ennätyskauden kortti "Oma ennätys" -napista (kohta 13)
+1. ~~Ennätyskauden kortti "Oma ennätys" -napista (kohta 13)~~ ✅ tehty 25.11.2026
    + Analytiikka: GoatCounterin tapahtumat (event) pelatuista kausista, esim. "kausi-pelattu" (ja tarvittaessa "draft-aloitettu", "jakokuva-tehty"). GoatCounter ei tunnista yksittäisiä käyttäjiä, joten saadaan kokonaismäärät, ei käyttäjäkohtaista lukua. Kausia per käynti = kausi-pelattu / sivun käynnit. Vain GitHub Pages -versiossa.
 2. "Katso pistepörssi" -nappi yhteenvetoon (kohta 11)
 3. Lisää kultasuonia: SM-liigan dynastiat valikoituna ja lähteistä tarkistettuna
