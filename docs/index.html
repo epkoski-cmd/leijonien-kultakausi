@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="b9253b2">
+<meta name="lkk-version" content="a9c25ab">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -304,6 +304,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card h2 { font-size: 34px; margin: 0; }
 .modal-card .gold { color: var(--gold); }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.star-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gold); margin-right: 4px; }
 .rest-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--amber); margin-right: 4px; }
 .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 /* Ennätyskauden kortti */
@@ -479,7 +480,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.44 · b9253b2</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.52 · a9c25ab</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1017,16 +1018,46 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (age > hi) { const x = age - hi; return -(0.5 * x + 0.06 * x * x); }
     return 0;
   }
+  // Poikkeukset ikäkäyrään: turnauksessa loistaneet pelaajat (lähde: englanninkielisen Wikipedian
+  // turnaussivujen palkinnot ja tilastot, haettu 2026-11-25). MM 1998–2001 -sivuilla ei ole tilastoja.
+  // A = IIHF:n paras pelaaja/pelipaikka, MVP tai tähdistökenttä: ikävähennyksestä jää 25 %.
+  // B = pistepörssin top 10 tai torjuntaprosentin top 5: ikävähennyksestä jää 50 %.
+  const STANDOUT = {
+    og88: { B: ["Erkki Lehtonen"] },
+    mm92: { A: ["Markus Ketterer", "Timo Jutila", "Jarkko Varvio"], B: ["Mikko Mäkelä", "Mika Nieminen", "Timo Saarikoski", "Rauli Raitanen"] },
+    mm94: { A: ["Timo Jutila", "Saku Koivu", "Jari Kurri"], B: ["Mikko Mäkelä", "Jere Lehtinen", "Jarmo Myllys"] },
+    og94: { A: ["Timo Jutila"], B: ["Mika Nieminen"] },
+    mm95: { A: ["Jarmo Myllys", "Saku Koivu", "Timo Jutila", "Jere Lehtinen", "Ville Peltonen"], B: ["Raimo Helminen"] },
+    og98: { B: ["Teemu Selänne", "Saku Koivu", "Jere Lehtinen"] },
+    wc04: { A: ["Kimmo Timonen", "Saku Koivu"], B: ["Miikka Kiprusoff"] },
+    og06: { A: ["Antero Niittymäki", "Teemu Selänne", "Saku Koivu", "Kimmo Timonen"], B: ["Ville Peltonen", "Olli Jokinen", "Jere Lehtinen"] },
+    mm06: { A: ["Petteri Nummelin"], B: ["Fredrik Norrena"] },
+    mm07: { A: ["Kari Lehtonen", "Petteri Nummelin"] },
+    mm08: { B: ["Niklas Bäckström"] },
+    og10: { B: ["Niklas Hagman"] },
+    mm11: { A: ["Jarkko Immonen"], B: ["Mikael Granlund", "Petri Vehanen"] },
+    og14: { A: ["Teemu Selänne", "Mikael Granlund"] },
+    mm14: { A: ["Pekka Rinne"], B: ["Jori Lehterä"] },
+    mm16: { A: ["Mikko Koskinen", "Patrik Laine", "Mikael Granlund"], B: ["Mikko Koivu"] },
+    mm19: { A: ["Mikko Lehtonen"], B: ["Kevin Lankinen"] },
+    mm21: { A: ["Jussi Olkinuora"] },
+    og22: { A: ["Mikko Lehtonen", "Sakari Manninen"], B: ["Teemu Hartikainen", "Harri Säteri"] },
+    mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
+  };
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
     const age = (tournamentDate(t) - Date.parse(BORN[p.n])) / (365.25 * 864e5);
-    return { ...p, r: Math.round(p.r + formDelta(age, p.p === 'G')), peak: p.r, age: Math.floor(age) };
+    const ex = STANDOUT[tid] || {};
+    const star = ex.A && ex.A.includes(p.n) ? 'A' : ex.B && ex.B.includes(p.n) ? 'B' : null;
+    const d = formDelta(age, p.p === 'G') * (star === 'A' ? 0.25 : star === 'B' ? 0.5 : 1);
+    return { ...p, r: Math.round(p.r + d), peak: p.r, age: Math.floor(age), star };
   }
 
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
-  // offset 2 → 0.4 (25.11.2026): turnauskunto laski keskivahvuutta 1,6, kullan todennäköisyys pidettiin ennallaan
-  const CONFIG = { spread: 3.0, offset: 0.4 };
+  // offset 2 → 0.7 (25.11.2026): turnauskunto ja poikkeuslista laskivat keskivahvuutta noin 1,3;
+  // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
+  const CONFIG = { spread: 3.0, offset: 0.7 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -1243,7 +1274,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1562,7 +1593,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
       <div class="rating-info">${ratingsOn()
-        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa, joten ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
         : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
@@ -1588,7 +1619,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;

@@ -299,6 +299,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card h2 { font-size: 34px; margin: 0; }
 .modal-card .gold { color: var(--gold); }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
+.star-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gold); margin-right: 4px; }
 .rest-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--amber); margin-right: 4px; }
 .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
 /* Ennätyskauden kortti */
@@ -794,7 +795,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
       <div class="rating-info">${ratingsOn()
-        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa, joten ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
         : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
@@ -820,7 +821,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;

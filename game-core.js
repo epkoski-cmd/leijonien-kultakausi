@@ -529,16 +529,46 @@
     if (age > hi) { const x = age - hi; return -(0.5 * x + 0.06 * x * x); }
     return 0;
   }
+  // Poikkeukset ikäkäyrään: turnauksessa loistaneet pelaajat (lähde: englanninkielisen Wikipedian
+  // turnaussivujen palkinnot ja tilastot, haettu 2026-11-25). MM 1998–2001 -sivuilla ei ole tilastoja.
+  // A = IIHF:n paras pelaaja/pelipaikka, MVP tai tähdistökenttä: ikävähennyksestä jää 25 %.
+  // B = pistepörssin top 10 tai torjuntaprosentin top 5: ikävähennyksestä jää 50 %.
+  const STANDOUT = {
+    og88: { B: ["Erkki Lehtonen"] },
+    mm92: { A: ["Markus Ketterer", "Timo Jutila", "Jarkko Varvio"], B: ["Mikko Mäkelä", "Mika Nieminen", "Timo Saarikoski", "Rauli Raitanen"] },
+    mm94: { A: ["Timo Jutila", "Saku Koivu", "Jari Kurri"], B: ["Mikko Mäkelä", "Jere Lehtinen", "Jarmo Myllys"] },
+    og94: { A: ["Timo Jutila"], B: ["Mika Nieminen"] },
+    mm95: { A: ["Jarmo Myllys", "Saku Koivu", "Timo Jutila", "Jere Lehtinen", "Ville Peltonen"], B: ["Raimo Helminen"] },
+    og98: { B: ["Teemu Selänne", "Saku Koivu", "Jere Lehtinen"] },
+    wc04: { A: ["Kimmo Timonen", "Saku Koivu"], B: ["Miikka Kiprusoff"] },
+    og06: { A: ["Antero Niittymäki", "Teemu Selänne", "Saku Koivu", "Kimmo Timonen"], B: ["Ville Peltonen", "Olli Jokinen", "Jere Lehtinen"] },
+    mm06: { A: ["Petteri Nummelin"], B: ["Fredrik Norrena"] },
+    mm07: { A: ["Kari Lehtonen", "Petteri Nummelin"] },
+    mm08: { B: ["Niklas Bäckström"] },
+    og10: { B: ["Niklas Hagman"] },
+    mm11: { A: ["Jarkko Immonen"], B: ["Mikael Granlund", "Petri Vehanen"] },
+    og14: { A: ["Teemu Selänne", "Mikael Granlund"] },
+    mm14: { A: ["Pekka Rinne"], B: ["Jori Lehterä"] },
+    mm16: { A: ["Mikko Koskinen", "Patrik Laine", "Mikael Granlund"], B: ["Mikko Koivu"] },
+    mm19: { A: ["Mikko Lehtonen"], B: ["Kevin Lankinen"] },
+    mm21: { A: ["Jussi Olkinuora"] },
+    og22: { A: ["Mikko Lehtonen", "Sakari Manninen"], B: ["Teemu Hartikainen", "Harri Säteri"] },
+    mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
+  };
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
     const age = (tournamentDate(t) - Date.parse(BORN[p.n])) / (365.25 * 864e5);
-    return { ...p, r: Math.round(p.r + formDelta(age, p.p === 'G')), peak: p.r, age: Math.floor(age) };
+    const ex = STANDOUT[tid] || {};
+    const star = ex.A && ex.A.includes(p.n) ? 'A' : ex.B && ex.B.includes(p.n) ? 'B' : null;
+    const d = formDelta(age, p.p === 'G') * (star === 'A' ? 0.25 : star === 'B' ? 0.5 : 1);
+    return { ...p, r: Math.round(p.r + d), peak: p.r, age: Math.floor(age), star };
   }
 
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
-  // offset 2 → 0.4 (25.11.2026): turnauskunto laski keskivahvuutta 1,6, kullan todennäköisyys pidettiin ennallaan
-  const CONFIG = { spread: 3.0, offset: 0.4 };
+  // offset 2 → 0.7 (25.11.2026): turnauskunto ja poikkeuslista laskivat keskivahvuutta noin 1,3;
+  // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
+  const CONFIG = { spread: 3.0, offset: 0.7 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -755,7 +785,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
