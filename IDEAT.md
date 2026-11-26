@@ -253,8 +253,9 @@ Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä
 - Kaikki saavat samana päivänä samat kuusi turnausta, saman "Arvo uusi" -vaihtoehdon kullekin kierrokselle ja samat vastustajien vireet (siemen päivämäärästä, ei palvelinta).
 - Sama kenttä saa saman kauden (siemen päivä + kenttä), joten ero syntyy valinnoista.
 - Haasteessa arvontatapa on turnaus ja lepovuoro ei ole käytössä; haaste ei vaikuta lepovuoroon eikä arvontapakkaan.
-- Ensimmäinen pelattu kausi on päivän tulos (tallessa selaimessa 14 päivää), sen jälkeen harjoituskierroksia.
-- Kutsu draftin alussa (ennen ensimmäistä valintaa) ja yhteenvedon lopussa. Jakokuvassa ja tekstissä "Päivän haaste 26.11.".
+- Yksi yritys päivässä (Wordle-malli): tulos tallentuu, kun kausi alkaa (tallessa selaimessa 14 päivää). Harjoituskierros poistettu 26.11.2026: niukkuus tekee tuloksesta merkittävän ja tuo takaisin huomenna.
+- Välilehdet otsikon alla: Draft | Päivän haaste (punainen piste, kun pelaamatta). Kumpikin välilehti muistaa tilanteensa käynnin ajan. Pelatun haasteen näkymä: tulos, kenttä kaukalossa, jakokuva, "Uusi haaste huomenna". Jakokuvassa ja tekstissä "Päivän haaste 26.11.".
+- Myöhemmin: pelin jälkeen päivän paras mahdollinen kenttä (mentori), oppimisen tueksi uusinnan sijaan.
 - GoatCounter-tapahtumat: haaste-aloitettu, haaste-pelattu, haaste-harjoitus.
 - Vaihe 2: haastelinkki ja vertailu kaverin tulokseen.
 
