@@ -228,6 +228,18 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gl-depth { font-weight: 500; color: var(--muted); }
 .gc-pens { margin: 0; font-size: 13.5px; color: var(--muted); }
 .stats tr.depth td { color: var(--muted); }
+.stats:not(.depth-open) tr.depth { display: none; }
+.stats tr.depth-toggle { cursor: pointer; }
+.stats tr.depth-toggle td { text-transform: none; letter-spacing: .02em; }
+.stats tr.depth-toggle .dt-arrow { display: inline-block; transition: transform .15s; }
+.stats.depth-open tr.depth-toggle .dt-arrow { transform: rotate(180deg); }
+.forecast { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.forecast .fc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.forecast .fc-head b { font-size: 18px; }
+.forecast .fc-head span { color: var(--muted); font-size: 13px; }
+.forecast .fc-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; }
+.forecast .fc-note, .fc-after { color: var(--muted); font-size: 12.5px; margin: 0; }
+.fc-after { margin-top: 6px; }
 .stats tr.sub td { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--ice); }
 .awards { display: grid; }
 .aw-list, .kings { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -944,7 +956,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     render();
   }
 
+  const pct = (x) => x >= 0.995 ? '99 %' : x > 0 && x < 0.01 ? 'alle 1 %' : Math.round(x * 100) + ' %';
+  function forecastHtml(f, rating) {
+    return `<div class="forecast">
+          <div class="label">Kauden ennuste</div>
+          <div class="fc-head"><b>${esc(f.label)}</b><span>Vahvuus ${rating.toFixed(1)}</span></div>
+          <div class="fc-row"><span>MM-kulta <b>${pct(f.gold)}</b></span><span>Mitali <b>${pct(f.medal)}</b></span><span>Puolivälierä <b>${pct(f.adv)}</b></span></div>
+          <p class="fc-note">Laskettu pelaamalla tällä vahvuudella 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi ja kultasuonet.</p>
+        </div>`;
+  }
   function renderReady() {
+    const rating = G.evaluateTeam(lineupPlayers()).total;
     $('#draftCol').innerHTML = `
       <div class="result">
         <div class="verdict">
@@ -952,6 +974,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <h2>Kausi alkaa</h2>
           <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
         </div>
+        ${forecastHtml(G.forecast(rating), rating)}
         <div class="actions">
           <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
           <button class="btn" id="playAll">Simuloi koko kausi</button>
@@ -971,9 +994,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const ev = G.evaluateTeam(lp);
     const skaters = ev.rows.filter((row) => row.slot.pos !== 'G').map((row) => ({ n: row.player.n, eff: row.eff, pos: row.slot.pos }));
     const gk = ev.rows.find((row) => row.slot.pos === 'G');
-    const depth = G.pickDepth(Math.random, Object.values(lp));
+    const depth = G.pickDepth(Math.random, Object.values(lp), S.history.map((h) => h.draw));
     S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth);
     S.result.rating = ev.total;
+    const f = G.forecast(ev.total);
+    S.result.forecast = { label: f.label, gold: f.gold, medal: f.medal };
     S.openGame = null;
     if (mode === 'step') { S.phase = 'step'; S.shown = 0; }
     else finishSeason(true);
@@ -1162,11 +1187,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
       <tr class="gk-head"><th>Maalivahti</th><th title="Ottelut">O</th><th title="Voitot">V</th><th title="Päästetyt maalit ottelua kohden">PM/O</th><th title="Nollapelit">NP</th></tr>
       <tr class="gk-row"><td>${nameCell(lp.G.n)}</td><td>${games.length}</td><td>${wins}</td><td><b>${gaa}</b></td><td><b>${so}</b></td></tr>
-      <tr class="sub"><td colspan="5">Muut kentät · pelin valitsemat</td></tr>
+      <tr class="sub depth-toggle" tabindex="0" role="button" aria-expanded="false"><td colspan="5">Muut kentät · eivät vaikuta tulokseen <span class="dt-arrow">▾</span></td></tr>
       ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
       </tbody></table>
       <p class="gk-line">M = maalit, S = syötöt, P = pisteet, J = jäähyminuutit · O = ottelut, V = voitot, PM/O = päästetyt maalit ottelua kohden, NP = nollapelit</p>
     </div>`;
+  }
+
+  // Muut kentät on oletuksena taitettu: ne tekevät maaleja, mutta eivät vaikuta otteluiden tuloksiin
+  function bindDepthToggle() {
+    document.querySelectorAll('.depth-toggle').forEach((row) => {
+      const flip = () => {
+        const t = row.closest('table');
+        const open = t.classList.toggle('depth-open');
+        row.setAttribute('aria-expanded', open);
+      };
+      row.onclick = flip;
+      row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+    });
   }
 
   function kings(games) {
@@ -1262,7 +1300,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <p class="playing" id="playing" ${S.animate ? '' : 'hidden'}>Kausi käynnissä…</p>
         </div>
         <div class="reveal" id="reveal" ${S.animate ? 'hidden' : ''}>
-          <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p></div>
+          <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p>${r.forecast ? `<p class="fc-after">Ennuste ennen kautta: ${esc(r.forecast.label.toLowerCase())} · kulta ${pct(r.forecast.gold)}, mitali ${pct(r.forecast.medal)}</p>` : ''}</div>
           ${r.perfect ? `<div class="medal perfect"><span class="disc gold">22</span><div><b>Täydellinen kausi</b><span>Kaikki 22 ottelua voitettu.</span></div></div>` : ''}
           <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
           ${awardsHtml(r)}
@@ -1287,6 +1325,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#mkImg').onclick = () => showShareImage(seasonCard(), $('#shareImgBox'));
     bindChips(render);
     bindExpand();
+    bindDepthToggle();
     animateResult(r);
   }
 

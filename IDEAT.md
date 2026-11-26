@@ -190,3 +190,18 @@ Päätökset ja tehty (25.11.2026):
 - ✅ Poikkeuslista (25.11.2026, STANDOUT game-core.js:ssä): englanninkielisen Wikipedian turnaussivujen palkinnot ja tilastot kaikista 27 turnauksesta. A = IIHF:n paras pelaaja/pelipaikka, MVP tai tähdistökenttä → ikävähennyksestä jää 25 %. B = pistepörssin top 10 tai torjuntaprosentin top 5 → jää 50 %. Kortissa ★ Turnauksen tähti / Pistekärki / Torjuntakärki. Esim. Selänne OL 2014 80 → 92, OL 2006 92 → 95, Laine MM 2016 82 → 87, Koivu MM 1995 88 → 91.
 - Aukot: MM 1998, 1999, 2000 ja 2001 -sivuilla ei ole palkintoja eikä tilastoja (voisi hakea IIHF:n arkistosta). OL 1988, 1994 ja 1998 sivuilla ei ole torjuntatilastoja, MM 2014:n torjuntataulukko jäi lukematta, MM 2011:n tähdistöstä luettiin vain osa.
 - Vaikeus viritetty uudelleen: offset 0,7.
+
+## 17. Testaajien palaute ja päätökset (2026-11-26)
+Palaute: peli on vaikea (ensimmäinen kulta noin 40 kauden jälkeen), arvot tuntuvat alhaisilta ikäkäyrän jälkeen, MM 2011 -kultajoukkue on heikko, MM-vastustajat toistuvat, muut kentät tuntuvat vaikuttavan tulokseen epäreilusti. Kaverit: entinen ammattilainen piti hauskana; opettaja ymmärsi pelin tutoriaalin jälkeen; palvelumuotoilija koki tuloksen satunnaiseksi ja kaipasi vastustajaa (haaste kaverille).
+
+Havainnot (simulaatio 26.11.2026):
+- Muut kentät eivät vaikuta otteluiden tulokseen lainkaan, vain maalintekijöihin ja jäähyihin. Ongelma on esitystavassa.
+- Oikeat kultajoukkueet ovat pelissä alakastissa: paras kenttä MM 1995 86,7, MM 2022 85,2, MM 2011 83,5, OL 2022 ja MM 2019 82,1 (kulta 1–5 %). WC 2004 92,9 ja OL 2006 91,4 ovat vahvimmat.
+- Kulta joukkueen vahvuuden mukaan: 86 → 3 %, 88 → 11 %, 90 → 26 %, 92 → 44 %.
+
+Päätökset:
+- **Tavoitevaikeus:** hyvä draft (vahvuus noin 89) voittaa MM-kullan noin joka 8. kausi (~12 %). Keinot: tuuria hieman vähemmän (spread), kultajoukkuekemia isommaksi (+0,7 → noin +1,5), offset viritetään simuloiden. Ei keksittyjä bonuksia; STANDOUT-aukot täytetään lähteistä.
+- **Muut kentät:** taitettu rivi "Muut kentät · eivät vaikuta tulokseen", avautuu napautuksella. Valitaan pelaajan turnausjoukkueista ilman yli 90:n tähtiä.
+- **Kauden ennuste** ennen kautta (vahvuus + kullan todennäköisyys).
+
+Järjestys: 1) ennuste ja muut kentät, 2) vaikeuden viritys, 3) EHT-palkinnot (osaturnausvoitot ja kokonaisvoitto ennätyskorttiin), 4) päivän haaste ja haastelinkki. Myöhemmin: MM-vastustajien kauden kunto, STANDOUT-aukot, karkeiden arvioiden tarkistus, "Pelaa sama joukkue 100 kertaa". Ei nyt: vaikeustasot, palvelimellinen tulostaulukko, automaattinen loppudraft.

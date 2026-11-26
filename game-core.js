@@ -620,18 +620,61 @@
   const scoreW = (p) => Math.pow(Math.max(2, p.eff - 68), 1.6) * (p.pos === 'D' ? 0.3 : 1);
   const assistW = (p) => Math.pow(Math.max(2, p.eff - 68), 1.3) * (p.pos === 'D' ? 0.75 : 1);
 
-  // Muut kentät: peli valitsee 6 hyökkääjää ja 3 puolustajaa samoilta aikakausilta kuin draftatut pelaajat
-  function pickDepth(rng, chosen) {
+  // Muut kentät: peli valitsee 6 hyökkääjää ja 3 puolustajaa. Ne tekevät maaleja ja ottavat jäähyjä,
+  // mutta eivät vaikuta otteluiden tuloksiin. Ensisijaisesti draftin turnausjoukkueista, sitten samoilta
+  // aikakausilta. Yli 90:n tähtiä ei valita, jottei muissa kentissä pelaa parempia kuin omassa.
+  const DEPTH_MAX = 90;
+  function pickDepth(rng, chosen, draws = []) {
     const names = chosen.map((p) => p.n);
     const eras = new Set(chosen.flatMap((p) => p.e));
-    const pool = PLAYERS.filter((p) => p.p !== 'G' && !names.includes(p.n));
+    const pool = PLAYERS.filter((p) => p.p !== 'G' && !names.includes(p.n) && p.r <= DEPTH_MAX);
+    const tids = draws.filter((d) => TOURNAMENTS.some((t) => t.id === d));
+    const fromTour = new Map();
+    for (const tid of shuffle(rng, tids)) {
+      for (const n of TOURNAMENTS.find((t) => t.id === tid).roster) {
+        const p = pool.find((x) => x.n === n);
+        if (p && !fromTour.has(n)) fromTour.set(n, inTournament(p, tid));
+      }
+    }
     const fromEras = pool.filter((p) => p.e.some((e) => eras.has(e)));
     const take = (isD, k) => {
-      const prim = shuffle(rng, fromEras.filter((p) => (p.p === 'D') === isD));
-      const rest = shuffle(rng, pool.filter((p) => (p.p === 'D') === isD && !prim.includes(p)));
-      return [...prim, ...rest].slice(0, k).map((p) => ({ n: p.n, eff: p.r - 4, pos: isD ? 'D' : p.p, depth: true }));
+      const isPos = (p) => (p.p === 'D') === isD;
+      const t1 = shuffle(rng, [...fromTour.values()].filter(isPos));
+      const t2 = shuffle(rng, fromEras.filter((p) => isPos(p) && !fromTour.has(p.n)));
+      const t3 = shuffle(rng, pool.filter((p) => isPos(p) && !fromTour.has(p.n) && !t2.includes(p)));
+      return [...t1, ...t2, ...t3].slice(0, k).map((p) => ({ n: p.n, eff: p.r - 4, pos: isD ? 'D' : p.p, depth: true }));
     };
     return [...take(false, 6), ...take(true, 3)];
+  }
+
+  // Kauden ennuste: simuloidaan sama vahvuus monta kertaa kiinteällä siemenellä (sama vahvuus = sama luku)
+  function seededRng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const fcCache = new Map();
+  function forecast(teamRating, n = 3000) {
+    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset;
+    if (fcCache.has(key)) return fcCache.get(key);
+    const rng = seededRng(20261126);
+    let gold = 0, medal = 0, adv = 0, perfect = 0;
+    for (let i = 0; i < n; i++) {
+      const r = simulateSeason(teamRating, rng);
+      if (r.medal === 'gold') gold++;
+      if (r.medal) medal++;
+      if (r.advanced) adv++;
+      if (r.perfect) perfect++;
+    }
+    const f = { gold: gold / n, medal: medal / n, adv: adv / n, perfect: perfect / n };
+    f.label = f.gold >= 0.3 ? 'Kultasuosikki' : f.medal >= 0.5 ? 'Mitalisuosikki' : f.medal >= 0.25 ? 'Mitalikandidaatti' : f.adv >= 0.5 ? 'Puolivälieräjoukkue' : 'Altavastaaja';
+    fcCache.set(key, f);
+    return f;
   }
 
   // Osa maaleista ja syötöistä tulee muilta kentiltä
@@ -785,7 +828,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);

@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="a9c25ab">
+<meta name="lkk-version" content="2e863fb">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -228,6 +228,18 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gl-depth { font-weight: 500; color: var(--muted); }
 .gc-pens { margin: 0; font-size: 13.5px; color: var(--muted); }
 .stats tr.depth td { color: var(--muted); }
+.stats:not(.depth-open) tr.depth { display: none; }
+.stats tr.depth-toggle { cursor: pointer; }
+.stats tr.depth-toggle td { text-transform: none; letter-spacing: .02em; }
+.stats tr.depth-toggle .dt-arrow { display: inline-block; transition: transform .15s; }
+.stats.depth-open tr.depth-toggle .dt-arrow { transform: rotate(180deg); }
+.forecast { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+.forecast .fc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.forecast .fc-head b { font-size: 18px; }
+.forecast .fc-head span { color: var(--muted); font-size: 13px; }
+.forecast .fc-row { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; }
+.forecast .fc-note, .fc-after { color: var(--muted); font-size: 12.5px; margin: 0; }
+.fc-after { margin-top: 6px; }
 .stats tr.sub td { font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--ice); }
 .awards { display: grid; }
 .aw-list, .kings { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -475,7 +487,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 25.11.2026 klo 15.52 · a9c25ab</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 10.41 · 2e863fb</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1104,18 +1116,61 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const scoreW = (p) => Math.pow(Math.max(2, p.eff - 68), 1.6) * (p.pos === 'D' ? 0.3 : 1);
   const assistW = (p) => Math.pow(Math.max(2, p.eff - 68), 1.3) * (p.pos === 'D' ? 0.75 : 1);
 
-  // Muut kentät: peli valitsee 6 hyökkääjää ja 3 puolustajaa samoilta aikakausilta kuin draftatut pelaajat
-  function pickDepth(rng, chosen) {
+  // Muut kentät: peli valitsee 6 hyökkääjää ja 3 puolustajaa. Ne tekevät maaleja ja ottavat jäähyjä,
+  // mutta eivät vaikuta otteluiden tuloksiin. Ensisijaisesti draftin turnausjoukkueista, sitten samoilta
+  // aikakausilta. Yli 90:n tähtiä ei valita, jottei muissa kentissä pelaa parempia kuin omassa.
+  const DEPTH_MAX = 90;
+  function pickDepth(rng, chosen, draws = []) {
     const names = chosen.map((p) => p.n);
     const eras = new Set(chosen.flatMap((p) => p.e));
-    const pool = PLAYERS.filter((p) => p.p !== 'G' && !names.includes(p.n));
+    const pool = PLAYERS.filter((p) => p.p !== 'G' && !names.includes(p.n) && p.r <= DEPTH_MAX);
+    const tids = draws.filter((d) => TOURNAMENTS.some((t) => t.id === d));
+    const fromTour = new Map();
+    for (const tid of shuffle(rng, tids)) {
+      for (const n of TOURNAMENTS.find((t) => t.id === tid).roster) {
+        const p = pool.find((x) => x.n === n);
+        if (p && !fromTour.has(n)) fromTour.set(n, inTournament(p, tid));
+      }
+    }
     const fromEras = pool.filter((p) => p.e.some((e) => eras.has(e)));
     const take = (isD, k) => {
-      const prim = shuffle(rng, fromEras.filter((p) => (p.p === 'D') === isD));
-      const rest = shuffle(rng, pool.filter((p) => (p.p === 'D') === isD && !prim.includes(p)));
-      return [...prim, ...rest].slice(0, k).map((p) => ({ n: p.n, eff: p.r - 4, pos: isD ? 'D' : p.p, depth: true }));
+      const isPos = (p) => (p.p === 'D') === isD;
+      const t1 = shuffle(rng, [...fromTour.values()].filter(isPos));
+      const t2 = shuffle(rng, fromEras.filter((p) => isPos(p) && !fromTour.has(p.n)));
+      const t3 = shuffle(rng, pool.filter((p) => isPos(p) && !fromTour.has(p.n) && !t2.includes(p)));
+      return [...t1, ...t2, ...t3].slice(0, k).map((p) => ({ n: p.n, eff: p.r - 4, pos: isD ? 'D' : p.p, depth: true }));
     };
     return [...take(false, 6), ...take(true, 3)];
+  }
+
+  // Kauden ennuste: simuloidaan sama vahvuus monta kertaa kiinteällä siemenellä (sama vahvuus = sama luku)
+  function seededRng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const fcCache = new Map();
+  function forecast(teamRating, n = 3000) {
+    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset;
+    if (fcCache.has(key)) return fcCache.get(key);
+    const rng = seededRng(20261126);
+    let gold = 0, medal = 0, adv = 0, perfect = 0;
+    for (let i = 0; i < n; i++) {
+      const r = simulateSeason(teamRating, rng);
+      if (r.medal === 'gold') gold++;
+      if (r.medal) medal++;
+      if (r.advanced) adv++;
+      if (r.perfect) perfect++;
+    }
+    const f = { gold: gold / n, medal: medal / n, adv: adv / n, perfect: perfect / n };
+    f.label = f.gold >= 0.3 ? 'Kultasuosikki' : f.medal >= 0.5 ? 'Mitalisuosikki' : f.medal >= 0.25 ? 'Mitalikandidaatti' : f.adv >= 0.5 ? 'Puolivälieräjoukkue' : 'Altavastaaja';
+    fcCache.set(key, f);
+    return f;
   }
 
   // Osa maaleista ja syötöistä tulee muilta kentiltä
@@ -1269,7 +1324,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1737,7 +1792,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     render();
   }
 
+  const pct = (x) => x >= 0.995 ? '99 %' : x > 0 && x < 0.01 ? 'alle 1 %' : Math.round(x * 100) + ' %';
+  function forecastHtml(f, rating) {
+    return `<div class="forecast">
+          <div class="label">Kauden ennuste</div>
+          <div class="fc-head"><b>${esc(f.label)}</b><span>Vahvuus ${rating.toFixed(1)}</span></div>
+          <div class="fc-row"><span>MM-kulta <b>${pct(f.gold)}</b></span><span>Mitali <b>${pct(f.medal)}</b></span><span>Puolivälierä <b>${pct(f.adv)}</b></span></div>
+          <p class="fc-note">Laskettu pelaamalla tällä vahvuudella 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi ja kultasuonet.</p>
+        </div>`;
+  }
   function renderReady() {
+    const rating = G.evaluateTeam(lineupPlayers()).total;
     $('#draftCol').innerHTML = `
       <div class="result">
         <div class="verdict">
@@ -1745,6 +1810,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <h2>Kausi alkaa</h2>
           <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
         </div>
+        ${forecastHtml(G.forecast(rating), rating)}
         <div class="actions">
           <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
           <button class="btn" id="playAll">Simuloi koko kausi</button>
@@ -1764,9 +1830,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const ev = G.evaluateTeam(lp);
     const skaters = ev.rows.filter((row) => row.slot.pos !== 'G').map((row) => ({ n: row.player.n, eff: row.eff, pos: row.slot.pos }));
     const gk = ev.rows.find((row) => row.slot.pos === 'G');
-    const depth = G.pickDepth(Math.random, Object.values(lp));
+    const depth = G.pickDepth(Math.random, Object.values(lp), S.history.map((h) => h.draw));
     S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth);
     S.result.rating = ev.total;
+    const f = G.forecast(ev.total);
+    S.result.forecast = { label: f.label, gold: f.gold, medal: f.medal };
     S.openGame = null;
     if (mode === 'step') { S.phase = 'step'; S.shown = 0; }
     else finishSeason(true);
@@ -1955,11 +2023,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       ${rows.filter((x) => !isDepth(x.n)).map((x, i) => `<tr${i === 0 && x.p ? ' class="lead"' : ''}><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td><b>${x.p}</b></td><td>${x.pim}</td></tr>`).join('')}
       <tr class="gk-head"><th>Maalivahti</th><th title="Ottelut">O</th><th title="Voitot">V</th><th title="Päästetyt maalit ottelua kohden">PM/O</th><th title="Nollapelit">NP</th></tr>
       <tr class="gk-row"><td>${nameCell(lp.G.n)}</td><td>${games.length}</td><td>${wins}</td><td><b>${gaa}</b></td><td><b>${so}</b></td></tr>
-      <tr class="sub"><td colspan="5">Muut kentät · pelin valitsemat</td></tr>
+      <tr class="sub depth-toggle" tabindex="0" role="button" aria-expanded="false"><td colspan="5">Muut kentät · eivät vaikuta tulokseen <span class="dt-arrow">▾</span></td></tr>
       ${rows.filter((x) => isDepth(x.n)).concat((S.result.depth || []).filter((n) => !rows.find((x) => x.n === n)).map((n) => ({ n, g: 0, a: 0, p: 0, pim: 0 }))).map((x) => `<tr class="depth"><td>${nameCell(x.n)}</td><td>${x.g}</td><td>${x.a}</td><td>${x.p}</td><td>${x.pim}</td></tr>`).join('')}
       </tbody></table>
       <p class="gk-line">M = maalit, S = syötöt, P = pisteet, J = jäähyminuutit · O = ottelut, V = voitot, PM/O = päästetyt maalit ottelua kohden, NP = nollapelit</p>
     </div>`;
+  }
+
+  // Muut kentät on oletuksena taitettu: ne tekevät maaleja, mutta eivät vaikuta otteluiden tuloksiin
+  function bindDepthToggle() {
+    document.querySelectorAll('.depth-toggle').forEach((row) => {
+      const flip = () => {
+        const t = row.closest('table');
+        const open = t.classList.toggle('depth-open');
+        row.setAttribute('aria-expanded', open);
+      };
+      row.onclick = flip;
+      row.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+    });
   }
 
   function kings(games) {
@@ -2055,7 +2136,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <p class="playing" id="playing" ${S.animate ? '' : 'hidden'}>Kausi käynnissä…</p>
         </div>
         <div class="reveal" id="reveal" ${S.animate ? 'hidden' : ''}>
-          <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p></div>
+          <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p>${r.forecast ? `<p class="fc-after">Ennuste ennen kautta: ${esc(r.forecast.label.toLowerCase())} · kulta ${pct(r.forecast.gold)}, mitali ${pct(r.forecast.medal)}</p>` : ''}</div>
           ${r.perfect ? `<div class="medal perfect"><span class="disc gold">22</span><div><b>Täydellinen kausi</b><span>Kaikki 22 ottelua voitettu.</span></div></div>` : ''}
           <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
           ${awardsHtml(r)}
@@ -2080,6 +2161,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#mkImg').onclick = () => showShareImage(seasonCard(), $('#shareImgBox'));
     bindChips(render);
     bindExpand();
+    bindDepthToggle();
     animateResult(r);
   }
 
