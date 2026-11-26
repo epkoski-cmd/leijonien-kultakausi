@@ -814,7 +814,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   // Kiinteä arvontarivi kaukalon yläpuolella: turnaus, kierros, arvo uusi, kumoa ja ohjeet.
   // Näkyy vain, kun sivun oma arvontaotsikko on vieritetty pois näkyvistä.
-  let drawObs = null;
   function updateDrawBar(hideTitle) {
     const bar = $('#drawBar');
     if (!bar || S.phase !== 'draft') return;
@@ -829,13 +828,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       $(id) && $(id).click();
     });
   }
+  // Näkyvyys verrataan kaukalon alareunaan (puhelin) tai ruudun yläreunaan (tietokone). Kun rivi tulee
+  // näkyviin, kaukalo kasvaa ja lista siirtyy saman verran alas, joten vertailu pysyy vakaana eikä rivi pätki.
+  function checkDrawBar() {
+    const bar = $('#drawBar'), head = document.querySelector('#draftCol .spin');
+    if (!bar || S.phase !== 'draft' || !head) return;
+    const line = isPhone() ? document.querySelector('.rinkcol').getBoundingClientRect().bottom : 0;
+    const show = head.getBoundingClientRect().bottom < line - 2;
+    if (bar.hidden === show) bar.hidden = !show;
+  }
+  let drawTick = false;
+  window.addEventListener('scroll', () => {
+    if (drawTick) return;
+    drawTick = true;
+    requestAnimationFrame(() => { drawTick = false; checkDrawBar(); });
+  }, { passive: true });
   function setupDrawBar() {
     updateDrawBar(S.spin || spinning);
-    if (drawObs) drawObs.disconnect();
-    const head = document.querySelector('#draftCol .spin');
-    if (!head || !('IntersectionObserver' in window)) return;
-    drawObs = new IntersectionObserver(([e]) => { if (S.phase === 'draft') $('#drawBar').hidden = e.isIntersecting; });
-    drawObs.observe(head);
+    checkDrawBar();
   }
 
   function drawTitle() {

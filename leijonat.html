@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="50640b4">
+<meta name="lkk-version" content="2072ba4">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -553,7 +553,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 16.07 · 50640b4</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 16.13 · 2072ba4</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1751,7 +1751,6 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   // Kiinteä arvontarivi kaukalon yläpuolella: turnaus, kierros, arvo uusi, kumoa ja ohjeet.
   // Näkyy vain, kun sivun oma arvontaotsikko on vieritetty pois näkyvistä.
-  let drawObs = null;
   function updateDrawBar(hideTitle) {
     const bar = $('#drawBar');
     if (!bar || S.phase !== 'draft') return;
@@ -1766,13 +1765,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       $(id) && $(id).click();
     });
   }
+  // Näkyvyys verrataan kaukalon alareunaan (puhelin) tai ruudun yläreunaan (tietokone). Kun rivi tulee
+  // näkyviin, kaukalo kasvaa ja lista siirtyy saman verran alas, joten vertailu pysyy vakaana eikä rivi pätki.
+  function checkDrawBar() {
+    const bar = $('#drawBar'), head = document.querySelector('#draftCol .spin');
+    if (!bar || S.phase !== 'draft' || !head) return;
+    const line = isPhone() ? document.querySelector('.rinkcol').getBoundingClientRect().bottom : 0;
+    const show = head.getBoundingClientRect().bottom < line - 2;
+    if (bar.hidden === show) bar.hidden = !show;
+  }
+  let drawTick = false;
+  window.addEventListener('scroll', () => {
+    if (drawTick) return;
+    drawTick = true;
+    requestAnimationFrame(() => { drawTick = false; checkDrawBar(); });
+  }, { passive: true });
   function setupDrawBar() {
     updateDrawBar(S.spin || spinning);
-    if (drawObs) drawObs.disconnect();
-    const head = document.querySelector('#draftCol .spin');
-    if (!head || !('IntersectionObserver' in window)) return;
-    drawObs = new IntersectionObserver(([e]) => { if (S.phase === 'draft') $('#drawBar').hidden = e.isIntersecting; });
-    drawObs.observe(head);
+    checkDrawBar();
   }
 
   function drawTitle() {
