@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="2072ba4">
+<meta name="lkk-version" content="3749eac">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -321,6 +321,14 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .res-badge.kulta { color: var(--gold); border-color: var(--gold); }
 .res-badge.hopea { color: var(--silver); border-color: var(--silver); }
 .res-badge.pronssi { color: var(--bronze); border-color: var(--bronze); }
+.daily-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1.5px solid var(--blue); border-radius: 12px; padding: 10px 14px; margin-top: 12px; }
+.daily-card { flex-wrap: wrap; }
+.daily-card > div { display: grid; gap: 2px; min-width: 0; flex: 1 1 200px; }
+.daily-card b { font-size: 16px; }
+.daily-card span { font-size: 14px; color: var(--muted); }
+.daily-card .btn { flex: none; }
+.daily-card.on { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 8%, var(--panel)); }
+.reveal .daily-card { margin-top: 0; }
 .mode-switch { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
 .mode-switch .label { margin-right: 4px; }
 .seg { border: 1px solid var(--line); background: var(--panel); padding: 5px 12px; border-radius: 99px; font-family: var(--f-data); font-weight: 600; font-size: 14px; }
@@ -553,7 +561,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 16.13 · 2072ba4</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 16.47 · 3749eac</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1491,7 +1499,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, STAR_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, seededRng, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, STAR_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1621,7 +1629,79 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const ok = new Set(G.TOURNAMENTS.map((t) => t.id));
     try { const d = JSON.parse(store.get('lkk-deck')); return Array.isArray(d) ? d.filter((id) => ok.has(id)) : []; } catch (e) { return []; }
   }
+  // Päivän haaste: kaikki pelaavat samana päivänä samat arvonnat, vastustajien vireet ja kauden.
+  // Kaikki lasketaan päivämäärästä, joten palvelinta ei tarvita.
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  const dayLabel = (ds) => { const [, m, d] = ds.split('-').map(Number); return `${d}.${m}.`; };
+  function hashStr(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  // Kuusi kierroksen turnausta ja jokaiselle kierrokselle oma vaihtoehto "Arvo uusi" -napille
+  function dailyPlan(ds) {
+    const rng = G.seededRng(hashStr('lkk-paiva-' + ds));
+    const order = G.shuffle(rng, G.TOURNAMENTS.map((t) => t.id));
+    const twin = (id, list) => TWINS.some((p) => p.includes(id) && p.some((o) => o !== id && list.includes(o)));
+    const main = [];
+    for (const id of order) if (main.length < 6 && !twin(id, main)) main.push(id);
+    const alt = [];
+    for (const id of order) if (alt.length < 6 && !main.includes(id) && !alt.includes(id)) alt.push(id);
+    while (alt.length < 6) alt.push(order.find((id) => !main.includes(id)) || order[0]);
+    return { main, alt };
+  }
+  // Päivän tulos tallentuu selaimeen: ensimmäinen pelattu kausi on päivän tulos, sen jälkeen harjoitusta
+  function dailyStore() {
+    try { const m = JSON.parse(store.get('lkk-daily')); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; }
+  }
+  const dailyResult = (ds) => dailyStore()[ds] || null;
+  function saveDaily(ds, card) {
+    const m = dailyStore();
+    if (m[ds]) m[ds].tries = (m[ds].tries || 1) + 1;
+    else m[ds] = { card, tries: 1 };
+    const keep = Object.keys(m).sort().slice(-14);
+    store.set('lkk-daily', JSON.stringify(Object.fromEntries(keep.map((k) => [k, m[k]]))));
+    return m[ds].tries === 1;
+  }
+  const cardLine = (c) => `${c.W}–${c.L}–${c.OTL} · ${c.medal ? MEDAL[c.medal][1] : 'ei mitalia'}`;
+  function dailyResultHtml(r) {
+    if (!S.daily) return '';
+    const prev = dailyResult(S.daily);
+    return `<div class="daily-card on"><div><b>Päivän haaste ${dayLabel(S.daily)}</b><span>${r.dailyFirst ? 'Tämä on päivän tuloksesi. Huomenna uudet arvonnat.' : prev ? `Harjoituskierros. Päivän tuloksesi on ${esc(cardLine(prev.card))}.` : ''}</span></div></div>`;
+  }
+  function dailyInviteHtml() {
+    const ds = todayStr(), prev = dailyResult(ds);
+    return `<div class="daily-card"><div><b>Päivän haaste ${dayLabel(ds)}</b><span>${prev ? `Tuloksesi tänään: ${esc(cardLine(prev.card))}.` : 'Kaikki pelaavat tänään samat arvonnat. Vertaa tulosta kavereiden kanssa.'}</span></div><button class="btn" id="dailyBtnRes">${prev ? 'Harjoittele' : 'Pelaa haaste'}</button></div>`;
+  }
+  function startDaily() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    S = fresh();
+    S.daily = todayStr();
+    S.mode = 'turnaus';
+    S.dailyPlan = dailyPlan(S.daily);
+    S.oppForm = G.rollOppForm(G.seededRng(hashStr('lkk-vire-' + S.daily)));
+    S.draw = rollDraw();
+    S.spin = true;
+    track('haaste-aloitettu', 'Päivän haaste aloitettu');
+    render();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
+  // Draftin alussa: kutsu päivän haasteeseen; haasteen aikana: merkintä ja poistumisnappi
+  function dailyDraftHtml(canSwitch) {
+    if (S.daily) {
+      const prev = dailyResult(S.daily);
+      return `<div class="daily-card on"><div><b>Päivän haaste ${dayLabel(S.daily)}</b><span>${prev ? `Harjoituskierros: päivän tuloksesi on jo ${esc(cardLine(prev.card))}.` : 'Kaikilla samat arvonnat tänään. Ensimmäinen kausi on päivän tuloksesi. Lepovuoro ei ole käytössä.'}</span></div><button class="link-btn" id="dailyExit">Lopeta haaste</button></div>`;
+    }
+    if (!canSwitch) return '';
+    const ds = todayStr(), prev = dailyResult(ds);
+    return `<div class="daily-card"><div><b>Päivän haaste ${dayLabel(ds)}</b><span>${prev ? `Tuloksesi tänään: ${esc(cardLine(prev.card))}.` : 'Kaikki pelaavat tänään samat arvonnat. Vertaa tulosta kavereiden kanssa.'}</span></div><button class="btn" id="dailyBtn">${prev ? 'Harjoittele' : 'Pelaa haaste'}</button></div>`;
+  }
   function rollDraw(exclude) {
+    if (S.daily) {
+      const i = Math.min(S.round, 6) - 1;
+      return exclude ? S.dailyPlan.alt[i] : S.dailyPlan.main[i];
+    }
     if (S.mode === 'aika') return rollEra(exclude);
     const recent = recentDrafts();
     const seenNow = (recent[0] && recent[0].id === S.id ? recent[0].t : []).concat(S.drawn, exclude ? [exclude] : []);
@@ -1686,11 +1766,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     try { const m = JSON.parse(store.get('lkk-rest')); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; }
   }
   function resting() {
+    if (S.daily) return [];
     const m = restMemo();
     const d = m.cur && m.cur.id !== S.id ? m.cur : m.prev && m.prev.id !== S.id ? m.prev : null;
     return d ? d.names : [];
   }
   function rememberLineup() {
+    if (S.daily) return;
     const m = restMemo();
     if (m.cur && m.cur.id !== S.id) m.prev = m.cur;
     m.cur = { id: S.id, names: Object.values(S.lineup) };
@@ -1754,7 +1836,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   function updateDrawBar(hideTitle) {
     const bar = $('#drawBar');
     if (!bar || S.phase !== 'draft') return;
-    bar.innerHTML = `<span class="db-title"><span class="label">Kierros ${Math.min(S.round, 6)}/6</span><b>${hideTitle ? '…' : drawTitle()}</b></span>
+    bar.innerHTML = `<span class="db-title"><span class="label">${S.daily ? `Haaste ${dayLabel(S.daily)} · ` : ''}Kierros ${Math.min(S.round, 6)}/6</span><b>${hideTitle ? '…' : drawTitle()}</b></span>
       <span class="db-actions">
         <button class="btn" data-act="reroll" ${S.rerolls && !hideTitle ? '' : 'disabled'} title="Arvo uusi">↻ ${S.rerolls}</button>
         <button class="btn" data-act="undo" ${S.history.length && !hideTitle ? '' : 'disabled'} title="Kumoa viimeisin valinta" aria-label="Kumoa">↶</button>
@@ -1800,7 +1882,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     spinning = true;
     updateDrawBar(true);
     col.classList.add('spinning');
-    lbl.textContent = `Kierros ${S.round}/6 · arvotaan ${S.mode === 'turnaus' ? 'turnausta' : 'aikakautta'}…`;
+    lbl.textContent = `${S.daily ? `Päivän haaste ${dayLabel(S.daily)} · ` : ''}Kierros ${S.round}/6 · arvotaan ${S.mode === 'turnaus' ? 'turnausta' : 'aikakautta'}…`;
     const delays = [45, 50, 55, 60, 70, 80, 95, 110, 130, 155, 185, 220, 260];
     let prev = '', i = 0;
     title.textContent = '…';
@@ -1830,13 +1912,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   function renderDraft() {
     const pool = drawPool();
     const tour = S.mode === 'turnaus' ? G.TOURNAMENTS.find((t) => t.id === S.draw) : null;
-    const canSwitch = S.round === 1 && !Object.keys(S.lineup).length;
+    const canSwitch = !S.daily && S.round === 1 && !Object.keys(S.lineup).length;
     const groups = [['G', 'Maalivahdit'], ['D', 'Puolustajat'], ['C', 'Keskushyökkääjät'], ['W', 'Laiturit']];
     const GROUP_POS = { G: ['G'], D: ['D'], C: ['C'], W: ['LW', 'RW'] };
     let html = `
       <div class="spin">
         <div class="spin-era">
-          <div class="label" id="spinLabel">Kierros ${S.round}/6 · arvottu ${tour ? 'turnaus' : 'aikakausi'}</div>
+          <div class="label" id="spinLabel">${S.daily ? `Päivän haaste ${dayLabel(S.daily)} · ` : ''}Kierros ${S.round}/6 · arvottu ${tour ? 'turnaus' : 'aikakausi'}</div>
           <h2 id="eraTitle">${drawTitle()}</h2>
         </div>
         <div class="spin-actions">
@@ -1845,6 +1927,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <button class="btn help-btn" id="helpBtn" aria-label="Ohjeet ja vinkit">?</button>
         </div>
       </div>
+      ${dailyDraftHtml(canSwitch)}
       ${canSwitch ? `<div class="mode-switch" role="group" aria-label="Arvontatapa">
         <span class="label">Arvonta</span>
         <button class="seg" data-mode="turnaus" aria-pressed="${S.mode === 'turnaus'}">Turnaus</button>
@@ -1898,6 +1981,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#helpBtn').onclick = () => showTips(false);
     $('#undoBtn').onclick = undoPick;
     setupDrawBar();
+    if ($('#dailyBtn')) $('#dailyBtn').onclick = startDaily;
+    if ($('#dailyExit')) $('#dailyExit').onclick = restart;
     $('#reroll').onclick = () => {
       if (!S.rerolls || spinning) return;
       S.rerolls--;
@@ -2099,7 +2184,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#draftCol').innerHTML = `
       <div class="result">
         <div class="verdict">
-          <div class="label">Kokoonpano valmis</div>
+          <div class="label">${S.daily ? `Päivän haaste ${dayLabel(S.daily)} · ` : ''}Kokoonpano valmis</div>
           <h2>Kausi alkaa</h2>
           <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
         </div>
@@ -2124,8 +2209,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const ev = G.evaluateTeam(lp);
     const skaters = ev.rows.filter((row) => row.slot.pos !== 'G').map((row) => ({ n: row.player.n, eff: row.eff, pos: row.slot.pos }));
     const gk = ev.rows.find((row) => row.slot.pos === 'G');
-    const depth = G.pickDepth(Math.random, Object.values(lp), S.history.map((h) => h.draw));
-    S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth, S.oppForm);
+    // Päivän haasteessa sama kenttä saa saman kauden kaikilla pelaajilla
+    const rng = S.daily ? G.seededRng(hashStr(`lkk-kausi-${S.daily}-` + G.SLOTS.map((sl) => lp[sl.id].n).join('|'))) : Math.random;
+    const depth = G.pickDepth(rng, Object.values(lp), S.history.map((h) => h.draw));
+    S.result = G.simulateSeason(ev.total, rng, skaters, { n: gk.player.n, eff: gk.eff }, depth, S.oppForm);
     S.result.rating = ev.total;
     const f = G.forecast(ev.total, S.oppForm);
     S.result.forecast = { label: f.label, goal: f.goal, gold: f.gold, medal: f.medal, dist: f.dist };
@@ -2143,6 +2230,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   function finishSeason(animate) {
     const r = S.result;
+    if (S.daily && r.dailyFirst === undefined) {
+      r.dailyFirst = saveDaily(S.daily, seasonCard());
+      track(r.dailyFirst ? 'haaste-pelattu' : 'haaste-harjoitus', r.dailyFirst ? 'Päivän haaste pelattu' : 'Päivän haaste harjoitus');
+    }
     track('kausi-pelattu', 'Kausi pelattu');
     if (r.perfect) track('kausi-taydellinen', 'Täydellinen kausi 22–0');
     S.phase = 'result';
@@ -2173,6 +2264,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       eht: r.eht ? { champion: r.eht.champion, place: r.eht.place, cups: r.eht.cups } : null,
       top: top ? { n: top.n, g: top.g, a: top.a } : null,
       date: new Date().toISOString().slice(0, 10),
+      daily: S.daily || null,
+      practice: !!(S.daily && S.result.dailyFirst === false),
     };
   }
   // EHT kunniamainintana: mestaruus tai turnausvoitot (sijoitus ilman voittoja ei ole palkinto)
@@ -2532,6 +2625,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         </div>
         <div class="reveal" id="reveal" ${S.animate ? 'hidden' : ''}>
           <div class="verdict"><h2>${esc(v.title)}</h2><p>${esc(v.line)}</p></div>
+          ${dailyResultHtml(r)}
           ${expectationHtml(r)}
           ${r.perfect ? `<div class="medal perfect"><span class="disc gold">22</span><div><b>Täydellinen kausi</b><span>Kaikki 22 ottelua voitettu.</span></div></div>` : ''}
           <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
@@ -2539,6 +2633,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           ${awardsHtml(r)}
           ${ehtSummaryHtml(r)}
           ${scoringHtml(r.games)}
+          ${S.daily ? '' : dailyInviteHtml()}
         </div>
         <div>
           <div class="label" style="margin-bottom:6px">Ottelut · avaa maalintekijät napauttamalla</div>
@@ -2555,6 +2650,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div id="shareImgBox" class="share-box" hidden></div>
       </div>`;
     $('#again').onclick = restart;
+    if ($('#dailyBtnRes')) $('#dailyBtnRes').onclick = startDaily;
     $('#copy').onclick = copyResult;
     $('#mkImg').onclick = () => showShareImage(seasonCard(), $('#shareImgBox'));
     bindChips(render);
@@ -2640,7 +2736,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
     // Tulos
     x.font = `600 28px ${BC}`; x.fillStyle = C.muted;
-    x.fillText('KAUSI · VOITOT – TAPPIOT – JATKOAIKATAPPIOT', PAD, 214);
+    if (d.daily) { x.fillStyle = C.gold; x.fillText(`PÄIVÄN HAASTE ${dayLabel(d.daily)}${d.practice ? ' · HARJOITUS' : ''}`, PAD, 214); }
+    else x.fillText('KAUSI · VOITOT – TAPPIOT – JATKOAIKATAPPIOT', PAD, 214);
     x.font = `800 210px ${D}`;
     let px = PAD;
     for (const [t, col] of [[String(d.W), C.ink], ['–', C.ink], [String(d.L), C.red], ['–', C.ink], [String(d.OTL), C.amber]]) {
@@ -2751,7 +2848,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const order = ['LW', 'C', 'RW', 'D1', 'D2', 'G'];
     const medal = r.medal ? MEDAL[r.medal][1] : 'ei mitalia';
     const top = scoring(r.games).filter((x) => !isDepth(x.n))[0];
-    return `Leijonien kultakausi: ${r.W}–${r.L}–${r.OTL}${r.perfect ? ' · TÄYDELLINEN KAUSI 22–0' : ''} · ${medal}\n` +
+    return `Leijonien kultakausi${S.daily ? ` · Päivän haaste ${dayLabel(S.daily)}${r.dailyFirst === false ? ' (harjoitus)' : ''}` : ''}: ${r.W}–${r.L}–${r.OTL}${r.perfect ? ' · TÄYDELLINEN KAUSI 22–0' : ''} · ${medal}\n` +
       order.map((id) => `${G.SLOTS.find((s) => s.id === id).short} ${lp[id].n}`).join('\n') +
       (top ? `\nPistekuningas ${top.n} ${top.g}+${top.a}` : '') +
       (r.mmAwards.awards.length ? '\n' + r.mmAwards.awards.map((a) => `★ ${a.title}: ${a.n}`).join('\n') : '') +

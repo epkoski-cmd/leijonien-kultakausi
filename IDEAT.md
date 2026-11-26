@@ -248,3 +248,12 @@ Ehdotettu järjestys: 1) päivän haaste ja haastelinkki, 2) tavoitteet, 3) pela
 Pikkuidea (ei vaadi keskustelua): pelaaja-albumissa näkyy **yleisin kentällisesi** ("näitä kavereita olet peluuttanut eniten"). Mentori voi neuvoa, miten valintoja voi tehdä toisin, jotta menestystä tulee.
 
 Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä). Nimi-, tavaramerkki- ja persoonaoikeudet tarkistetaan IPR-juristilta ennen kaupallista julkaisua.
+
+### 18.1 Päivän haaste, vaihe 1 (toteutettu 26.11.2026)
+- Kaikki saavat samana päivänä samat kuusi turnausta, saman "Arvo uusi" -vaihtoehdon kullekin kierrokselle ja samat vastustajien vireet (siemen päivämäärästä, ei palvelinta).
+- Sama kenttä saa saman kauden (siemen päivä + kenttä), joten ero syntyy valinnoista.
+- Haasteessa arvontatapa on turnaus ja lepovuoro ei ole käytössä; haaste ei vaikuta lepovuoroon eikä arvontapakkaan.
+- Ensimmäinen pelattu kausi on päivän tulos (tallessa selaimessa 14 päivää), sen jälkeen harjoituskierroksia.
+- Kutsu draftin alussa (ennen ensimmäistä valintaa) ja yhteenvedon lopussa. Jakokuvassa ja tekstissä "Päivän haaste 26.11.".
+- GoatCounter-tapahtumat: haaste-aloitettu, haaste-pelattu, haaste-harjoitus.
+- Vaihe 2: haastelinkki ja vertailu kaverin tulokseen.
