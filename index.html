@@ -1832,7 +1832,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       if (m && m[1] !== MY_VERSION) $('#updateBar').hidden = false;
     } catch (e) {}
   }
-  $('#updateBtn').onclick = () => location.reload();
+  // Päivitys aloittaa sivun alusta: selain ei palauta vanhaa vierityskohtaa uudelleenlatauksessa
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  $('#updateBtn').onclick = () => { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); location.reload(); };
   $('#updateLater').onclick = () => { updateDismissed = true; $('#updateBar').hidden = true; };
   document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
   window.addEventListener('pageshow', checkUpdate);
