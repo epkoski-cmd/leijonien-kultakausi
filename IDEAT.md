@@ -205,3 +205,10 @@ Päätökset:
 - **Kauden ennuste** ennen kautta (vahvuus + kullan todennäköisyys).
 
 Järjestys: 1) ennuste ja muut kentät, 2) vaikeuden viritys, 3) EHT-palkinnot (osaturnausvoitot ja kokonaisvoitto ennätyskorttiin), 4) päivän haaste ja haastelinkki. Myöhemmin: MM-vastustajien kauden kunto, STANDOUT-aukot, karkeiden arvioiden tarkistus, "Pelaa sama joukkue 100 kertaa". Ei nyt: vaikeustasot, palvelimellinen tulostaulukko, automaattinen loppudraft.
+
+Toteutettu 26.11.2026:
+- ✅ Kauden ennuste (vahvuus, kulta, mitali, puolivälierä; 3 000 kauden simulaatio kiinteällä siemenellä) ja ennuste tulossivulla. Muut kentät taitettuna rivinä, valitaan draftin turnausjoukkueista, ei yli 90:n pelaajia.
+- Vaikeuden tarkennus: 600 ahneen draftin mediaani oli 88,6 ja kulta 89:llä noin 17 %, eli huolellinen pelaaja oli jo tavoitteen yläpuolella. Turhautuminen johtui sumennetuista arvoista (joukkueet alle 87:n, kulta 1–4 %). Kultajoukkuekemia syntyi 13 %:ssa drafteista, lähes aina MM 1995 tai MM 2022; MM 2011 kerran 800:sta, joten kemian kasvattaminen ei olisi auttanut 2011:tä.
+- ✅ Kultavire: kultaa voittaneen turnausjoukkueen pelaaja saa siitä turnauksesta +2 (◆ Kultavire kortissa, ohjeissa oma rivi). MM 2011:n paras kenttä 83,5 → 85,5.
+- ✅ Finaalin vastustaja +2 (vain kultaan). offset 0,7 → 0,6. Tulos: vahvuus 89 → kulta noin 12 %, mitali noin 63 %; 86 → kulta 2–3 %; 92 → noin 34 %.
+- Seuraavaksi: vastustajien kauden kunto ennusteeseen ja tappion selitys (esim. "Välierä: Ruotsi 90 vs. Suomi 88"), jotta tappiolla on näkyvä syy. Sitten EHT-palkinnot ja päivän haaste.

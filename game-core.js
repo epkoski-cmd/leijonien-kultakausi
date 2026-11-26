@@ -555,6 +555,7 @@
     og22: { A: ["Mikko Lehtonen", "Sakari Manninen"], B: ["Teemu Hartikainen", "Harri Säteri"] },
     mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
   };
+  const GOLD_FORM = 2;
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
@@ -562,13 +563,17 @@
     const ex = STANDOUT[tid] || {};
     const star = ex.A && ex.A.includes(p.n) ? 'A' : ex.B && ex.B.includes(p.n) ? 'B' : null;
     const d = formDelta(age, p.p === 'G') * (star === 'A' ? 0.25 : star === 'B' ? 0.5 : 1);
-    return { ...p, r: Math.round(p.r + d), peak: p.r, age: Math.floor(age), star };
+    // Kultavire: oikean kultajoukkueen pelaajat olivat sinä vuonna parhaimmillaan yhdessä
+    const vire = t.res === 'kulta' ? GOLD_FORM : 0;
+    return { ...p, r: Math.round(p.r + d + vire), peak: p.r, age: Math.floor(age), star, vire };
   }
 
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
   // offset 2 → 0.7 (25.11.2026): turnauskunto ja poikkeuslista laskivat keskivahvuutta noin 1,3;
   // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
-  const CONFIG = { spread: 3.0, offset: 0.7 };
+  // 26.11.2026: kultavire (+2) ja finaalin lisävahvuus (+2) → offset 0,6. Tavoite: vahvuus 89 → kulta noin 12 %
+  // (joka 8. kausi), mitali noin 63 %.
+  const CONFIG = { spread: 3.0, offset: 0.6 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -762,6 +767,8 @@
     return { awards, allstar, mmGames: mm.length };
   }
 
+  // Finaalissa vastustaja pelaa parhaansa: kulta on harvinaisempi, mitalien todennäköisyys ei muutu
+  const FINAL_EDGE = 2;
   function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = []) {
     const games = [];
     const eht = ['Ruotsi', 'Tšekki', 'Sveitsi'];
@@ -797,7 +804,8 @@
         games.push(sf);
         if (sf.win) {
           const fPool = ['Kanada', 'Kanada', 'Ruotsi', 'USA'].filter((n) => n !== sf.opp && n !== qf.opp);
-          const fin = playGame(rng, teamRating, pickOne(rng, fPool), 'po');
+          const fo = pickOne(rng, fPool);
+          const fin = playGame(rng, teamRating, { ...fo, r: fo.r + FINAL_EDGE }, 'po');
           fin.round = 'Finaali';
           games.push(fin);
           medal = fin.win ? 'gold' : 'silver';

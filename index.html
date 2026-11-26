@@ -557,6 +557,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>✦</span> Kultasuoni: veljekset, mitalijoukkueen kaverit, seurakaverit ja saman sukupolven pelaajat saavat bonusta. Kaukalossa samanväriset pisteet näyttävät, ketkä kuuluvat samaan kultasuoneen.</li>
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
       <li><span>v</span> Turnauskunto: pelaajan taso riippuu iästä kyseisessä turnauksessa. Nuori lupaus ja veteraani ovat huippuaan heikompia.</li>
+      <li><span>◆</span> Kultavire: kultaa voittaneen joukkueen (MM tai olympialaiset) pelaajat olivat sinä vuonna vireessä (+2).</li>
       <li><span>zZ</span> Lepovuoro: edellisessä draftissa valitsemasi kuusi pelaajaa lepäävät seuraavan draftin.</li>
     </ul>`;
   function showTips(first) {
@@ -833,7 +834,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.vire ? `<span class="star-tag vire-tag" title="Oikea kultajoukkue: pelaaja oli sinä vuonna vireessä (+${p.vire})">◆ Kultavire</span> ` : '') + (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
