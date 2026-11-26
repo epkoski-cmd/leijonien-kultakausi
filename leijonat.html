@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="7658f2a">
+<meta name="lkk-version" content="37fed0e">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -188,6 +188,8 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .stage-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
 .stage-rec { font-family: var(--f-data); font-weight: 600; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .gms { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
+.gms.row3 { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 420px; }
+.gms.row3 + .gms.row3 { margin-top: 6px; }
 .gm { display: grid; gap: 1px; padding: 6px 8px; border-radius: 4px; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--line); font-variant-numeric: tabular-nums; transition: border-color .2s, opacity .2s; }
 .gm.pending { opacity: .35; }
 .gm.W { border-left-color: var(--win); } .gm.L { border-left-color: var(--red); } .gm.O { border-left-color: var(--amber); }
@@ -498,7 +500,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 11.56 · 7658f2a</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 12.16 · 37fed0e</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -2050,20 +2052,26 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return stages.map((st) => {
       const gs = games.filter((g) => g.stage === st.id);
       if (!gs.length) return '';
-      // Ottelu kerrallaan: uusin ottelu ensimmäisenä myös vaiheen sisällä
-      const chips = (opts.newestFirst ? gs.slice().reverse() : gs).map((g) => {
+      const chip = (g) => {
         const i = r.games.indexOf(g);
         const c = g.win ? 'W' : g.ot ? 'O' : 'L';
         return `<button class="gm${opts.latest === i ? ' latest' : ''}" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">
           ${g.round ? `<span class="gm-round">${esc(g.round)}</span>` : ''}
           <span class="gm-opp">${esc(g.opp)}</span>
           <span class="gm-res">${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</span></button>`;
-      }).join('');
+      };
+      // Ottelu kerrallaan: kolmen ottelun rivit, uusin rivi ylimpänä, rivin sisällä aikajärjestys vasemmalta oikealle
+      let rowsHtml;
+      if (opts.newestFirst) {
+        const rows = [];
+        for (let k = 0; k < gs.length; k += 3) rows.push(gs.slice(k, k + 3));
+        rowsHtml = rows.reverse().map((row) => `<div class="gms row3">${row.map(chip).join('')}</div>`).join('');
+      } else rowsHtml = `<div class="gms">${gs.map(chip).join('')}</div>`;
       const w = gs.filter((g) => g.win).length;
       const extra = st.id === 'mm' && gs.length === 7 ? ` · ${r.groupPts} p` : '';
       const openHere = S.openGame !== null && gs.includes(r.games[S.openGame]) && !(opts.latest === S.openGame);
       const detail = openHere ? `<div class="gm-detail" id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : '';
-      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div><div class="gms">${chips}</div>${detail}</div>`;
+      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div>${rowsHtml}${detail}</div>`;
     }).join('');
   }
 
@@ -2332,15 +2340,19 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     }
     fitFont(x, d.title.toUpperCase(), 800, 76, D, W - PAD * 2 - 230);
     x.fillStyle = C.ink; x.fillText(d.title.toUpperCase(), PAD, 474);
-    // Suhde odotukseen: "YLI ODOTUSTEN · ennakko: mitalikandidaatti"
+    // Suhde odotukseen merkkinä otsikon alla: [YLI ODOTUSTEN] ennakko: mitalikandidaatti
     if (d.expect) {
       x.font = `700 32px ${BC}`;
       const h = d.expect.head.toUpperCase();
-      x.fillStyle = d.expect.cls === 'up' ? C.gold : d.expect.cls === 'down' ? C.red : C.ink;
-      x.fillText(h, PAD, 520);
-      const hw = x.measureText(h + '  ').width;
+      const bw = x.measureText(h).width + 36;
+      const up = d.expect.cls === 'up', down = d.expect.cls === 'down';
+      rrect(x, PAD, 494, bw, 50, 25);
+      x.fillStyle = up ? C.gold : down ? C.red : C.panel; x.fill();
+      if (!up && !down) { x.lineWidth = 3; x.strokeStyle = C.line; x.stroke(); }
+      x.fillStyle = up ? C.bg : C.ink;
+      x.fillText(h, PAD + 18, 530);
       x.font = `500 28px ${B}`; x.fillStyle = C.muted;
-      x.fillText('· ennakko: ' + d.expect.pre.toLowerCase(), PAD + hw, 520);
+      x.fillText('ennakko: ' + d.expect.pre.toLowerCase(), PAD + bw + 16, 529);
     }
 
     // Mitali
@@ -2355,7 +2367,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     x.textAlign = 'left';
 
     // Ottelunauha
-    const sy = 548, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
+    const sy = 566, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
     for (let i = 0; i < n; i++) {
       const g = d.games[i];
       x.fillStyle = !g ? C.panel : g === 'W' ? C.win : g === 'O' ? C.amber : C.red;
@@ -2363,7 +2375,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     }
 
     // Kaukalo
-    const ry = 624, rh = 430, rw = W - PAD * 2;
+    const ry = 636, rh = 430, rw = W - PAD * 2;
     rrect(x, PAD, ry, rw, rh, 60); x.fillStyle = C.panel; x.fill();
     x.lineWidth = 5; x.strokeStyle = C.ink; x.stroke();
     x.save(); rrect(x, PAD, ry, rw, rh, 60); x.clip();
@@ -2388,7 +2400,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     box('G', W / 2 - fw / 2, ry + 300, fw);
 
     // Palkinnot ja pistekuningas
-    let ay = 1118;
+    let ay = 1126;
     const aw = d.awards.slice(0, 3);
     if (d.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
     for (const a of aw.slice(0, 3)) {
