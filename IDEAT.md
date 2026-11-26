@@ -233,3 +233,9 @@ Toteutettu 26.11.2026:
 - Ottelu kerrallaan: turnauksen päätyttyä ilmoitus sijoituksesta ja voittajasta, viimeisen jälkeen EHT:n lopputulos. Otsikkorivin sijoitusta napauttamalla avautuu turnauksen taulukko ja muut ottelut.
 - Yhteenvedossa EHT-osio (mestaruus / sijoitus, turnaussijoitukset, kokonaistaulukko). Ennätyskorttiin, jakokuvaan ja kopioitavaan tekstiin rivi "EHT-mestari · x/4 turnausvoittoa" tai "Turnausvoitot: …". Ennätyksen laskenta ei muutu.
 - Simulointi: vahvuus 89,5 → EHT-mestari noin 50 %, turnausvoittoja keskimäärin 1,7; 86 → 8 %; 91 → 72 %. MM-kulta ennallaan.
+
+### 17.z Tähtivire, kiinteä arvontarivi ja MM-ilmoitukset (toteutettu 26.11.2026)
+- Tähtivire: STANDOUT A (IIHF:n palkinto, tähdistökenttä) +2, B (pistekärki, torjuntakärki) +1, kultavireen päälle. Aiemmin tähti hyötyi vain pienemmästä ikävähennyksestä, joten parhaassa iässä oleva tähti ei saanut mitään. Kortissa "★ Turnauksen tähti +2", kaukalossa ★ pelipaikan vieressä, siru "★ Tähtivire: … +x".
+- Tasapaino: ahneen draftin mediaani 89,5 → 90,0 ja kulta 14,6 → 19 %. offset 0,9 → 1,4 palauttaa kullan noin 15 %:iin. Tähdet ohittava draft on hieman aiempaa vaikeampi.
+- Kiinteä arvontarivi kaukalon yläpuolella (turnaus, kierros, ↻ arvo uusi, ↶ kumoa, ?). Näkyy, kun sivun oma arvontaotsikko on vieritetty pois. Arvonnan aikana turnaus piilossa.
+- MM-ilmoitukset ottelu kerrallaan: alkusarjan jälkeen (pisteet, jatkoon / ei, puolivälierän vastustaja ja vahvuus), puolivälierän ja välierän jälkeen (tulos ja seuraava vastustaja), finaalin ja pronssiottelun jälkeen. Pohja selostajahahmolle.

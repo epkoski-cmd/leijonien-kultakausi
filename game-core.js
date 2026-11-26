@@ -556,6 +556,9 @@
     mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
   };
   const GOLD_FORM = 4;
+  // Tähtivire: turnauksessa loistanut pelaaja oli tulessa. A (IIHF:n palkinto, tähdistökenttä) +2, B (pistekärki, torjuntakärki) +1.
+  // Kertyy kultavireen päälle.
+  const STAR_FORM = { A: 2, B: 1 };
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
@@ -565,7 +568,8 @@
     const d = formDelta(age, p.p === 'G') * (star === 'A' ? 0.25 : star === 'B' ? 0.5 : 1);
     // Kultavire: oikean kultajoukkueen pelaajat olivat sinä vuonna parhaimmillaan yhdessä
     const vire = t.res === 'kulta' ? GOLD_FORM : 0;
-    return { ...p, r: Math.round(p.r + d + vire), peak: p.r, age: Math.floor(age), star, vire };
+    const starBonus = star ? STAR_FORM[star] : 0;
+    return { ...p, r: Math.round(p.r + d + vire + starBonus), peak: p.r, age: Math.floor(age), star, vire, starBonus };
   }
 
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
@@ -573,7 +577,9 @@
   // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
   // 26.11.2026: kultavire +4 ja finaalin lisävahvuus +2 → offset 0,9. Ahneen draftin mediaani 89,5 voittaa
   // kullan noin joka 8. kausi (noin 12 %), mitali noin 60 %.
-  const CONFIG = { spread: 3.0, offset: 0.9 };
+  // 26.11.2026 ilta: tähtivire (+2/+1) nosti ahneen draftin mediaanin 89,5 → 90,0 ja kullan 14,6 → 19 %;
+  // offset 0,9 → 1,4 palauttaa kullan noin 15 %:iin. Tähdet ohittava draft on hieman aiempaa vaikeampi.
+  const CONFIG = { spread: 3.0, offset: 1.4 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -923,7 +929,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, STAR_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);

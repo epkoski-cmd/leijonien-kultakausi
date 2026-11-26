@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="951e948">
+<meta name="lkk-version" content="00c3fcb">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -269,6 +269,8 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .eht-banner { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 14.5px; }
 .eht-banner.win { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); }
 .eht-trophy { font-size: 22px; }
+.eht-banner.loss { border-color: color-mix(in srgb, var(--red) 55%, var(--line)); }
+.mb-str { font-size: 13px; color: var(--muted); }
 .eht-sum { display: grid; gap: 8px; }
 .eht-champ { display: flex; gap: 12px; align-items: center; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 14px; }
 .eht-champ > span { font-size: 28px; }
@@ -363,6 +365,16 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
 .slot.filled.vire { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 12px color-mix(in srgb, var(--gold) 45%, transparent); }
 .chip.vire { border-style: dashed; }
+.chip.star { border-color: var(--gold); }
+.slot-star { color: var(--gold); }
+.drawbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 2px 6px; }
+.drawbar[hidden] { display: none; }
+.db-title { display: grid; min-width: 0; line-height: 1.15; }
+.db-title .label { font-size: 10.5px; }
+.db-title b { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.db-title .res-badge { font-size: 10px; padding: 1px 5px; vertical-align: 2px; }
+.db-actions { display: flex; gap: 6px; flex: none; }
+.db-actions .btn { min-height: 32px; padding: 4px 10px; font-size: 14px; }
 .star-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gold); margin-right: 4px; }
 .rest-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--amber); margin-right: 4px; }
 .modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
@@ -526,6 +538,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 <main class="wrap" id="app">
   <section id="draftCol" aria-live="polite"></section>
   <aside class="rinkcol">
+    <div class="drawbar" id="drawBar" hidden></div>
     <div class="rink" id="rink"></div>
     <div class="rink-foot">
       <div>
@@ -539,7 +552,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 15.03 · 951e948</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 15.55 · 00c3fcb</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1104,6 +1117,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
   };
   const GOLD_FORM = 4;
+  // Tähtivire: turnauksessa loistanut pelaaja oli tulessa. A (IIHF:n palkinto, tähdistökenttä) +2, B (pistekärki, torjuntakärki) +1.
+  // Kertyy kultavireen päälle.
+  const STAR_FORM = { A: 2, B: 1 };
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
@@ -1113,7 +1129,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const d = formDelta(age, p.p === 'G') * (star === 'A' ? 0.25 : star === 'B' ? 0.5 : 1);
     // Kultavire: oikean kultajoukkueen pelaajat olivat sinä vuonna parhaimmillaan yhdessä
     const vire = t.res === 'kulta' ? GOLD_FORM : 0;
-    return { ...p, r: Math.round(p.r + d + vire), peak: p.r, age: Math.floor(age), star, vire };
+    const starBonus = star ? STAR_FORM[star] : 0;
+    return { ...p, r: Math.round(p.r + d + vire + starBonus), peak: p.r, age: Math.floor(age), star, vire, starBonus };
   }
 
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
@@ -1121,7 +1138,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
   // 26.11.2026: kultavire +4 ja finaalin lisävahvuus +2 → offset 0,9. Ahneen draftin mediaani 89,5 voittaa
   // kullan noin joka 8. kausi (noin 12 %), mitali noin 60 %.
-  const CONFIG = { spread: 3.0, offset: 0.9 };
+  // 26.11.2026 ilta: tähtivire (+2/+1) nosti ahneen draftin mediaanin 89,5 → 90,0 ja kullan 14,6 → 19 %;
+  // offset 0,9 → 1,4 palauttaa kullan noin 15 %:iin. Tähdet ohittava draft on hieman aiempaa vaikeampi.
+  const CONFIG = { spread: 3.0, offset: 1.4 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -1471,7 +1490,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, STAR_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1542,6 +1561,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
       <li><span>v</span> Turnauskunto: pelaajan taso riippuu iästä kyseisessä turnauksessa. Nuori lupaus ja veteraani ovat huippuaan heikompia.</li>
       <li><span>◆</span> Kultavire: kultaa voittaneen joukkueen (MM tai olympialaiset) pelaajat olivat sinä vuonna vireessä: arvio +4. Kaukalossa kultainen kehys näyttää, kenellä vire on.</li>
+      <li><span>★</span> Tähtivire: turnauksessa loistanut pelaaja oli tulessa. Turnauksen tähti (IIHF:n palkinto tai tähdistökenttä) +2, pistekärki tai torjuntakärki +1. Kaukalossa ★ pelipaikan vieressä.</li>
       <li><span>zZ</span> Lepovuoro: edellisessä draftissa valitsemasi kuusi pelaajaa lepäävät seuraavan draftin.</li>
     </ul>`;
   function showTips(first) {
@@ -1698,6 +1718,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       toast(`<b>Oma ennätys</b><br>Paras kautesi tässä pelissä: ${n(w, 'voitto', 'voittoa')}, ${n(l, 'tappio', 'tappiota')}, ${n(o, 'jatkoaikatappio', 'jatkoaikatappiota')}. Ennätyskauden kortti tallentuu, kun pelaat yhtä hyvän tai paremman kauden.`);
     };
     renderRink();
+    $('#drawBar').hidden = true;
     if (S.phase === 'draft') renderDraft();
     else if (S.phase === 'ready') renderReady();
     else if (S.phase === 'step') renderStep();
@@ -1727,6 +1748,32 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
   }
 
+  // Kiinteä arvontarivi kaukalon yläpuolella: turnaus, kierros, arvo uusi, kumoa ja ohjeet.
+  // Näkyy vain, kun sivun oma arvontaotsikko on vieritetty pois näkyvistä.
+  let drawObs = null;
+  function updateDrawBar(hideTitle) {
+    const bar = $('#drawBar');
+    if (!bar || S.phase !== 'draft') return;
+    bar.innerHTML = `<span class="db-title"><span class="label">Kierros ${Math.min(S.round, 6)}/6</span><b>${hideTitle ? '…' : drawTitle()}</b></span>
+      <span class="db-actions">
+        <button class="btn" data-act="reroll" ${S.rerolls && !hideTitle ? '' : 'disabled'} title="Arvo uusi">↻ ${S.rerolls}</button>
+        <button class="btn" data-act="undo" ${S.history.length && !hideTitle ? '' : 'disabled'} title="Kumoa viimeisin valinta" aria-label="Kumoa">↶</button>
+        <button class="btn" data-act="help" aria-label="Ohjeet ja vinkit">?</button>
+      </span>`;
+    bar.querySelectorAll('[data-act]').forEach((b) => b.onclick = () => {
+      const id = { reroll: '#reroll', undo: '#undoBtn', help: '#helpBtn' }[b.dataset.act];
+      $(id) && $(id).click();
+    });
+  }
+  function setupDrawBar() {
+    updateDrawBar(S.spin || spinning);
+    if (drawObs) drawObs.disconnect();
+    const head = document.querySelector('#draftCol .spin');
+    if (!head || !('IntersectionObserver' in window)) return;
+    drawObs = new IntersectionObserver(([e]) => { if (S.phase === 'draft') $('#drawBar').hidden = e.isIntersecting; });
+    drawObs.observe(head);
+  }
+
   function drawTitle() {
     const tour = S.mode === 'turnaus' ? G.TOURNAMENTS.find((t) => t.id === S.draw) : null;
     return (tour ? esc(tour.label) : esc(G.ERAS[S.draw])) +
@@ -1740,6 +1787,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const names = S.mode === 'turnaus' ? G.TOURNAMENTS.map((t) => t.label) : Object.values(G.ERAS);
     const final = title.innerHTML, finalLbl = lbl.textContent;
     spinning = true;
+    updateDrawBar(true);
     col.classList.add('spinning');
     lbl.textContent = `Kierros ${S.round}/6 · arvotaan ${S.mode === 'turnaus' ? 'turnausta' : 'aikakautta'}…`;
     const delays = [45, 50, 55, 60, 70, 80, 95, 110, 130, 155, 185, 220, 260];
@@ -1760,6 +1808,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         col.classList.remove('spinning');
         col.classList.add('revealed');
         spinning = false;
+        updateDrawBar(false);
         afterDrawShown();
       }
     };
@@ -1795,7 +1844,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
       ${tour && tour.res === 'kulta' ? `<div class="vire-line"><span aria-hidden="true">◆</span> <span><b>Kultavire:</b> tämä joukkue voitti kultaa, joten sen pelaajat ovat vireessä: arvio +${G.GOLD_FORM}.</span></div>` : ''}
       <div class="rating-info">${ratingsOn()
-        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa, joten ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa: tähtivire +2 tai +1, ja ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
         : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
@@ -1821,7 +1870,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}: tähtivire +${p.starBonus}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'} +${p.starBonus}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
@@ -1836,6 +1885,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     else if (!spinning && !modalOpen) afterDrawShown();
     $('#helpBtn').onclick = () => showTips(false);
     $('#undoBtn').onclick = undoPick;
+    setupDrawBar();
     $('#reroll').onclick = () => {
       if (!S.rerolls || spinning) return;
       S.rerolls--;
@@ -1883,7 +1933,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const pen = G.fitPenalty(p, s.pos);
         const v = veinsOf(p.n);
         const dots = v.length ? `<span class="vdots" aria-hidden="true">${v.map((i) => `<i style="background:${VEIN(i)}"></i>`).join('')}</span>` : '';
-        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}${v.length ? ' veined' : ''}${p.vire ? ' vire' : ''}" disabled${p.vire ? ` title="Kultavire +${p.vire}"` : ''}>${dots}<span class="label">${s.short}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
+        const tip = [p.vire ? `Kultavire +${p.vire}` : '', p.starBonus ? `Tähtivire +${p.starBonus}` : ''].filter(Boolean).join(', ');
+        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}${v.length ? ' veined' : ''}${p.vire ? ' vire' : ''}" disabled${tip ? ` title="${tip}"` : ''}>${dots}<span class="label">${s.short}${p.starBonus ? '<span class="slot-star" aria-label="Tähtivire"> ★</span>' : ''}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
           ${pen ? `<span class="era pen">−${pen} ${pen <= 4 ? 'sivupaikka' : 'väärä rooli'}</span>` : ''}</button>`;
       }
       return `<button class="slot" disabled><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span></button>`;
@@ -1901,7 +1952,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const vireRows = ev.rows.filter((row) => row.player.vire);
     const vireEff = vireRows.reduce((a, row) => a + row.slot.w * row.player.vire, 0);
     const vireChip = vireRows.length ? `<span class="chip vire" title="Kultajoukkueen pelaajat: arvio +${vireRows[0].player.vire}. Vaikutus vahvuuteen riippuu pelipaikan painosta.">◆ Kultavire: ${esc(vireRows.map((row) => surname(row.player.n)).join(', '))} +${vireEff.toFixed(1)}</span>` : '';
-    $('#chips').innerHTML = vireChip + ev.chem.map((c, i) => `<span class="chip" title="${esc(c.who.join(', '))}"><i class="vdot" style="background:${VEIN(i)}"></i>${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('') +
+    const starRows = ev.rows.filter((row) => row.player.starBonus);
+    const starEff = starRows.reduce((a, row) => a + row.slot.w * row.player.starBonus, 0);
+    const starChip = starRows.length ? `<span class="chip star" title="Turnauksessa loistaneet: tähti +2, pistekärki tai torjuntakärki +1. Vaikutus vahvuuteen riippuu pelipaikan painosta.">★ Tähtivire: ${esc(starRows.map((row) => surname(row.player.n)).join(', '))} +${starEff.toFixed(1)}</span>` : '';
+    $('#chips').innerHTML = vireChip + starChip + ev.chem.map((c, i) => `<span class="chip" title="${esc(c.who.join(', '))}"><i class="vdot" style="background:${VEIN(i)}"></i>${esc(c.name)} +${c.b.toFixed(1)}</span>`).join('') +
       (ev.capped ? `<span class="chip cap" title="Kultasuonista saa yhteensä enintään +${G.CHEM_CAP.toFixed(1)}">Katto: yhteensä +${G.CHEM_CAP.toFixed(1)}</span>` : '');
   }
 
@@ -1997,7 +2051,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <button class="link-btn fc-toggle" id="fcToggle" aria-expanded="false">Näytä todennäköisyydet ▾</button>
           <div class="fc-odds" id="fcOdds" hidden>
             <div class="fc-row"><span>MM-kulta <b>${pct(f.gold)}</b></span><span>Mitali <b>${pct(f.medal)}</b></span><span>Puolivälierä <b>${pct(f.adv)}</b></span></div>
-            <p class="fc-note">Laskettu pelaamalla tällä vahvuudella ja tämän kauden vastustajien vireellä 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi, kultasuonet ja kultavire.</p>
+            <p class="fc-note">Laskettu pelaamalla tällä vahvuudella ja tämän kauden vastustajien vireellä 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi, kultasuonet, kultavire ja tähtivire.</p>
           </div>
         </div>`;
   }
@@ -2232,6 +2286,41 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (g.stage === 'eht4') txt += r.eht.champion ? `<br><b>Euro Hockey Tour: Suomi on EHT-mestari!</b>` : `<br>Euro Hockey Tour: Suomi ${r.eht.place}., mestaruuden voitti ${esc(r.eht.table[0].n)}.`;
     return `<div class="eht-banner ${es.place === 1 || (g.stage === 'eht4' && r.eht.champion) ? 'win' : ''}"><span class="eht-trophy" aria-hidden="true">${es.place === 1 ? '🏆' : '🏒'}</span><span>${txt}</span></div>`;
   }
+  // MM-vaiheiden ilmoitukset ottelu kerrallaan: alkusarjan jälkeen ja jokaisen pudotuspeliottelun jälkeen
+  const ELATIVE = { Kanada: 'Kanadasta', Ruotsi: 'Ruotsista', USA: 'USA:sta', 'Tšekki': 'Tšekistä', Sveitsi: 'Sveitsistä', Slovakia: 'Slovakiasta', Saksa: 'Saksasta', Latvia: 'Latviasta', Tanska: 'Tanskasta', Norja: 'Norjasta', 'Itävalta': 'Itävallasta', Kazakstan: 'Kazakstanista', Ranska: 'Ranskasta', Slovenia: 'Sloveniasta', Unkari: 'Unkarista', 'Iso-Britannia': 'Iso-Britanniasta' };
+  const ALLATIVE = { Kanada: 'Kanadalle', Ruotsi: 'Ruotsille', USA: 'USA:lle', 'Tšekki': 'Tšekille', Sveitsi: 'Sveitsille', Slovakia: 'Slovakialle', Saksa: 'Saksalle', Latvia: 'Latvialle', Tanska: 'Tanskalle', Norja: 'Norjalle', 'Itävalta': 'Itävallalle', Kazakstan: 'Kazakstanille', Ranska: 'Ranskalle', Slovenia: 'Slovenialle', Unkari: 'Unkarille', 'Iso-Britannia': 'Iso-Britannialle' };
+  function nextOpp(g) {
+    if (!g) return '';
+    const mods = [];
+    if (g.vire) mods.push('vire ' + signed(g.vire));
+    if (g.edge) mods.push('finaali +' + g.edge);
+    return `<b>${esc(g.opp)}</b>${g.oppR !== undefined ? ` <span class="mb-str">(vahvuus ${g.oppR}${mods.length ? ', ' + mods.join(', ') : ''})</span>` : ''}`;
+  }
+  function mmBanner(r, idx) {
+    const g = r.games[idx], next = r.games[idx + 1];
+    if (!g) return '';
+    let txt = '', tone = '', icon = '🏒';
+    const res = `${g.f}–${g.a}${g.ot ? ' ja' : ''}`;
+    if (g.stage === 'mm' && !(next && next.stage === 'mm')) {
+      const mm = r.games.filter((x) => x.stage === 'mm');
+      const w = mm.filter((x) => x.win).length;
+      if (r.advanced) { tone = 'win'; txt = `<b>Alkusarja: ${w} voittoa, ${r.groupPts} pistettä. Jatkoon!</b><br>Puolivälierässä vastaan ${nextOpp(next)}.`; }
+      else { tone = 'loss'; txt = `<b>Alkusarjasta ${r.groupPts} pistettä.</b> Jatkopaikka jäi saamatta, jatkoon tarvittiin noin 10.`; }
+    } else if (g.round === 'Puolivälierä') {
+      if (g.win) { tone = 'win'; txt = `<b>Voitto ${esc(ELATIVE[g.opp] || g.opp)} ${res}!</b><br>Välierässä vastaan ${nextOpp(next)}.`; }
+      else { tone = 'loss'; txt = `<b>Puolivälierätappio ${esc(ALLATIVE[g.opp] || g.opp)} ${res}.</b> Kausi päättyi.`; }
+    } else if (g.round === 'Välierä') {
+      if (g.win) { tone = 'win'; icon = '🥇'; txt = `<b>Finaaliin! Voitto ${esc(ELATIVE[g.opp] || g.opp)} ${res}.</b><br>Kultaottelussa vastaan ${nextOpp(next)}.`; }
+      else { tone = 'loss'; txt = `<b>Välierätappio ${esc(ALLATIVE[g.opp] || g.opp)} ${res}.</b><br>Pronssiottelussa vastaan ${nextOpp(next)}.`; }
+    } else if (g.round === 'Finaali') {
+      if (g.win) { tone = 'win'; icon = '🥇'; txt = `<b>Maailmanmestarit! Finaalivoitto ${esc(ELATIVE[g.opp] || g.opp)} ${res}.</b>`; }
+      else { icon = '🥈'; txt = `<b>MM-hopeaa.</b> Finaalitappio ${esc(ALLATIVE[g.opp] || g.opp)} ${res}.`; }
+    } else if (g.round === 'Pronssiottelu') {
+      if (g.win) { tone = 'win'; icon = '🥉'; txt = `<b>MM-pronssia! Voitto ${esc(ELATIVE[g.opp] || g.opp)} ${res}.</b>`; }
+      else { tone = 'loss'; txt = `<b>Pronssi jäi saamatta.</b> Tappio ${esc(ALLATIVE[g.opp] || g.opp)} ${res}.`; }
+    } else return '';
+    return `<div class="eht-banner mm-banner ${tone}"><span class="eht-trophy" aria-hidden="true">${icon}</span><span>${txt}</span></div>`;
+  }
   function ehtSummaryHtml(r) {
     if (!r.eht) return '';
     const E = r.eht;
@@ -2391,7 +2480,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <div class="record small-rec">${recHtml(record(shown))}</div>
         </div>
         ${last ? gameDetail(last, S.shown - 1) : ''}
-        ${last ? ehtBanner(r, S.shown - 1) : ''}
+        ${last ? ehtBanner(r, S.shown - 1) + mmBanner(r, S.shown - 1) : ''}
         <div class="step-bar" id="stepBar">
         <div class="next-up">
           ${done
