@@ -582,8 +582,31 @@
     return win ? [w, l] : [l, w];
   }
 
-  function playGame(rng, team, o, stage) {
-    const win = rng() < winProb(team, o.r);
+  // Vastustajien kauden vire: jokainen maa saa kaudeksi vireen −3…+3 (keskimäärin 0).
+  // Vire arvotaan ennen kautta ja kerrotaan ennusteessa, joten kaudet eroavat toisistaan.
+  const OPP_FORM_W = [1, 2, 3, 4, 3, 2, 1]; // −3 … +3
+  const CONTENDERS = ['Kanada', 'Ruotsi', 'USA', 'Tšekki', 'Sveitsi', 'Slovakia', 'Saksa'];
+  function rollOppForm(rng = Math.random) {
+    const tot = OPP_FORM_W.reduce((a, b) => a + b, 0);
+    const form = {};
+    for (const o of OPPONENTS) {
+      let x = rng() * tot, k = 0;
+      while (x >= OPP_FORM_W[k]) { x -= OPP_FORM_W[k]; k++; }
+      form[o.n] = k - 3;
+    }
+    return form;
+  }
+
+  // Ottelun sanallinen tulkinta Suomen voittomahdollisuuden mukaan
+  function gameOutlook(p, win) {
+    if (win) return p < 0.35 ? 'Yllätysvoitto' : p < 0.55 ? 'Tasaisen ottelun voitto' : 'Odotettu voitto';
+    return p >= 0.55 ? 'Yllätystappio' : p >= 0.35 ? 'Tasaisen ottelun tappio' : 'Odotettu tappio';
+  }
+
+  function playGame(rng, team, o, stage, vire = 0, edge = 0) {
+    const oppR = o.r + vire + edge;
+    const p = winProb(team, oppR);
+    const win = rng() < p;
     const extra = rng() < 0.22; // ratkesi jatkoajalla tai voittolaukauksilla
     let [f, a] = goals(rng, win);
     if (extra) {
@@ -591,7 +614,7 @@
       f = win ? t + 1 : t;
       a = win ? t : t + 1;
     }
-    return { stage, opp: o.n, win, ot: extra, f, a };
+    return { stage, opp: o.n, win, ot: extra, f, a, oppBase: o.r, oppR, vire, edge, p };
   }
 
   function shuffle(rng, arr) {
@@ -681,14 +704,14 @@
     return { cmp, rank: k, name: RANK_NAME[k], atLeast };
   }
   const fcCache = new Map();
-  function forecast(teamRating, n = 3000) {
-    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset;
+  function forecast(teamRating, form = {}, n = 3000) {
+    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset + '|' + OPPONENTS.map((o) => form[o.n] || 0).join(',');
     if (fcCache.has(key)) return fcCache.get(key);
     const rng = seededRng(20261126);
     let gold = 0, medal = 0, adv = 0, perfect = 0;
     const dist = [0, 0, 0, 0, 0, 0];
     for (let i = 0; i < n; i++) {
-      const r = simulateSeason(teamRating, rng);
+      const r = simulateSeason(teamRating, rng, null, null, [], form);
       dist[resultRank(r)]++;
       if (r.medal === 'gold') gold++;
       if (r.medal) medal++;
@@ -790,11 +813,12 @@
 
   // Finaalissa vastustaja pelaa parhaansa: kulta on harvinaisempi, mitalien todennäköisyys ei muutu
   const FINAL_EDGE = 2;
-  function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = []) {
+  function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = [], form = {}) {
     const games = [];
+    const playGameF = (rng, team, o, stage, edge = 0) => playGame(rng, team, o, stage, form[o.n] || 0, edge);
     const eht = ['Ruotsi', 'Tšekki', 'Sveitsi'];
     for (const st of STAGES.slice(0, 4)) {
-      for (const n of shuffle(rng, eht)) games.push(playGame(rng, teamRating, opp(n), st.id));
+      for (const n of shuffle(rng, eht)) games.push(playGameF(rng, teamRating, opp(n), st.id));
     }
     // MM-lohko: 8 joukkuetta, neljä parasta jatkoon
     const group = [
@@ -806,7 +830,7 @@
     ];
     let pts = 0;
     for (const o of shuffle(rng, group)) {
-      const g = playGame(rng, teamRating, o, 'mm');
+      const g = playGameF(rng, teamRating, o, 'mm');
       pts += g.win ? (g.ot ? 2 : 3) : g.ot ? 1 : 0;
       games.push(g);
     }
@@ -815,24 +839,24 @@
     let advanced = pts >= 10; // noin neljä voittoa riittää jatkoon
     if (advanced) {
       const qfPool = ['Sveitsi', 'Slovakia', 'Saksa', 'Tšekki', 'Latvia', 'USA', 'Ruotsi'].filter((n) => !groupNames.includes(n));
-      const qf = playGame(rng, teamRating, pickOne(rng, qfPool), 'po');
+      const qf = playGameF(rng, teamRating, pickOne(rng, qfPool), 'po');
       qf.round = 'Puolivälierä';
       games.push(qf);
       if (qf.win) {
         const sfPool = ['Kanada', 'Ruotsi', 'USA', 'Tšekki'].filter((n) => n !== qf.opp);
-        const sf = playGame(rng, teamRating, pickOne(rng, sfPool), 'po');
+        const sf = playGameF(rng, teamRating, pickOne(rng, sfPool), 'po');
         sf.round = 'Välierä';
         games.push(sf);
         if (sf.win) {
           const fPool = ['Kanada', 'Kanada', 'Ruotsi', 'USA'].filter((n) => n !== sf.opp && n !== qf.opp);
           const fo = pickOne(rng, fPool);
-          const fin = playGame(rng, teamRating, { ...fo, r: fo.r + FINAL_EDGE }, 'po');
+          const fin = playGameF(rng, teamRating, fo, 'po', FINAL_EDGE);
           fin.round = 'Finaali';
           games.push(fin);
           medal = fin.win ? 'gold' : 'silver';
         } else {
           const bPool = ['Ruotsi', 'USA', 'Tšekki', 'Sveitsi'].filter((n) => n !== sf.opp && n !== qf.opp);
-          const br = playGame(rng, teamRating, pickOne(rng, bPool), 'po');
+          const br = playGameF(rng, teamRating, pickOne(rng, bPool), 'po');
           br.round = 'Pronssiottelu';
           games.push(br);
           medal = br.win ? 'bronze' : null;
@@ -857,7 +881,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);

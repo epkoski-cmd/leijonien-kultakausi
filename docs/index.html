@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="37fed0e">
+<meta name="lkk-version" content="b5b5f39">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -248,6 +248,18 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .forecast .fc-note { color: var(--muted); font-size: 12.5px; margin: 4px 0 0; }
 .forecast .fc-goal { margin: 0; }
 .forecast .fc-toggle { justify-self: start; }
+.fc-form { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 14px; }
+.fc-form .label { width: 100%; }
+.fm.hot b { color: var(--red); }
+.fm.cold b { color: var(--win); }
+.gc-str { display: grid; gap: 2px; font-size: 13px; color: var(--muted); padding: 6px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.gc-str b { color: var(--ink, inherit); }
+.gc-str .label, .nu-str { margin-right: 4px; }
+.nu-str { font-size: 13px; color: var(--muted); }
+.decisive { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 6px; }
+.decisive > b { font-size: 16px; }
+.dc-note { font-size: 14px; color: var(--muted); }
+.decisive .gc-str { border-bottom: 0; padding-bottom: 0; }
 .expect { border-radius: 12px; padding: 10px 14px; display: grid; gap: 2px; border: 1px solid var(--line); }
 .expect b { font-size: 17px; }
 .expect span { color: var(--muted); font-size: 14px; }
@@ -505,7 +517,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 12.16 · 37fed0e</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 14.39 · b5b5f39</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1096,8 +1108,31 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return win ? [w, l] : [l, w];
   }
 
-  function playGame(rng, team, o, stage) {
-    const win = rng() < winProb(team, o.r);
+  // Vastustajien kauden vire: jokainen maa saa kaudeksi vireen −3…+3 (keskimäärin 0).
+  // Vire arvotaan ennen kautta ja kerrotaan ennusteessa, joten kaudet eroavat toisistaan.
+  const OPP_FORM_W = [1, 2, 3, 4, 3, 2, 1]; // −3 … +3
+  const CONTENDERS = ['Kanada', 'Ruotsi', 'USA', 'Tšekki', 'Sveitsi', 'Slovakia', 'Saksa'];
+  function rollOppForm(rng = Math.random) {
+    const tot = OPP_FORM_W.reduce((a, b) => a + b, 0);
+    const form = {};
+    for (const o of OPPONENTS) {
+      let x = rng() * tot, k = 0;
+      while (x >= OPP_FORM_W[k]) { x -= OPP_FORM_W[k]; k++; }
+      form[o.n] = k - 3;
+    }
+    return form;
+  }
+
+  // Ottelun sanallinen tulkinta Suomen voittomahdollisuuden mukaan
+  function gameOutlook(p, win) {
+    if (win) return p < 0.35 ? 'Yllätysvoitto' : p < 0.55 ? 'Tasaisen ottelun voitto' : 'Odotettu voitto';
+    return p >= 0.55 ? 'Yllätystappio' : p >= 0.35 ? 'Tasaisen ottelun tappio' : 'Odotettu tappio';
+  }
+
+  function playGame(rng, team, o, stage, vire = 0, edge = 0) {
+    const oppR = o.r + vire + edge;
+    const p = winProb(team, oppR);
+    const win = rng() < p;
     const extra = rng() < 0.22; // ratkesi jatkoajalla tai voittolaukauksilla
     let [f, a] = goals(rng, win);
     if (extra) {
@@ -1105,7 +1140,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       f = win ? t + 1 : t;
       a = win ? t : t + 1;
     }
-    return { stage, opp: o.n, win, ot: extra, f, a };
+    return { stage, opp: o.n, win, ot: extra, f, a, oppBase: o.r, oppR, vire, edge, p };
   }
 
   function shuffle(rng, arr) {
@@ -1195,14 +1230,14 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { cmp, rank: k, name: RANK_NAME[k], atLeast };
   }
   const fcCache = new Map();
-  function forecast(teamRating, n = 3000) {
-    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset;
+  function forecast(teamRating, form = {}, n = 3000) {
+    const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset + '|' + OPPONENTS.map((o) => form[o.n] || 0).join(',');
     if (fcCache.has(key)) return fcCache.get(key);
     const rng = seededRng(20261126);
     let gold = 0, medal = 0, adv = 0, perfect = 0;
     const dist = [0, 0, 0, 0, 0, 0];
     for (let i = 0; i < n; i++) {
-      const r = simulateSeason(teamRating, rng);
+      const r = simulateSeason(teamRating, rng, null, null, [], form);
       dist[resultRank(r)]++;
       if (r.medal === 'gold') gold++;
       if (r.medal) medal++;
@@ -1304,11 +1339,12 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   // Finaalissa vastustaja pelaa parhaansa: kulta on harvinaisempi, mitalien todennäköisyys ei muutu
   const FINAL_EDGE = 2;
-  function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = []) {
+  function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = [], form = {}) {
     const games = [];
+    const playGameF = (rng, team, o, stage, edge = 0) => playGame(rng, team, o, stage, form[o.n] || 0, edge);
     const eht = ['Ruotsi', 'Tšekki', 'Sveitsi'];
     for (const st of STAGES.slice(0, 4)) {
-      for (const n of shuffle(rng, eht)) games.push(playGame(rng, teamRating, opp(n), st.id));
+      for (const n of shuffle(rng, eht)) games.push(playGameF(rng, teamRating, opp(n), st.id));
     }
     // MM-lohko: 8 joukkuetta, neljä parasta jatkoon
     const group = [
@@ -1320,7 +1356,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     ];
     let pts = 0;
     for (const o of shuffle(rng, group)) {
-      const g = playGame(rng, teamRating, o, 'mm');
+      const g = playGameF(rng, teamRating, o, 'mm');
       pts += g.win ? (g.ot ? 2 : 3) : g.ot ? 1 : 0;
       games.push(g);
     }
@@ -1329,24 +1365,24 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     let advanced = pts >= 10; // noin neljä voittoa riittää jatkoon
     if (advanced) {
       const qfPool = ['Sveitsi', 'Slovakia', 'Saksa', 'Tšekki', 'Latvia', 'USA', 'Ruotsi'].filter((n) => !groupNames.includes(n));
-      const qf = playGame(rng, teamRating, pickOne(rng, qfPool), 'po');
+      const qf = playGameF(rng, teamRating, pickOne(rng, qfPool), 'po');
       qf.round = 'Puolivälierä';
       games.push(qf);
       if (qf.win) {
         const sfPool = ['Kanada', 'Ruotsi', 'USA', 'Tšekki'].filter((n) => n !== qf.opp);
-        const sf = playGame(rng, teamRating, pickOne(rng, sfPool), 'po');
+        const sf = playGameF(rng, teamRating, pickOne(rng, sfPool), 'po');
         sf.round = 'Välierä';
         games.push(sf);
         if (sf.win) {
           const fPool = ['Kanada', 'Kanada', 'Ruotsi', 'USA'].filter((n) => n !== sf.opp && n !== qf.opp);
           const fo = pickOne(rng, fPool);
-          const fin = playGame(rng, teamRating, { ...fo, r: fo.r + FINAL_EDGE }, 'po');
+          const fin = playGameF(rng, teamRating, fo, 'po', FINAL_EDGE);
           fin.round = 'Finaali';
           games.push(fin);
           medal = fin.win ? 'gold' : 'silver';
         } else {
           const bPool = ['Ruotsi', 'USA', 'Tšekki', 'Sveitsi'].filter((n) => n !== sf.opp && n !== qf.opp);
-          const br = playGame(rng, teamRating, pickOne(rng, bPool), 'po');
+          const br = playGameF(rng, teamRating, pickOne(rng, bPool), 'po');
           br.round = 'Pronssiottelu';
           games.push(br);
           medal = br.win ? 'bronze' : null;
@@ -1371,7 +1407,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1391,7 +1427,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   let S;
   function fresh() {
-    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], revealed: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null };
+    return { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), round: 1, mode: store.get('lkk-mode') === 'aika' ? 'aika' : 'turnaus', draw: null, drawn: [], rerolls: 1, history: [], future: [], revealed: [], lineup: {}, phase: 'draft', result: null, eraHistory: [], groupOpen: {}, shown: 0, openGame: null, oppForm: G.rollOppForm() };
   }
 
   function start(data) {
@@ -1401,6 +1437,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (!S.history) { S.history = []; S.future = []; }
     if (S.result && (!S.result.played || !S.result.mmAwards || !S.result.depth)) { S.phase = 'ready'; S.result = null; }
     if (S.openGame === undefined) S.openGame = null;
+    if (!S.oppForm) S.oppForm = G.rollOppForm();
     if (!S.mode) { S.mode = 'aika'; S.draw = S.era || null; S.drawn = []; }
     if (S.phase === 'draft' && !S.draw) { S.draw = rollDraw(); S.spin = true; }
     if (!S.revealed) S.revealed = [];
@@ -1847,15 +1884,51 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   const pct = (x) => x >= 0.995 ? '99 %' : x > 0 && x < 0.01 ? 'alle 1 %' : Math.round(x * 100) + ' %';
   const ESSIVE = { Kultasuosikki: 'kultasuosikkina', Mitalisuosikki: 'mitalisuosikkina', Mitalikandidaatti: 'mitalikandidaattina', 'Puolivälieräjoukkue': 'puolivälieräjoukkueena', Altavastaaja: 'altavastaajana' };
+  // Vastustajien kauden vire sanoina: vain kärkimaat, joiden vire poikkeaa selvästi tavallisesta
+  const FORM_WORD = { 3: 'huippuvireessä', 2: 'vahvassa iskussa', '-2': 'vaisu', '-3': 'kriisissä' };
+  const signed = (x) => (x > 0 ? '+' : x < 0 ? '−' : '±') + Math.abs(x);
+  function formLine(form) {
+    const items = G.CONTENDERS.filter((n) => Math.abs(form[n] || 0) >= 2)
+      .map((n) => `<span class="fm ${form[n] > 0 ? 'hot' : 'cold'}">${esc(n)} ${FORM_WORD[form[n]]} <b>${signed(form[n])}</b></span>`);
+    return items.length ? items.join('') : '<span class="fm">Kärkimaat tavanomaisessa vireessä.</span>';
+  }
+  // Joukkueiden vahvuudet ottelussa (ei maalit): Suomi ensin, vastustajan lisät suluissa
+  function oppStrength(g) {
+    const mods = [];
+    if (g.vire) mods.push('vire ' + signed(g.vire));
+    if (g.edge) mods.push('finaali +' + g.edge);
+    return `${esc(g.opp)} ${g.oppR}${mods.length ? ` <small>(${mods.join(', ')})</small>` : ''}`;
+  }
+  function strengthHtml(g, rating) {
+    if (g.p === undefined) return '';
+    return `<div class="gc-str"><span><span class="label">Joukkueiden vahvuus</span> Suomi ${rating.toFixed(1)} · ${oppStrength(g)}</span>
+        <span>Voittomahdollisuus ${pct(g.p)} · <b>${G.gameOutlook(g.p, g.win)}</b></span></div>`;
+  }
+  // Kauden ratkaisu: viimeinen pudotuspeliottelu, tai alkusarjassa kirvelevin tappio
+  function decisiveHtml(r) {
+    const po = r.games.filter((g) => g.stage === 'po');
+    const last = po[po.length - 1];
+    let head, g, note = '';
+    if (last) { g = last; head = `${g.round}: Suomi – ${esc(g.opp)} ${g.f}–${g.a}${g.ot ? ' ja' : ''}`; }
+    else {
+      g = r.games.filter((x) => x.stage === 'mm' && !x.win && x.p !== undefined).sort((a, b) => b.p - a.p)[0];
+      if (!g) return '';
+      head = `Kirvelevin tappio: Suomi – ${esc(g.opp)} ${g.f}–${g.a}${g.ot ? ' ja' : ''}`;
+      note = `<span class="dc-note">Alkusarjasta ${r.groupPts} pistettä, jatkoon tarvittiin noin 10.</span>`;
+    }
+    if (g.p === undefined) return '';
+    return `<div class="decisive"><div class="label">Kauden ratkaisu</div><b>${head}</b>${note}${strengthHtml(g, r.rating)}</div>`;
+  }
   function forecastHtml(f, rating) {
     return `<div class="forecast">
           <div class="label">Kauden odotus</div>
           <div class="fc-head"><b>${esc(f.label)}</b><span>Vahvuus ${rating.toFixed(1)}</span></div>
           <p class="fc-goal">${esc(f.goal)}</p>
+          <p class="fc-form"><span class="label">Vastustajien vire</span>${formLine(S.oppForm)}</p>
           <button class="link-btn fc-toggle" id="fcToggle" aria-expanded="false">Näytä todennäköisyydet ▾</button>
           <div class="fc-odds" id="fcOdds" hidden>
             <div class="fc-row"><span>MM-kulta <b>${pct(f.gold)}</b></span><span>Mitali <b>${pct(f.medal)}</b></span><span>Puolivälierä <b>${pct(f.adv)}</b></span></div>
-            <p class="fc-note">Laskettu pelaamalla tällä vahvuudella 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi, kultasuonet ja kultavire.</p>
+            <p class="fc-note">Laskettu pelaamalla tällä vahvuudella ja tämän kauden vastustajien vireellä 3 000 kautta. Ottelut ratkaisevat vain sinun kuusi pelaajaasi, kultasuonet ja kultavire.</p>
           </div>
         </div>`;
   }
@@ -1895,7 +1968,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <h2>Kausi alkaa</h2>
           <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
         </div>
-        ${forecastHtml(G.forecast(rating), rating)}
+        ${forecastHtml(G.forecast(rating, S.oppForm), rating)}
         <div class="actions">
           <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
           <button class="btn" id="playAll">Simuloi koko kausi</button>
@@ -1917,9 +1990,9 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const skaters = ev.rows.filter((row) => row.slot.pos !== 'G').map((row) => ({ n: row.player.n, eff: row.eff, pos: row.slot.pos }));
     const gk = ev.rows.find((row) => row.slot.pos === 'G');
     const depth = G.pickDepth(Math.random, Object.values(lp), S.history.map((h) => h.draw));
-    S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth);
+    S.result = G.simulateSeason(ev.total, Math.random, skaters, { n: gk.player.n, eff: gk.eff }, depth, S.oppForm);
     S.result.rating = ev.total;
-    const f = G.forecast(ev.total);
+    const f = G.forecast(ev.total, S.oppForm);
     S.result.forecast = { label: f.label, goal: f.goal, gold: f.gold, medal: f.medal, dist: f.dist };
     S.openGame = null;
     if (mode === 'step') { S.phase = 'step'; S.shown = 0; }
@@ -2034,6 +2107,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return `<div class="game-card ${c}">
       <div class="gc-head"><span class="label">Ottelu ${idx + 1} · ${esc(stageLabel(g))}</span><span class="gc-tag">${g.win ? 'Voitto' : g.ot ? 'Jatkoaikatappio' : 'Tappio'}</span></div>
       <div class="gc-score"><span>Suomi – ${esc(g.opp)}</span><b>${g.f}–${g.a}${g.ot ? '<small> ja</small>' : ''}</b></div>
+      ${strengthHtml(g, S.result.rating)}
       <div class="gc-sum">
         ${star ? `<span><span class="gc-star" aria-hidden="true">★</span> Ottelun tähti: <b>${star}</b></span>` : ''}
         <span class="gc-scorers">${fin.length ? 'Suomen maalit: ' + scorerTxt : 'Suomi ei tehnyt maalia.'}</span>
@@ -2196,7 +2270,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         <div class="next-up">
           ${done
             ? `<span class="label">Kausi pelattu</span>`
-            : `<span class="label">Seuraavaksi · ${esc(stageLabel(next))}</span><b>Suomi – ${esc(next.opp)}</b>`}
+            : `<span class="label">Seuraavaksi · ${esc(stageLabel(next))}</span><b>Suomi – ${esc(next.opp)}</b>${next.p !== undefined ? `<span class="nu-str">Vahvuus: Suomi ${r.rating.toFixed(1)} · ${oppStrength(next)}</span>` : ''}`}
         </div>
         <div class="actions">
           ${done
@@ -2234,6 +2308,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           ${expectationHtml(r)}
           ${r.perfect ? `<div class="medal perfect"><span class="disc gold">22</span><div><b>Täydellinen kausi</b><span>Kaikki 22 ottelua voitettu.</span></div></div>` : ''}
           <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
+          ${decisiveHtml(r)}
           ${awardsHtml(r)}
           ${scoringHtml(r.games)}
         </div>

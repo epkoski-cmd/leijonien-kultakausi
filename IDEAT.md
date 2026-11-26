@@ -219,3 +219,10 @@ Toteutettu 26.11.2026:
 - Ei tehdä: hopea- ja pronssivire (23/27 turnauksesta on mitalijoukkueita, vire nostaisi vain kokonaistasoa).
 - Iso idea, vaiheittain: hahmot (keksittyjä, ei oikeita henkilöitä): 1) kapteeni/valmentaja ennen ja jälkeen kauden, 2) selostaja ottelukortteihin, 3) mentori ja kriitikko draftiin, 4) nemesis = vastustajan valmentaja, liittyy vastustajien kauden kuntoon.
 - ✅ Kultavire näytetään kerran pelaajalistan yläpuolella (vire koskee aina koko turnausjoukkuetta, korttikohtainen merkki toisti samaa), kaukalossa kultainen kehys. Jakokuvassa ja kopioitavassa tekstissä suhde odotukseen ("YLI ODOTUSTEN · ennakko: mitalikandidaatti").
+
+### 17.x Vastustajien vire ja kauden ratkaisu (toteutettu 26.11.2026)
+- Jokainen maa saa kaudeksi vireen −3…+3 (painot 1-2-3-4-3-2-1, keskiarvo 0). Arvotaan draftin alussa, näkyy ennusteessa ("Vastustajien vire": vain kärkimaat, |vire| ≥ 2). Ennuste lasketaan kauden vireillä.
+- Simulointi: kultaprosentti ei muutu (89,5 → n. 13 %), mutta saman joukkueen ennuste vaihtelee kausittain 5–20 %.
+- Ottelukortissa ja seuraavan ottelun kohdalla: "Joukkueiden vahvuus: Suomi 87.4 · Kanada 92 (vire +2, finaali +2)" + voittomahdollisuus ja sanallinen tulkinta (Odotettu / Tasaisen ottelun / Yllätys- voitto tai tappio; rajat 35 % ja 55 %).
+- Yhteenvedossa "Kauden ratkaisu": viimeinen pudotuspeliottelu, tai alkusarjassa jääneillä kirvelevin tappio (suurin voittomahdollisuus).
+- Sanalliset tulkinnat ovat pohja tuleville hahmoille (selostaja, kriitikko).
