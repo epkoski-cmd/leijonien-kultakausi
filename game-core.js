@@ -555,7 +555,7 @@
     og22: { A: ["Mikko Lehtonen", "Sakari Manninen"], B: ["Teemu Hartikainen", "Harri Säteri"] },
     mm22: { A: ["Jussi Olkinuora", "Mikko Lehtonen", "Sakari Manninen"], B: ["Mikael Granlund"] },
   };
-  const GOLD_FORM = 2;
+  const GOLD_FORM = 4;
   function inTournament(p, tid) {
     const t = TOURNAMENTS.find((x) => x.id === tid);
     if (!p || !t || !BORN[p.n]) return p;
@@ -571,9 +571,9 @@
   // Säädettävät: CONFIG.spread = kuinka paljon tuuria, CONFIG.offset = vastustajien lisävahvuus
   // offset 2 → 0.7 (25.11.2026): turnauskunto ja poikkeuslista laskivat keskivahvuutta noin 1,3;
   // kullan todennäköisyys pidettiin ennallaan (noin 8–9 % ahneella valinnalla)
-  // 26.11.2026: kultavire (+2) ja finaalin lisävahvuus (+2) → offset 0,6. Tavoite: vahvuus 89 → kulta noin 12 %
-  // (joka 8. kausi), mitali noin 63 %.
-  const CONFIG = { spread: 3.0, offset: 0.6 };
+  // 26.11.2026: kultavire +4 ja finaalin lisävahvuus +2 → offset 0,9. Ahneen draftin mediaani 89,5 voittaa
+  // kullan noin joka 8. kausi (noin 12 %), mitali noin 60 %.
+  const CONFIG = { spread: 3.0, offset: 0.9 };
   const winProb = (team, oppR) => 1 / (1 + Math.exp(-(team - oppR - CONFIG.offset) / CONFIG.spread));
 
   function goals(rng, win) {
@@ -663,21 +663,42 @@
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
   }
+  // Kauden lopputulos järjestyslukuna: 0 alkusarja, 1 puolivälierä, 2 neljäs, 3 pronssi, 4 hopea, 5 kulta
+  const RANK_NAME = ['putoaminen alkusarjassa', 'puolivälierä', 'neljäs sija', 'MM-pronssi', 'MM-hopea', 'MM-kulta'];
+  function resultRank(r) {
+    if (r.medal) return { bronze: 3, silver: 4, gold: 5 }[r.medal];
+    if (!r.advanced) return 0;
+    const last = r.games.filter((g) => g.stage === 'po').pop();
+    return last && last.round === 'Pronssiottelu' ? 2 : 1;
+  }
+  // Tulos suhteessa ennusteeseen: yli, odotusten mukainen vai alle (30 %:n hännät)
+  function vsForecast(f, r) {
+    if (!f || !f.dist) return null;
+    const k = resultRank(r);
+    const atLeast = f.dist.slice(k).reduce((a, x) => a + x, 0);
+    const atMost = f.dist.slice(0, k + 1).reduce((a, x) => a + x, 0);
+    const cmp = atLeast <= 0.3 ? 'up' : atMost <= 0.3 ? 'down' : 'even';
+    return { cmp, rank: k, name: RANK_NAME[k], atLeast };
+  }
   const fcCache = new Map();
   function forecast(teamRating, n = 3000) {
     const key = teamRating.toFixed(2) + '|' + CONFIG.spread + '|' + CONFIG.offset;
     if (fcCache.has(key)) return fcCache.get(key);
     const rng = seededRng(20261126);
     let gold = 0, medal = 0, adv = 0, perfect = 0;
+    const dist = [0, 0, 0, 0, 0, 0];
     for (let i = 0; i < n; i++) {
       const r = simulateSeason(teamRating, rng);
+      dist[resultRank(r)]++;
       if (r.medal === 'gold') gold++;
       if (r.medal) medal++;
       if (r.advanced) adv++;
       if (r.perfect) perfect++;
     }
-    const f = { gold: gold / n, medal: medal / n, adv: adv / n, perfect: perfect / n };
-    f.label = f.gold >= 0.3 ? 'Kultasuosikki' : f.medal >= 0.5 ? 'Mitalisuosikki' : f.medal >= 0.25 ? 'Mitalikandidaatti' : f.adv >= 0.5 ? 'Puolivälieräjoukkue' : 'Altavastaaja';
+    const f = { gold: gold / n, medal: medal / n, adv: adv / n, perfect: perfect / n, dist: dist.map((x) => x / n) };
+    const t = f.gold >= 0.3 ? 0 : f.medal >= 0.5 ? 1 : f.medal >= 0.25 ? 2 : f.adv >= 0.5 ? 3 : 4;
+    f.label = ['Kultasuosikki', 'Mitalisuosikki', 'Mitalikandidaatti', 'Puolivälieräjoukkue', 'Altavastaaja'][t];
+    f.goal = ['Tavoite on MM-kulta.', 'Tavoite on mitali. Kulta olisi juhlan paikka.', 'Tavoite on puolivälierä. Mitali olisi hieno saavutus.', 'Tavoite on puolivälierä. Mitali olisi yllätys.', 'Tavoite on selvitä alkusarjasta.'][t];
     fcCache.set(key, f);
     return f;
   }
@@ -836,7 +857,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);

@@ -212,3 +212,9 @@ Toteutettu 26.11.2026:
 - ✅ Kultavire: kultaa voittaneen turnausjoukkueen pelaaja saa siitä turnauksesta +2 (◆ Kultavire kortissa, ohjeissa oma rivi). MM 2011:n paras kenttä 83,5 → 85,5.
 - ✅ Finaalin vastustaja +2 (vain kultaan). offset 0,7 → 0,6. Tulos: vahvuus 89 → kulta noin 12 %, mitali noin 63 %; 86 → kulta 2–3 %; 92 → noin 34 %.
 - Seuraavaksi: vastustajien kauden kunto ennusteeseen ja tappion selitys (esim. "Välierä: Ruotsi 90 vs. Suomi 88"), jotta tappiolla on näkyvä syy. Sitten EHT-palkinnot ja päivän haaste.
+- Testipalaute 26.11.2026 klo 11: prosentit tuntuivat kylmiltä (hopea 2 %:n kultaennusteella ei tuntunut juhlalta), kultaviren vaikutusta ei huomannut, MM-alkusarjan uusin ottelu jäi alimmaksi.
+- ✅ Uusin ottelu ensimmäisenä myös vaiheen sisällä (ottelu kerrallaan).
+- ✅ Ennuste → "Kauden odotus": sanallinen tavoite, todennäköisyydet napautuksen takana. Tulossivulla vertailu odotukseen: Yli odotusten / Odotusten mukainen / Suosikki lunasti paikkansa / Alle odotusten (30 %:n hännät tulosjakaumasta).
+- ✅ Kultavire +4, näkyy kaukalossa ◆ ja vahvuuden alla sirussa ("◆ Kultavire: Granlund, Olkinuora +1.6"). offset 0,9: ahneen draftin mediaani 89,5, kulta noin 12 %.
+- Ei tehdä: hopea- ja pronssivire (23/27 turnauksesta on mitalijoukkueita, vire nostaisi vain kokonaistasoa).
+- Iso idea, vaiheittain: hahmot (keksittyjä, ei oikeita henkilöitä): 1) kapteeni/valmentaja ennen ja jälkeen kauden, 2) selostaja ottelukortteihin, 3) mentori ja kriitikko draftiin, 4) nemesis = vastustajan valmentaja, liittyy vastustajien kauden kuntoon.
