@@ -252,7 +252,10 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .gc-str .label, .nu-str { margin-right: 4px; }
 .nu-str { font-size: 13px; color: var(--muted); }
 .decisive { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 6px; }
-.decisive > b { font-size: 16px; }
+.decisive > b { font-size: 15px; font-weight: 600; }
+.dc-verdict { font-size: 19px; font-weight: 700; line-height: 1.15; }
+.dc-verdict.up { color: var(--gold); }
+.dc-verdict.down { color: var(--red); }
 .dc-note { font-size: 14px; color: var(--muted); }
 .decisive .gc-str { border-bottom: 0; padding-bottom: 0; }
 .expect { border-radius: 12px; padding: 10px 14px; display: grid; gap: 2px; border: 1px solid var(--line); }
@@ -1007,10 +1010,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (g.edge) mods.push('finaali +' + g.edge);
     return `${esc(g.opp)} ${g.oppR}${mods.length ? ` <small>(${mods.join(', ')})</small>` : ''}`;
   }
-  function strengthHtml(g, rating) {
+  function strengthHtml(g, rating, withOutlook = true) {
     if (g.p === undefined) return '';
     return `<div class="gc-str"><span><span class="label">Joukkueiden vahvuus</span> Suomi ${rating.toFixed(1)} · ${oppStrength(g)}</span>
-        <span>Voittomahdollisuus ${pct(g.p)} · <b>${G.gameOutlook(g.p, g.win)}</b></span></div>`;
+        <span>Voittomahdollisuus ${pct(g.p)}${withOutlook ? ` · <b>${G.gameOutlook(g.p, g.win)}</b>` : ''}</span></div>`;
   }
   // Kauden ratkaisu: viimeinen pudotuspeliottelu, tai alkusarjassa kirvelevin tappio
   function decisiveHtml(r) {
@@ -1025,7 +1028,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       note = `<span class="dc-note">Alkusarjasta ${r.groupPts} pistettä, jatkoon tarvittiin noin 10.</span>`;
     }
     if (g.p === undefined) return '';
-    return `<div class="decisive"><div class="label">Kauden ratkaisu</div><b>${head}</b>${note}${strengthHtml(g, r.rating)}</div>`;
+    // Sanallinen arvio heti otsikon alle: se on ratkaisun ydin, luvut perustelevat sen
+    const surprise = g.win ? g.p < 0.35 : g.p >= 0.55;
+    const tone = surprise ? (g.win ? 'up' : 'down') : '';
+    return `<div class="decisive"><div class="label">Kauden ratkaisu</div><div class="dc-verdict ${tone}">${G.gameOutlook(g.p, g.win)}</div><b>${head}</b>${note}${strengthHtml(g, r.rating, false)}</div>`;
   }
   function forecastHtml(f, rating) {
     return `<div class="forecast">
