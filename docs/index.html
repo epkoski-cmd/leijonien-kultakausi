@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="248a5dd">
+<meta name="lkk-version" content="951e948">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -261,6 +261,30 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .dc-verdict { font-size: 19px; font-weight: 700; line-height: 1.15; }
 .dc-verdict.up { color: var(--gold); }
 .dc-verdict.down { color: var(--red); }
+.eht-place { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.eht-place.won { color: var(--gold); font-weight: 700; }
+.eht-cup { margin: 4px 0 8px; }
+.eht-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.eht-table caption { text-align: left; font-weight: 700; padding-bottom: 4px; }
+.eht-table th { font-size: 12px; color: var(--muted); font-weight: 600; text-align: left; padding: 2px 6px; }
+.eht-table td { padding: 4px 6px; border-top: 1px solid var(--line); }
+.eht-table td:first-child { width: 2.2em; color: var(--muted); }
+.eht-table tr.me td { color: var(--gold); font-weight: 700; }
+.eht-others { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+.eht-banner { display: flex; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-size: 14.5px; }
+.eht-banner.win { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--panel)); }
+.eht-trophy { font-size: 22px; }
+.eht-sum { display: grid; gap: 8px; }
+.eht-champ { display: flex; gap: 12px; align-items: center; border: 2px solid var(--gold); border-radius: 12px; padding: 10px 14px; }
+.eht-champ > span { font-size: 28px; }
+.eht-champ div { display: grid; }
+.eht-champ b { font-size: 18px; color: var(--gold); }
+.eht-champ div span { color: var(--muted); font-size: 14px; }
+.eht-line { margin: 0; color: var(--muted); }
+.eht-cups { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.eht-cups li { display: flex; justify-content: space-between; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; }
+.eht-cups li.won { border-color: var(--gold); }
+.eht-cups li.won b { color: var(--gold); }
 .dc-note { font-size: 14px; color: var(--muted); }
 .decisive .gc-str { border-bottom: 0; padding-bottom: 0; }
 .expect { border-radius: 12px; padding: 10px 14px; display: grid; gap: 2px; border: 1px solid var(--line); }
@@ -520,7 +544,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 14.57 · 248a5dd</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 15.03 · 951e948</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1158,10 +1182,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
   // Kausi: Euro Hockey Tour 4 × 3 ottelua, MM-alkusarja 7, pudotuspelit 3 = 22 ottelua
   const STAGES = [
-    { id: 'eht1', label: 'EHT 1/4 · Turnaus Suomessa' },
-    { id: 'eht2', label: 'EHT 2/4 · Turnaus Sveitsissä' },
-    { id: 'eht3', label: 'EHT 3/4 · Turnaus Ruotsissa' },
-    { id: 'eht4', label: 'EHT 4/4 · Turnaus Tšekissä' },
+    { id: 'eht1', label: 'EHT 1/4 · Karjala Cup', cup: 'Karjala Cup', host: 'Suomi' },
+    { id: 'eht2', label: 'EHT 2/4 · Swiss Ice Hockey Games', cup: 'Swiss Ice Hockey Games', host: 'Sveitsi' },
+    { id: 'eht3', label: 'EHT 3/4 · Beijer Hockey Games', cup: 'Beijer Hockey Games', host: 'Ruotsi' },
+    { id: 'eht4', label: 'EHT 4/4 · Czech Hockey Games', cup: 'Czech Hockey Games', host: 'Tšekki' },
     { id: 'mm', label: 'MM-alkusarja' },
     { id: 'po', label: 'MM-pudotuspelit' },
   ];
@@ -1340,6 +1364,47 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { awards, allstar, mmGames: mm.length };
   }
 
+  // EHT-sarjataulukko: neljä maata pelaa kaikki keskenään. Suomen ottelut on jo pelattu,
+  // muiden keskinäiset ottelut simuloidaan samoilla vahvuuksilla ja kauden vireillä.
+  // Pisteet: voitto 3, jatkoaikavoitto 2, jatkoaikatappio 1. Tasapisteissä maaliero, sitten tehdyt maalit.
+  const EHT_TEAMS = ['Suomi', 'Ruotsi', 'Tšekki', 'Sveitsi'];
+  function tableRow(n) { return { n, pts: 0, gf: 0, ga: 0, w: 0, otw: 0, otl: 0, l: 0 }; }
+  function addResult(row, f, a, win, ot) {
+    row.gf += f; row.ga += a;
+    if (win) { if (ot) { row.otw++; row.pts += 2; } else { row.w++; row.pts += 3; } }
+    else if (ot) { row.otl++; row.pts += 1; } else row.l++;
+  }
+  const sortTable = (rows) => rows.sort((x, y) => y.pts - x.pts || (y.gf - y.ga) - (x.gf - x.ga) || y.gf - x.gf || EHT_TEAMS.indexOf(x.n) - EHT_TEAMS.indexOf(y.n));
+  function ehtTables(rng, games, form) {
+    const str = (n) => opp(n).r + (form[n] || 0);
+    const total = Object.fromEntries(EHT_TEAMS.map((n) => [n, tableRow(n)]));
+    const stages = STAGES.slice(0, 4).map((st) => {
+      const rows = Object.fromEntries(EHT_TEAMS.map((n) => [n, tableRow(n)]));
+      const others = [];
+      for (const g of games.filter((x) => x.stage === st.id)) {
+        addResult(rows.Suomi, g.f, g.a, g.win, g.ot);
+        addResult(rows[g.opp], g.a, g.f, !g.win, g.ot);
+      }
+      const rest = EHT_TEAMS.slice(1);
+      for (let i = 0; i < rest.length; i++) for (let j = i + 1; j < rest.length; j++) {
+        const [h, v] = [rest[i], rest[j]];
+        const win = rng() < 1 / (1 + Math.exp(-(str(h) - str(v)) / CONFIG.spread));
+        const ot = rng() < 0.22;
+        let [f, a] = goals(rng, win);
+        if (ot) { const t = Math.min(f, a); f = win ? t + 1 : t; a = win ? t : t + 1; }
+        addResult(rows[h], f, a, win, ot);
+        addResult(rows[v], a, f, !win, ot);
+        others.push({ h, v, f, a, ot });
+      }
+      for (const n of EHT_TEAMS) for (const k of ['pts', 'gf', 'ga', 'w', 'otw', 'otl', 'l']) total[n][k] += rows[n][k];
+      const table = sortTable(Object.values(rows));
+      return { id: st.id, cup: st.cup, table, others, place: table.findIndex((x) => x.n === 'Suomi') + 1 };
+    });
+    const table = sortTable(Object.values(total));
+    const place = table.findIndex((x) => x.n === 'Suomi') + 1;
+    return { stages, table, place, champion: place === 1, cups: stages.filter((x) => x.place === 1).map((x) => x.cup) };
+  }
+
   // Finaalissa vastustaja pelaa parhaansa: kulta on harvinaisempi, mitalien todennäköisyys ei muutu
   const FINAL_EDGE = 2;
   function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = [], form = {}) {
@@ -1392,11 +1457,12 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         }
       }
     }
+    const ehtRes = ehtTables(rng, games, form);
     if (skaters && skaters.length) for (const g of games) { assignGoals(rng, g, skaters, depth); assignPens(rng, g, [...skaters, ...depth]); }
     const W = games.filter((g) => g.win).length;
     const OTL = games.filter((g) => !g.win && g.ot).length;
     const L = games.length - W - OTL;
-    const res = { games, W, L, OTL, played: games.length, groupPts: pts, advanced, medal, perfect: W === SEASON_GAMES, depth: depth.map((p) => p.n) };
+    const res = { games, W, L, OTL, played: games.length, groupPts: pts, advanced, medal, perfect: W === SEASON_GAMES, depth: depth.map((p) => p.n), eht: ehtRes };
     if (skaters && skaters.length && goalie) res.mmAwards = computeAwards(rng, res, skaters, goalie);
     return res;
   }
@@ -1410,7 +1476,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -2043,9 +2109,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       expect: (() => { const e = expectation(r); return e ? { cls: e.cls, head: e.head, pre: e.pre } : null; })(),
       games: r.games.map((g) => g.win ? 'W' : g.ot ? 'O' : 'L'),
       awards: r.mmAwards.awards.map((a) => ({ title: a.title, n: a.n })),
+      eht: r.eht ? { champion: r.eht.champion, place: r.eht.place, cups: r.eht.cups } : null,
       top: top ? { n: top.n, g: top.g, a: top.a } : null,
       date: new Date().toISOString().slice(0, 10),
     };
+  }
+  // EHT kunniamainintana: mestaruus tai turnausvoitot (sijoitus ilman voittoja ei ole palkinto)
+  function ehtAward(d) {
+    const e = d.eht;
+    if (!e || (!e.champion && !e.cups.length)) return null;
+    if (e.champion) return { title: 'EHT-mestari', n: `${e.cups.length}/4 turnausvoittoa` };
+    return { title: e.cups.length === 1 ? 'Turnausvoitto' : 'Turnausvoitot', n: e.cups.join(', ') };
   }
   function bestCard() {
     try { const c = JSON.parse(store.get('lkk-bestCard')); return c && c.v === 1 ? c : null; } catch (e) { return null; }
@@ -2058,6 +2132,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     const items = [
       ...(d.perfect ? [`<li><span class="aw-star" aria-hidden="true">★</span><b>Täydellinen kausi</b> 22–0</li>`] : []),
       ...d.awards.map((a) => `<li><span class="aw-star" aria-hidden="true">★</span>${esc(a.title)}: <b>${esc(a.n)}</b></li>`),
+      ...(ehtAward(d) ? [`<li><span class="aw-star" aria-hidden="true">★</span>${esc(ehtAward(d).title)}: <b>${esc(ehtAward(d).n)}</b></li>`] : []),
       ...(d.top ? [`<li><span class="aw-star" aria-hidden="true">★</span>Pistekuningas: <b>${esc(d.top.n)}</b> ${d.top.g}+${d.top.a}</li>`] : []),
     ].join('');
     showModal(`<div class="label">Oma ennätys · ${da}.${mo}.${y}</div>
@@ -2139,6 +2214,41 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     });
   }
 
+  // EHT: osaturnauksen sijoitus ja sarjataulukko (näkyy, kun Suomen kolme ottelua on pelattu)
+  const ehtStage = (r, id) => r.eht && r.eht.stages.find((x) => x.id === id);
+  const placeTxt = (k) => k === 1 ? '1. sija · turnausvoitto' : `${k}. sija`;
+  function ehtTableHtml(rows, cap) {
+    const tr = rows.map((x, i) => `<tr class="${x.n === 'Suomi' ? 'me' : ''}"><td>${i + 1}.</td><td>${esc(x.n)}</td><td>${x.w + x.otw}–${x.l}–${x.otl}</td><td>${x.gf}–${x.ga}</td><td><b>${x.pts}</b></td></tr>`).join('');
+    return `<table class="eht-table">${cap ? `<caption>${esc(cap)}</caption>` : ''}<thead><tr><th></th><th>Maa</th><th>V–T–JT</th><th>Maalit</th><th>P</th></tr></thead><tbody>${tr}</tbody></table>`;
+  }
+  function ehtCupHtml(es) {
+    const others = es.others.map((o) => `${esc(o.h)} – ${esc(o.v)} ${o.f}–${o.a}${o.ot ? ' ja' : ''}`).join(' · ');
+    return `<div class="eht-cup">${ehtTableHtml(es.table, '')}<p class="eht-others">Muut ottelut: ${others}</p></div>`;
+  }
+  // Ottelu kerrallaan: kun osaturnaus päättyy, kerrotaan sijoitus heti (ja viimeisen jälkeen EHT:n lopputulos)
+  function ehtBanner(r, idx) {
+    const g = r.games[idx];
+    if (!g || !g.stage.startsWith('eht') || !r.eht) return '';
+    const gs = r.games.filter((x) => x.stage === g.stage);
+    if (gs[gs.length - 1] !== g) return '';
+    const es = ehtStage(r, g.stage);
+    const winner = es.table[0].n;
+    let txt = es.place === 1 ? `<b>${esc(es.cup)}: Suomi voitti turnauksen!</b>` : `<b>${esc(es.cup)}: Suomi ${es.place}.</b> Turnauksen voitti ${esc(winner)}.`;
+    if (g.stage === 'eht4') txt += r.eht.champion ? `<br><b>Euro Hockey Tour: Suomi on EHT-mestari!</b>` : `<br>Euro Hockey Tour: Suomi ${r.eht.place}., mestaruuden voitti ${esc(r.eht.table[0].n)}.`;
+    return `<div class="eht-banner ${es.place === 1 || (g.stage === 'eht4' && r.eht.champion) ? 'win' : ''}"><span class="eht-trophy" aria-hidden="true">${es.place === 1 ? '🏆' : '🏒'}</span><span>${txt}</span></div>`;
+  }
+  function ehtSummaryHtml(r) {
+    if (!r.eht) return '';
+    const E = r.eht;
+    const cups = E.stages.map((es) => `<li class="${es.place === 1 ? 'won' : ''}"><span>${esc(es.cup)}</span><b>${es.place}.</b></li>`).join('');
+    return `<div class="eht-sum">
+      <div class="label" style="margin-bottom:6px">Euro Hockey Tour</div>
+      ${E.champion ? `<div class="eht-champ"><span aria-hidden="true">🏆</span><div><b>EHT-mestari</b><span>${E.cups.length}/4 turnausvoittoa</span></div></div>` : `<p class="eht-line">Suomi sijoittui ${E.place}. · mestaruuden voitti ${esc(E.table[0].n)}${E.cups.length ? ` · turnausvoittoja ${E.cups.length}/4` : ''}</p>`}
+      <ul class="eht-cups">${cups}</ul>
+      ${ehtTableHtml(E.table, 'Kokonaistaulukko')}
+    </div>`;
+  }
+
   // opts.newestFirst: käynnissä oleva turnaus ylimmäksi; opts.latest: korostettavan ottelun indeksi
   function stagesHtml(r, games, opts = {}) {
     const stages = opts.newestFirst ? G.STAGES.slice().reverse() : G.STAGES;
@@ -2161,14 +2271,20 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         rowsHtml = rows.reverse().map((row) => `<div class="gms row3">${row.map(chip).join('')}</div>`).join('');
       } else rowsHtml = `<div class="gms">${gs.map(chip).join('')}</div>`;
       const w = gs.filter((g) => g.win).length;
-      const extra = st.id === 'mm' && gs.length === 7 ? ` · ${r.groupPts} p` : '';
+      const es = st.id.startsWith('eht') && gs.length === 3 ? ehtStage(r, st.id) : null;
+      const extra = st.id === 'mm' && gs.length === 7 ? ` · ${r.groupPts} p` : es ? ` · <button class="eht-place${es.place === 1 ? ' won' : ''}" data-eht="${st.id}" aria-expanded="${S.ehtOpen === st.id}">${es.place === 1 ? '🏆 ' : ''}${placeTxt(es.place)} ${S.ehtOpen === st.id ? '▴' : '▾'}</button>` : '';
+      const ehtOpen = es && S.ehtOpen === st.id ? ehtCupHtml(es) : '';
       const openHere = S.openGame !== null && gs.includes(r.games[S.openGame]) && !(opts.latest === S.openGame);
       const detail = openHere ? `<div class="gm-detail" id="gameDetail">${gameDetail(r.games[S.openGame], S.openGame)}</div>` : '';
-      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div>${rowsHtml}${detail}</div>`;
+      return `<div class="stage"><div class="stage-head"><span class="label">${esc(st.label)}</span><span class="stage-rec">${w}/${gs.length}${extra}</span></div>${ehtOpen}${rowsHtml}${detail}</div>`;
     }).join('');
   }
 
   function bindChips(rerender) {
+    document.querySelectorAll('#stages .eht-place').forEach((b) => b.onclick = () => {
+      S.ehtOpen = S.ehtOpen === b.dataset.eht ? null : b.dataset.eht;
+      rerender();
+    });
     document.querySelectorAll('#stages .gm').forEach((b) => b.onclick = () => {
       const i = +b.dataset.i;
       S.openGame = S.openGame === i ? null : i;
@@ -2280,6 +2396,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <div class="record small-rec">${recHtml(record(shown))}</div>
         </div>
         ${last ? gameDetail(last, S.shown - 1) : ''}
+        ${last ? ehtBanner(r, S.shown - 1) : ''}
         <div class="step-bar" id="stepBar">
         <div class="next-up">
           ${done
@@ -2324,6 +2441,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <div class="medal"><span class="disc ${m[0]}">${r.medal === 'gold' ? '1' : r.medal === 'silver' ? '2' : r.medal === 'bronze' ? '3' : '–'}</span><div><b>${m[1]}</b><span>${m[2]}</span></div></div>
           ${decisiveHtml(r)}
           ${awardsHtml(r)}
+          ${ehtSummaryHtml(r)}
           ${scoringHtml(r.games)}
         </div>
         <div>
@@ -2495,8 +2613,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
 
     // Palkinnot ja pistekuningas
     let ay = 1126;
-    const aw = d.awards.slice(0, 3);
+    const ea = ehtAward(d);
+    const aw = d.awards.slice(0, ea ? 2 : 3);
     if (d.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
+    if (ea) aw.splice(Math.min(aw.length, 2), 0, ea);
     for (const a of aw.slice(0, 3)) {
       x.font = `800 40px ${D}`; x.fillStyle = C.gold; x.fillText('★', PAD, ay);
       x.font = `600 28px ${BC}`; const t = a.title.toUpperCase();
@@ -2539,6 +2659,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       order.map((id) => `${G.SLOTS.find((s) => s.id === id).short} ${lp[id].n}`).join('\n') +
       (top ? `\nPistekuningas ${top.n} ${top.g}+${top.a}` : '') +
       (r.mmAwards.awards.length ? '\n' + r.mmAwards.awards.map((a) => `★ ${a.title}: ${a.n}`).join('\n') : '') +
+      (() => { const ea = r.eht && ehtAward({ eht: { champion: r.eht.champion, cups: r.eht.cups } }); return ea ? `\n★ ${ea.title}: ${ea.n}` : ''; })() +
       (() => { const e = expectation(r); return e ? `\n${e.head} (ennakko: ${e.pre.toLowerCase()})` : ''; })() +
       `\nVahvuus ${r.rating.toFixed(1)}`;
   }

@@ -226,3 +226,10 @@ Toteutettu 26.11.2026:
 - Ottelukortissa ja seuraavan ottelun kohdalla: "Joukkueiden vahvuus: Suomi 87.4 · Kanada 92 (vire +2, finaali +2)" + voittomahdollisuus ja sanallinen tulkinta (Odotettu / Tasaisen ottelun / Yllätys- voitto tai tappio; rajat 35 % ja 55 %).
 - Yhteenvedossa "Kauden ratkaisu": viimeinen pudotuspeliottelu, tai alkusarjassa jääneillä kirvelevin tappio (suurin voittomahdollisuus).
 - Sanalliset tulkinnat ovat pohja tuleville hahmoille (selostaja, kriitikko).
+
+### 17.y EHT-palkinnot (toteutettu 26.11.2026)
+- Osaturnauksille oikeat nimet: Karjala Cup, Swiss Ice Hockey Games, Beijer Hockey Games, Czech Hockey Games (lähde: Wikipedia, Euro Hockey Tour).
+- Muiden maiden keskinäiset ottelut simuloidaan (samat vahvuudet ja kauden vireet, ilman Suomen offsetia). Pisteet 3/2/1, tasapisteissä maaliero ja tehdyt maalit.
+- Ottelu kerrallaan: turnauksen päätyttyä ilmoitus sijoituksesta ja voittajasta, viimeisen jälkeen EHT:n lopputulos. Otsikkorivin sijoitusta napauttamalla avautuu turnauksen taulukko ja muut ottelut.
+- Yhteenvedossa EHT-osio (mestaruus / sijoitus, turnaussijoitukset, kokonaistaulukko). Ennätyskorttiin, jakokuvaan ja kopioitavaan tekstiin rivi "EHT-mestari · x/4 turnausvoittoa" tai "Turnausvoitot: …". Ennätyksen laskenta ei muutu.
+- Simulointi: vahvuus 89,5 → EHT-mestari noin 50 %, turnausvoittoja keskimäärin 1,7; 86 → 8 %; 91 → 72 %. MM-kulta ennallaan.

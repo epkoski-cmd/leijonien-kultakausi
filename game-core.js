@@ -629,10 +629,10 @@
 
   // Kausi: Euro Hockey Tour 4 × 3 ottelua, MM-alkusarja 7, pudotuspelit 3 = 22 ottelua
   const STAGES = [
-    { id: 'eht1', label: 'EHT 1/4 · Turnaus Suomessa' },
-    { id: 'eht2', label: 'EHT 2/4 · Turnaus Sveitsissä' },
-    { id: 'eht3', label: 'EHT 3/4 · Turnaus Ruotsissa' },
-    { id: 'eht4', label: 'EHT 4/4 · Turnaus Tšekissä' },
+    { id: 'eht1', label: 'EHT 1/4 · Karjala Cup', cup: 'Karjala Cup', host: 'Suomi' },
+    { id: 'eht2', label: 'EHT 2/4 · Swiss Ice Hockey Games', cup: 'Swiss Ice Hockey Games', host: 'Sveitsi' },
+    { id: 'eht3', label: 'EHT 3/4 · Beijer Hockey Games', cup: 'Beijer Hockey Games', host: 'Ruotsi' },
+    { id: 'eht4', label: 'EHT 4/4 · Czech Hockey Games', cup: 'Czech Hockey Games', host: 'Tšekki' },
     { id: 'mm', label: 'MM-alkusarja' },
     { id: 'po', label: 'MM-pudotuspelit' },
   ];
@@ -811,6 +811,47 @@
     return { awards, allstar, mmGames: mm.length };
   }
 
+  // EHT-sarjataulukko: neljä maata pelaa kaikki keskenään. Suomen ottelut on jo pelattu,
+  // muiden keskinäiset ottelut simuloidaan samoilla vahvuuksilla ja kauden vireillä.
+  // Pisteet: voitto 3, jatkoaikavoitto 2, jatkoaikatappio 1. Tasapisteissä maaliero, sitten tehdyt maalit.
+  const EHT_TEAMS = ['Suomi', 'Ruotsi', 'Tšekki', 'Sveitsi'];
+  function tableRow(n) { return { n, pts: 0, gf: 0, ga: 0, w: 0, otw: 0, otl: 0, l: 0 }; }
+  function addResult(row, f, a, win, ot) {
+    row.gf += f; row.ga += a;
+    if (win) { if (ot) { row.otw++; row.pts += 2; } else { row.w++; row.pts += 3; } }
+    else if (ot) { row.otl++; row.pts += 1; } else row.l++;
+  }
+  const sortTable = (rows) => rows.sort((x, y) => y.pts - x.pts || (y.gf - y.ga) - (x.gf - x.ga) || y.gf - x.gf || EHT_TEAMS.indexOf(x.n) - EHT_TEAMS.indexOf(y.n));
+  function ehtTables(rng, games, form) {
+    const str = (n) => opp(n).r + (form[n] || 0);
+    const total = Object.fromEntries(EHT_TEAMS.map((n) => [n, tableRow(n)]));
+    const stages = STAGES.slice(0, 4).map((st) => {
+      const rows = Object.fromEntries(EHT_TEAMS.map((n) => [n, tableRow(n)]));
+      const others = [];
+      for (const g of games.filter((x) => x.stage === st.id)) {
+        addResult(rows.Suomi, g.f, g.a, g.win, g.ot);
+        addResult(rows[g.opp], g.a, g.f, !g.win, g.ot);
+      }
+      const rest = EHT_TEAMS.slice(1);
+      for (let i = 0; i < rest.length; i++) for (let j = i + 1; j < rest.length; j++) {
+        const [h, v] = [rest[i], rest[j]];
+        const win = rng() < 1 / (1 + Math.exp(-(str(h) - str(v)) / CONFIG.spread));
+        const ot = rng() < 0.22;
+        let [f, a] = goals(rng, win);
+        if (ot) { const t = Math.min(f, a); f = win ? t + 1 : t; a = win ? t : t + 1; }
+        addResult(rows[h], f, a, win, ot);
+        addResult(rows[v], a, f, !win, ot);
+        others.push({ h, v, f, a, ot });
+      }
+      for (const n of EHT_TEAMS) for (const k of ['pts', 'gf', 'ga', 'w', 'otw', 'otl', 'l']) total[n][k] += rows[n][k];
+      const table = sortTable(Object.values(rows));
+      return { id: st.id, cup: st.cup, table, others, place: table.findIndex((x) => x.n === 'Suomi') + 1 };
+    });
+    const table = sortTable(Object.values(total));
+    const place = table.findIndex((x) => x.n === 'Suomi') + 1;
+    return { stages, table, place, champion: place === 1, cups: stages.filter((x) => x.place === 1).map((x) => x.cup) };
+  }
+
   // Finaalissa vastustaja pelaa parhaansa: kulta on harvinaisempi, mitalien todennäköisyys ei muutu
   const FINAL_EDGE = 2;
   function simulateSeason(teamRating, rng = Math.random, skaters = null, goalie = null, depth = [], form = {}) {
@@ -863,11 +904,12 @@
         }
       }
     }
+    const ehtRes = ehtTables(rng, games, form);
     if (skaters && skaters.length) for (const g of games) { assignGoals(rng, g, skaters, depth); assignPens(rng, g, [...skaters, ...depth]); }
     const W = games.filter((g) => g.win).length;
     const OTL = games.filter((g) => !g.win && g.ot).length;
     const L = games.length - W - OTL;
-    const res = { games, W, L, OTL, played: games.length, groupPts: pts, advanced, medal, perfect: W === SEASON_GAMES, depth: depth.map((p) => p.n) };
+    const res = { games, W, L, OTL, played: games.length, groupPts: pts, advanced, medal, perfect: W === SEASON_GAMES, depth: depth.map((p) => p.n), eht: ehtRes };
     if (skaters && skaters.length && goalie) res.mmAwards = computeAwards(rng, res, skaters, goalie);
     return res;
   }
@@ -881,7 +923,7 @@
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { EHT_TEAMS, ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, rollOppForm, gameOutlook, CONTENDERS, FINAL_EDGE, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
