@@ -286,4 +286,9 @@ Mitä tutkitaan jokaisesta: ydinsilmukka, päivän haaste ja jakaminen, ansainta
   - Ei renkaita eikä olympialogoja.
   - Pelin sisäinen tosiasiallinen maininta ("Olympiahopea 1988") mahdollisesti sallittu. Varmistetaan juristilta.
   - Varavaihtoehto: "Talvikisat" tai pelkkä paikka ja vuosi ("Nagano 1998", "Torino 2006").
-- Tarkistettava myös: onko **"Leijonat"** Jääkiekkoliiton rekisteröimä tavaramerkki (PRH ja EUIPO). Se on pelin nimessä, joten se on olympiasanoja tärkeämpi.
+- **"Leijonat" on Jääkiekkoliiton rekisteröimä tavaramerkki** (EUIPO, todettu 26.11.2026). Se on pelin nimessä, joten se on olympiasanoja tärkeämpi.
+  - Vielä tarkistettavaa: kattaako rekisteröinti luokat 9 (sovellukset) ja 41 (viihde ja pelit), ja onko merkki sana- vai kuviomerkki.
+  - Ennen sovelluskauppaa nimi vaihdetaan ilman sanaa Leijonat, ellei Jääkiekkoliiton kanssa sovita toisin. Myös sovelluksen nimi, kuvake, kuvaus ja hakusanat pidetään puhtaina.
+  - Pelin sisällä "Suomi" ja "Suomen maajoukkue" ovat turvallisia kuvaavia ilmauksia.
+  - Kaksi vaihtoehtoa: lisenssi tai yhteistyö Jääkiekkoliiton kanssa (toisi myös näkyvyyttä) tai oma nimi.
+  - Selainversio (GitHub Pages, ilmainen fanipeli) on pienempi riski kuin kaupallinen sovellus, mutta nimi kannattaa vaihtaa jo ennen kuin peli kasvaa.
