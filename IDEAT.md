@@ -239,3 +239,12 @@ Toteutettu 26.11.2026:
 - Tasapaino: ahneen draftin mediaani 89,5 → 90,0 ja kulta 14,6 → 19 %. offset 0,9 → 1,4 palauttaa kullan noin 15 %:iin. Tähdet ohittava draft on hieman aiempaa vaikeampi.
 - Kiinteä arvontarivi kaukalon yläpuolella (turnaus, kierros, ↻ arvo uusi, ↶ kumoa, ?). Näkyy, kun sivun oma arvontaotsikko on vieritetty pois. Arvonnan aikana turnaus piilossa.
 - MM-ilmoitukset ottelu kerrallaan: alkusarjan jälkeen (pisteet, jatkoon / ei, puolivälierän vastustaja ja vahvuus), puolivälierän ja välierän jälkeen (tulos ja seuraava vastustaja), finaalin ja pronssiottelun jälkeen. Pohja selostajahahmolle.
+
+## 18. Tiekartta ja pikkuideat (26.11.2026)
+Lopputavoite: sovelluskauppapeli. Kerrokset: ydinsilmukka → tavoitteet (syy kokeilla eri kokoonpanoja) → pelaaja-albumi (pitkä edistyminen) → sosiaalinen (päivän haaste, haastelinkki, myöhemmin tulostaulukot) → live-ops (viikkoteemat). Hahmot ovat tavoitteiden ja tarinan jakelukanava. Palvelin vasta, kun mittarit näyttävät paluuta.
+
+Ehdotettu järjestys: 1) päivän haaste ja haastelinkki, 2) tavoitteet, 3) pelaaja-albumi, 4) ensimmäinen hahmo, 5) viikkoteemat, 6) palvelin.
+
+Pikkuidea (ei vaadi keskustelua): pelaaja-albumissa näkyy **yleisin kentällisesi** ("näitä kavereita olet peluuttanut eniten"). Mentori voi neuvoa, miten valintoja voi tehdä toisin, jotta menestystä tulee.
+
+Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä). Nimi-, tavaramerkki- ja persoonaoikeudet tarkistetaan IPR-juristilta ennen kaupallista julkaisua.
