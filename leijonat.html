@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="60d34ce">
+<meta name="lkk-version" content="7658f2a">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -304,7 +304,9 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .stats tr.gk-row td { background: color-mix(in srgb, var(--gold) 8%, var(--panel)); font-weight: 600; }
 .stages.anim .stage-rec { visibility: hidden; }
 .stage[hidden] { display: none; }
-.spinning .group, .spinning .hint-row, .spinning .mode-switch { visibility: hidden; }
+.spinning .group, .spinning .hint-row, .spinning .mode-switch, .spinning .vire-line { visibility: hidden; }
+.vire-line { display: flex; gap: 8px; align-items: baseline; border: 1.5px solid var(--gold); border-radius: 10px; padding: 8px 12px; background: color-mix(in srgb, var(--gold) 10%, var(--panel)); font-size: 14px; }
+.vire-line > span:first-child { color: var(--gold); }
 .spinning #reroll { opacity: .4; pointer-events: none; }
 .spinning #eraTitle { color: var(--muted); }
 #eraTitle.tick { animation: tick .09s ease-out; }
@@ -318,7 +320,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .modal-card h2 { font-size: 34px; margin: 0; }
 .modal-card .gold { color: var(--gold); }
 .modal-card p { margin: 0; font-size: 16px; line-height: 1.5; }
-.vire-mark { color: var(--gold); }
+.slot.filled.vire { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold), 0 0 12px color-mix(in srgb, var(--gold) 45%, transparent); }
 .chip.vire { border-style: dashed; }
 .star-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--gold); margin-right: 4px; }
 .rest-tag { display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--amber); margin-right: 4px; }
@@ -496,7 +498,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 11.40 · 60d34ce</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 11.56 · 7658f2a</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1362,7 +1364,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return { title: 'Alkusarjaan jäätiin', line: 'Kokoonpano ei kantanut. Uusi draft?' };
   }
 
-  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
+  const api = { ERAS, PLAYERS, TOURNAMENTS, SLOTS, POS_LABEL, SYNERGIES, OPPONENTS, STAGES, SEASON_GAMES, CONFIG, CHEM_CAP, BORN, STANDOUT, inTournament, fitPenalty, seasonStats, pickDepth, forecast, GOLD_FORM, vsForecast, resultRank, evaluateTeam, simulateSeason, verdict, winProb, shuffle };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Leijonat = api;
 })(this);
@@ -1431,7 +1433,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <li><span>✦</span> Kultasuoni: veljekset, mitalijoukkueen kaverit, seurakaverit ja saman sukupolven pelaajat saavat bonusta. Kaukalossa samanväriset pisteet näyttävät, ketkä kuuluvat samaan kultasuoneen.</li>
       <li><span>↻</span> Arvontaa voi vaihtaa kerran koko draftin aikana.</li>
       <li><span>v</span> Turnauskunto: pelaajan taso riippuu iästä kyseisessä turnauksessa. Nuori lupaus ja veteraani ovat huippuaan heikompia.</li>
-      <li><span>◆</span> Kultavire: kultaa voittaneen joukkueen (MM tai olympialaiset) pelaajat olivat sinä vuonna vireessä: arvio +4. Kaukalossa ◆ näyttää, kenellä vire on.</li>
+      <li><span>◆</span> Kultavire: kultaa voittaneen joukkueen (MM tai olympialaiset) pelaajat olivat sinä vuonna vireessä: arvio +4. Kaukalossa kultainen kehys näyttää, kenellä vire on.</li>
       <li><span>zZ</span> Lepovuoro: edellisessä draftissa valitsemasi kuusi pelaajaa lepäävät seuraavan draftin.</li>
     </ul>`;
   function showTips(first) {
@@ -1681,6 +1683,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <div class="hint-row" id="hintRow">${S.round === 1
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
+      ${tour && tour.res === 'kulta' ? `<div class="vire-line"><span aria-hidden="true">◆</span> <span><b>Kultavire:</b> tämä joukkue voitti kultaa, joten sen pelaajat ovat vireessä: arvio +${G.GOLD_FORM}.</span></div>` : ''}
       <div class="rating-info">${ratingsOn()
         ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa, joten ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
         : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
@@ -1708,7 +1711,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const opts = dis ? [] : placeOptions(p);
         const one = opts.length === 1;
         const inner = `<span class="pos ${p.p}" title="${anyFwd ? 'Hyökkääjä, mikä tahansa hyökkäyspaikka' : ''}">${posTxt}</span>
-          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.vire ? `<span class="star-tag vire-tag" title="Oikea kultajoukkue: pelaaja oli sinä vuonna vireessä (+${p.vire})">◆ Kultavire</span> ` : '') + (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
+          <span class="pl-main"><span class="pl-name">${esc(p.n)}</span>${p.age != null ? `<span class="pl-age" title="Ikä turnauksen aikaan">${p.age} v</span>` : ''}${dis ? '' : synBadge(p)}<span class="pl-hint">${rest ? '<span class="rest-tag">Lepovuorossa</span> pelasi edellisessä draftissasi' : (p.star ? `<span class="star-tag" title="${p.star === 'A' ? 'Turnauksen palkinto tai tähdistökenttä' : p.p === 'G' ? 'Torjuntaprosentin top 5' : 'Pistepörssin top 10'}">★ ${p.star === 'A' ? 'Turnauksen tähti' : p.p === 'G' ? 'Torjuntakärki' : 'Pistekärki'}</span> ` : '') + esc(taken(p) ? 'Jo joukkueessa' : shortHint(p.h))}</span></span>
           <span class="rating${S.revealed.includes(p.n) ? ' revealed' : ''}" data-r="${esc(p.n)}" title="Taso 0–100. Napauta nähdäksesi.">${p.r}</span>`;
         const optHtml = (tag) => opts.map((o) => `<${tag} class="opt${o.pen ? (o.pen <= 4 ? ' warn' : ' bad') : ''}"${tag === 'button' ? ` data-n="${esc(p.n)}" data-slot="${o.slot.id}" aria-label="${esc(p.n)}: ${o.slot.label}${o.pen ? ', −' + o.pen : ''}"` : ''}>${o.slot.short}${o.pen ? ' −' + o.pen : ''}</${tag}>`).join('');
         if (dis) html += `<div class="pl off" title="${esc(p.n + ' – ' + p.h)}">${inner}<span class="pl-opts"></span></div>`;
@@ -1770,7 +1773,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         const pen = G.fitPenalty(p, s.pos);
         const v = veinsOf(p.n);
         const dots = v.length ? `<span class="vdots" aria-hidden="true">${v.map((i) => `<i style="background:${VEIN(i)}"></i>`).join('')}</span>` : '';
-        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}${v.length ? ' veined' : ''}" disabled>${dots}<span class="label">${s.short}${p.vire ? ` <span class="vire-mark" title="Kultavire +${p.vire}">◆</span>` : ''}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
+        return `<button class="slot filled${S.justPlaced === s.id ? ' just' : ''}${v.length ? ' veined' : ''}${p.vire ? ' vire' : ''}" disabled${p.vire ? ` title="Kultavire +${p.vire}"` : ''}>${dots}<span class="label">${s.short}</span><span class="who"><span class="wf">${esc(p.n)}</span><span class="ws">${esc(p.n.split(' ').slice(1).join(' ') || p.n)}</span></span>
           ${pen ? `<span class="era pen">−${pen} ${pen <= 4 ? 'sivupaikka' : 'väärä rooli'}</span>` : ''}</button>`;
       }
       return `<button class="slot" disabled><span class="label"><span class="lf">${s.label}</span><span class="ls">${s.short}</span></span></button>`;
@@ -1860,17 +1863,21 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     };
   }
   // Kauden tulos suhteessa odotukseen
-  function expectationHtml(r) {
+  function expectation(r) {
     const f = r.forecast;
     const v = f && G.vsForecast(f, r);
-    if (!v) return '';
+    if (!v) return null;
     const was = `Ennen kautta joukkuetta pidettiin ${ESSIVE[f.label] || f.label.toLowerCase()}.`;
     const res = v.name.charAt(0).toUpperCase() + v.name.slice(1);
     const [cls, head, line] = v.cmp === 'up' ? ['up', 'Yli odotusten!', `${res} – ${was.charAt(0).toLowerCase() + was.slice(1)}`]
       : v.cmp === 'down' ? ['down', 'Alle odotusten', `${was} Tulos: ${v.name}.`]
       : v.rank === 5 ? ['even', 'Suosikki lunasti paikkansa', was]
       : ['even', 'Odotusten mukainen kausi', `${was} Tulos: ${v.name}.`];
-    return `<div class="expect ${cls}"><b>${head}</b><span>${esc(line)}</span></div>`;
+    return { cls, head, line, pre: f.label };
+  }
+  function expectationHtml(r) {
+    const e = expectation(r);
+    return e ? `<div class="expect ${e.cls}"><b>${e.head}</b><span>${esc(e.line)}</span></div>` : '';
   }
   function renderReady() {
     const rating = G.evaluateTeam(lineupPlayers()).total;
@@ -1945,6 +1952,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return {
       v: 1, W: r.W, L: r.L, OTL: r.OTL, medal: r.medal || null, perfect: !!r.perfect, rating: r.rating,
       title: G.verdict(r).title, lineup,
+      expect: (() => { const e = expectation(r); return e ? { cls: e.cls, head: e.head, pre: e.pre } : null; })(),
       games: r.games.map((g) => g.win ? 'W' : g.ot ? 'O' : 'L'),
       awards: r.mmAwards.awards.map((a) => ({ title: a.title, n: a.n })),
       top: top ? { n: top.n, g: top.g, a: top.a } : null,
@@ -2323,7 +2331,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       x.fillStyle = col; x.fillText(t, px, 400); px += x.measureText(t).width;
     }
     fitFont(x, d.title.toUpperCase(), 800, 76, D, W - PAD * 2 - 230);
-    x.fillStyle = C.ink; x.fillText(d.title.toUpperCase(), PAD, 486);
+    x.fillStyle = C.ink; x.fillText(d.title.toUpperCase(), PAD, 474);
+    // Suhde odotukseen: "YLI ODOTUSTEN · ennakko: mitalikandidaatti"
+    if (d.expect) {
+      x.font = `700 32px ${BC}`;
+      const h = d.expect.head.toUpperCase();
+      x.fillStyle = d.expect.cls === 'up' ? C.gold : d.expect.cls === 'down' ? C.red : C.ink;
+      x.fillText(h, PAD, 520);
+      const hw = x.measureText(h + '  ').width;
+      x.font = `500 28px ${B}`; x.fillStyle = C.muted;
+      x.fillText('· ennakko: ' + d.expect.pre.toLowerCase(), PAD + hw, 520);
+    }
 
     // Mitali
     const mx = W - PAD - 90, my = 320;
@@ -2337,7 +2355,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     x.textAlign = 'left';
 
     // Ottelunauha
-    const sy = 528, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
+    const sy = 548, gap = 8, n = G.SEASON_GAMES, cw = (W - PAD * 2 - gap * (n - 1)) / n;
     for (let i = 0; i < n; i++) {
       const g = d.games[i];
       x.fillStyle = !g ? C.panel : g === 'W' ? C.win : g === 'O' ? C.amber : C.red;
@@ -2345,7 +2363,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     }
 
     // Kaukalo
-    const ry = 610, rh = 430, rw = W - PAD * 2;
+    const ry = 624, rh = 430, rw = W - PAD * 2;
     rrect(x, PAD, ry, rw, rh, 60); x.fillStyle = C.panel; x.fill();
     x.lineWidth = 5; x.strokeStyle = C.ink; x.stroke();
     x.save(); rrect(x, PAD, ry, rw, rh, 60); x.clip();
@@ -2370,7 +2388,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     box('G', W / 2 - fw / 2, ry + 300, fw);
 
     // Palkinnot ja pistekuningas
-    let ay = 1110;
+    let ay = 1118;
     const aw = d.awards.slice(0, 3);
     if (d.perfect) aw.unshift({ title: 'Täydellinen kausi', n: '22–0' });
     for (const a of aw.slice(0, 3)) {
@@ -2415,6 +2433,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       order.map((id) => `${G.SLOTS.find((s) => s.id === id).short} ${lp[id].n}`).join('\n') +
       (top ? `\nPistekuningas ${top.n} ${top.g}+${top.a}` : '') +
       (r.mmAwards.awards.length ? '\n' + r.mmAwards.awards.map((a) => `★ ${a.title}: ${a.n}`).join('\n') : '') +
+      (() => { const e = expectation(r); return e ? `\n${e.head} (ennakko: ${e.pre.toLowerCase()})` : ''; })() +
       `\nVahvuus ${r.rating.toFixed(1)}`;
   }
 

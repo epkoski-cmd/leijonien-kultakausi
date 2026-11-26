@@ -218,3 +218,4 @@ Toteutettu 26.11.2026:
 - ✅ Kultavire +4, näkyy kaukalossa ◆ ja vahvuuden alla sirussa ("◆ Kultavire: Granlund, Olkinuora +1.6"). offset 0,9: ahneen draftin mediaani 89,5, kulta noin 12 %.
 - Ei tehdä: hopea- ja pronssivire (23/27 turnauksesta on mitalijoukkueita, vire nostaisi vain kokonaistasoa).
 - Iso idea, vaiheittain: hahmot (keksittyjä, ei oikeita henkilöitä): 1) kapteeni/valmentaja ennen ja jälkeen kauden, 2) selostaja ottelukortteihin, 3) mentori ja kriitikko draftiin, 4) nemesis = vastustajan valmentaja, liittyy vastustajien kauden kuntoon.
+- ✅ Kultavire näytetään kerran pelaajalistan yläpuolella (vire koskee aina koko turnausjoukkuetta, korttikohtainen merkki toisti samaa), kaukalossa kultainen kehys. Jakokuvassa ja kopioitavassa tekstissä suhde odotukseen ("YLI ODOTUSTEN · ennakko: mitalikandidaatti").
