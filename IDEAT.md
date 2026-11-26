@@ -257,3 +257,33 @@ Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä
 - Kutsu draftin alussa (ennen ensimmäistä valintaa) ja yhteenvedon lopussa. Jakokuvassa ja tekstissä "Päivän haaste 26.11.".
 - GoatCounter-tapahtumat: haaste-aloitettu, haaste-pelattu, haaste-harjoitus.
 - Vaihe 2: haastelinkki ja vertailu kaverin tulokseen.
+
+## 19. Kilpailijatutkimus: saman kategorian draft-pelit (kirjattu 26.11.2026)
+Rajaus: verrataan vain 17-0- ja 82-0-tyyppisiin draft-peleihin (arvottu joukkue tai aikakausi → kaikkien aikojen kokoonpano → simuloitu kausi). Konamin ja EA:n lisensoidut korttipelit (eFootball, FC Mobile) ja managerit (Top Eleven ym.) jätetään pois, koska emme kilpaile niiden kanssa.
+
+Tutkittavat pelit:
+- **38-0** (38-0.app, Englannin pääsarja): sivun mukaan yli 5,4 M pelaajaa, ilmainen, tuotto mainoksista. Selaimessa sekä App Storessa ja Google Playssa.
+- **PerThirtySix 17-0** (NFL): yli 100 000 pelikertaa ensimmäisen viikon aikana (kesäkuu 2026). Selaimessa sekä iPhonella ja Androidilla.
+- **20-0: Sports Draft Legends** (iOS, 10 lajia): 4,8 tähteä ja 6,7 k arviota. Tuotto tukijatilauksesta (5,99 $/kk, 47,99 $/v), kausipassista (11,99 $), pelivaluuttapaketeista ja palkituista videomainoksista.
+- **The Perfect Season** (runthe.gg, NFL): pelkkä selainpeli, palkkakatto 140 M$.
+- **All-Timers: 17-0 & 82-0 Draft** ja **Football Draft Game: 17-0** (Android): latausmäärät selvittämättä.
+- Alkuperä: NBA 82-0, joka lähti TikTok- ja Instagram-trendistä.
+
+Mitä tutkitaan jokaisesta: ydinsilmukka, päivän haaste ja jakaminen, ansaintamalli, tavoitteet ja edistyminen, sovelluskauppaversion ero selainversioon sekä oikeuksien käsittely.
+
+### 19.1 Oikeudet: miten kilpailijat toimivat (havainnot 26.11.2026)
+- Kaikki käyttävät **oikeita pelaajien ja seurojen nimiä ilman lisenssiä**.
+- Useimmilla on vastuuvapauslauseke, esimerkiksi "itsenäinen fanipeli, ei yhteydessä liigaan, seuroihin tai pelaajayhdistykseen". 20-0 lisää, että nimiä käytetään vain tunnistamiseen. The Perfect Season mainitsee erikseen NFLPA:n.
+- 38-0 ilmoittaa, ettei se käytä logoja, seurojen vaakunoita, pelaajakuvia eikä muuta virallista brändäystä. PerThirtySix 17-0 käyttää NFL-joukkueiden logoja ja kypäräkuvia, mikä on riskialttein ratkaisu.
+- Yhdysvalloissa tukena on C.B.C. v. MLB Advanced Media (2007): fantasiapeli sai käyttää pelaajien nimiä ja tilastoja, koska sananvapaus voitti persoonaoikeuden. Suomea ja EU:ta tämä ei koske.
+- Johtopäätös: nimet kyllä, logot, vaakunat, pelipaidat ja pelaajakuvat ei. Vastuuvapauslauseke näkyviin.
+
+### 19.2 Olympia-sanat
+- Olympiasymbolit, -nimet ja -tunnisteet ovat KOK:n omaisuutta (olympiaperuskirjan sääntö 7). Nairobin sopimus velvoittaa jäsenmaat kieltämään olympiasymbolin kaupallisen käytön ilman KOK:n lupaa. Suomen jäsenyyttä ei ole tarkistettu. KOK valvoo käyttöä aggressiivisesti, ja sovelluskaupoista on poistettu sovelluksia olympia-sanojen takia.
+- Pelissä esiintyy nyt sanoja Olympialaiset, Olympiakulta, Olympiahopea ja Olympiapronssi (game-core.js, data/tournaments.py, index.html). Ne kuvaavat tosiasiallisia turnauksia ja mitaleja. Riski on pienempi kuin nimessä tai markkinoinnissa, mutta ei nolla.
+- Linja ennen sovelluskauppaa:
+  - Ei olympiasanoja sovelluksen nimessä, kuvauksessa, hakusanoissa, kuvakaappauksissa eikä mainonnassa.
+  - Ei renkaita eikä olympialogoja.
+  - Pelin sisäinen tosiasiallinen maininta ("Olympiahopea 1988") mahdollisesti sallittu. Varmistetaan juristilta.
+  - Varavaihtoehto: "Talvikisat" tai pelkkä paikka ja vuosi ("Nagano 1998", "Torino 2006").
+- Tarkistettava myös: onko **"Leijonat"** Jääkiekkoliiton rekisteröimä tavaramerkki (PRH ja EUIPO). Se on pelin nimessä, joten se on olympiasanoja tärkeämpi.
