@@ -287,7 +287,13 @@ Mitä tutkitaan jokaisesta: ydinsilmukka, päivän haaste ja jakaminen, ansainta
   - Pelin sisäinen tosiasiallinen maininta ("Olympiahopea 1988") mahdollisesti sallittu. Varmistetaan juristilta.
   - Varavaihtoehto: "Talvikisat" tai pelkkä paikka ja vuosi ("Nagano 1998", "Torino 2006").
 - **"Leijonat" on Jääkiekkoliiton rekisteröimä tavaramerkki** (EUIPO, todettu 26.11.2026). Se on pelin nimessä, joten se on olympiasanoja tärkeämpi.
-  - Vielä tarkistettavaa: kattaako rekisteröinti luokat 9 (sovellukset) ja 41 (viihde ja pelit), ja onko merkki sana- vai kuviomerkki.
+  - Tarkistettu EUIPO:sta ja TMviewista 26.11.2026:
+    - EU-tavaramerkki 017902489 on **sanamerkki** LEIJONAT. Haltija on Suomen Jääkiekkoliitto ry, merkki on rekisteröity 19.2.2020 ja voimassa 18.5.2028 asti.
+    - Luokat 16, 24, 25, 28, 35, 36 ja 41.
+    - Luokka 28 sisältää "ice hockey games", "hockey games" ja "hand-held electronic ice hockey video games". Luokka 41 sisältää "entertainment in the nature of ice hockey games".
+    - Luokkaa 9 (ladattavat ohjelmistot ja mobiilisovellukset) ei ole, mutta jääkiekkopelit ovat merkin piirissä, joten tämä ei suojaa meitä.
+    - Lisäksi voimassa on Iso-Britannian merkki ja tammikuussa 2026 haettu kansainvälinen rekisteröinti (WIPO 1908544): liitto laajentaa suojaa.
+    - Suomen kansallisessa rekisterissä (PRH) ei ole voimassa olevaa Leijonat-merkkiä. EU-merkki on kuitenkin voimassa myös Suomessa.
   - Ennen sovelluskauppaa nimi vaihdetaan ilman sanaa Leijonat, ellei Jääkiekkoliiton kanssa sovita toisin. Myös sovelluksen nimi, kuvake, kuvaus ja hakusanat pidetään puhtaina.
   - Pelin sisällä "Suomi" ja "Suomen maajoukkue" ovat turvallisia kuvaavia ilmauksia.
   - Kaksi vaihtoehtoa: lisenssi tai yhteistyö Jääkiekkoliiton kanssa (toisi myös näkyvyyttä) tai oma nimi.
