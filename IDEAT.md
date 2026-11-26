@@ -294,6 +294,10 @@ Mitä tutkitaan jokaisesta: ydinsilmukka, päivän haaste ja jakaminen, ansainta
     - Luokkaa 9 (ladattavat ohjelmistot ja mobiilisovellukset) ei ole, mutta jääkiekkopelit ovat merkin piirissä, joten tämä ei suojaa meitä.
     - Lisäksi voimassa on Iso-Britannian merkki ja tammikuussa 2026 haettu kansainvälinen rekisteröinti (WIPO 1908544): liitto laajentaa suojaa.
     - Suomen kansallisessa rekisterissä (PRH) ei ole voimassa olevaa Leijonat-merkkiä. EU-merkki on kuitenkin voimassa myös Suomessa.
+  - **Uusi nimi, Kultakausi:** TMview (EU, PRH, WIPO ym.) 26.11.2026: ei yhtään merkkiä sanalla "kultakausi" eikä "golden era hockey". Verkkohaulla ei löytynyt peliä tai sovellusta tällä nimellä.
+    - Kultakausi on yleiskielinen sana, jonka kuka tahansa voi vapaasti käyttää. Yksinään sitä on vaikea rekisteröidä omaksi merkiksi (heikko erottamiskyky), ja kilpailija voi käyttää samaa sanaa.
+    - Vahvempi merkki syntyy yhdistelmästä, esim. "Kultakausi 22–0" tai oma logo.
+    - Ennen sitoutumista tarkistetaan vielä: App Store ja Google Play, verkkotunnukset ja somekahvat, kansainvälinen nimi ja haetaanko oma merkki (luokat 9 ja 41).
   - Ennen sovelluskauppaa nimi vaihdetaan ilman sanaa Leijonat, ellei Jääkiekkoliiton kanssa sovita toisin. Myös sovelluksen nimi, kuvake, kuvaus ja hakusanat pidetään puhtaina.
   - Pelin sisällä "Suomi" ja "Suomen maajoukkue" ovat turvallisia kuvaavia ilmauksia.
   - Kaksi vaihtoehtoa: lisenssi tai yhteistyö Jääkiekkoliiton kanssa (toisi myös näkyvyyttä) tai oma nimi.
