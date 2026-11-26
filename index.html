@@ -786,6 +786,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     lbl.textContent = `Kierros ${S.round}/6 · arvotaan ${S.mode === 'turnaus' ? 'turnausta' : 'aikakautta'}…`;
     const delays = [45, 50, 55, 60, 70, 80, 95, 110, 130, 155, 185, 220, 260];
     let prev = '', i = 0;
+    title.textContent = '…';
     const tick = () => {
       if (!document.body.contains(title)) { spinning = false; return; }
       if (i < delays.length) {
@@ -804,7 +805,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         afterDrawShown();
       }
     };
-    tick();
+    // Lyhyt tauko ennen arvontaa, jotta silmä ehtii sivun alkuun
+    setTimeout(tick, 350);
   }
 
   function renderDraft() {
@@ -1173,7 +1175,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#bcImg').onclick = () => showShareImage(d, $('#bcImgBox'));
   }
 
-  function restart() { S = fresh(); S.draw = rollDraw(); S.spin = true; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  // Uusi draft: hyppy heti sivun alkuun (ei pehmeää vieritystä, joka katkeaa puhelimessa sivun pituuden muuttuessa),
+  // jotta ohjeet ja turnausarvonta ovat näkyvissä arvonnan alkaessa
+  function restart() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    S = fresh(); S.draw = rollDraw(); S.spin = true; render();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
 
   const MEDAL = {
     gold: ['gold', 'MM-kulta', 'Leijonat voitti finaalin.'],

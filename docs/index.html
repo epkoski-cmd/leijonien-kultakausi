@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="b5b5f39">
+<meta name="lkk-version" content="84673a9">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -517,7 +517,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 14.39 · b5b5f39</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 14.48 · 84673a9</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1680,6 +1680,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     lbl.textContent = `Kierros ${S.round}/6 · arvotaan ${S.mode === 'turnaus' ? 'turnausta' : 'aikakautta'}…`;
     const delays = [45, 50, 55, 60, 70, 80, 95, 110, 130, 155, 185, 220, 260];
     let prev = '', i = 0;
+    title.textContent = '…';
     const tick = () => {
       if (!document.body.contains(title)) { spinning = false; return; }
       if (i < delays.length) {
@@ -1698,7 +1699,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
         afterDrawShown();
       }
     };
-    tick();
+    // Lyhyt tauko ennen arvontaa, jotta silmä ehtii sivun alkuun
+    setTimeout(tick, 350);
   }
 
   function renderDraft() {
@@ -2067,7 +2069,13 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#bcImg').onclick = () => showShareImage(d, $('#bcImgBox'));
   }
 
-  function restart() { S = fresh(); S.draw = rollDraw(); S.spin = true; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  // Uusi draft: hyppy heti sivun alkuun (ei pehmeää vieritystä, joka katkeaa puhelimessa sivun pituuden muuttuessa),
+  // jotta ohjeet ja turnausarvonta ovat näkyvissä arvonnan alkaessa
+  function restart() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    S = fresh(); S.draw = rollDraw(); S.spin = true; render();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }
 
   const MEDAL = {
     gold: ['gold', 'MM-kulta', 'Leijonat voitti finaalin.'],
