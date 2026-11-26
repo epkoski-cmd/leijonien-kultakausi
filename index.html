@@ -1135,7 +1135,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return stages.map((st) => {
       const gs = games.filter((g) => g.stage === st.id);
       if (!gs.length) return '';
-      const chips = gs.map((g) => {
+      // Ottelu kerrallaan: uusin ottelu ensimmäisenä myös vaiheen sisällä
+      const chips = (opts.newestFirst ? gs.slice().reverse() : gs).map((g) => {
         const i = r.games.indexOf(g);
         const c = g.win ? 'W' : g.ot ? 'O' : 'L';
         return `<button class="gm${opts.latest === i ? ' latest' : ''}" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">

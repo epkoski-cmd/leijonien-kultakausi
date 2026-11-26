@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="4b731f5">
+<meta name="lkk-version" content="c32751b">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -492,7 +492,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 11.05 · 4b731f5</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 11.30 · c32751b</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1984,7 +1984,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     return stages.map((st) => {
       const gs = games.filter((g) => g.stage === st.id);
       if (!gs.length) return '';
-      const chips = gs.map((g) => {
+      // Ottelu kerrallaan: uusin ottelu ensimmäisenä myös vaiheen sisällä
+      const chips = (opts.newestFirst ? gs.slice().reverse() : gs).map((g) => {
         const i = r.games.indexOf(g);
         const c = g.win ? 'W' : g.ot ? 'O' : 'L';
         return `<button class="gm${opts.latest === i ? ' latest' : ''}" data-i="${i}" data-c="${c}" aria-pressed="${S.openGame === i}">
