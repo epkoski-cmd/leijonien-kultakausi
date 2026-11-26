@@ -134,6 +134,7 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .pos { font-size: 11px; padding: 2px 0; }
 .rating { cursor: pointer; filter: blur(5px); opacity: .8; transition: filter .25s, opacity .25s; user-select: none; min-width: 26px; text-align: center; }
 .rating.revealed, .show-ratings .rating { filter: none; opacity: 1; cursor: default; }
+.rating-info.after-list { margin-top: 14px; }
 .rating-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-top: 6px; font-size: 13px; color: var(--muted); }
 .rating-info .demo { font-family: var(--f-display); font-weight: 800; font-size: 16px; color: var(--blue); filter: blur(3px); }
 .link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--blue); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
@@ -905,10 +906,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       <div class="hint-row" id="hintRow">${S.round === 1
         ? (tour ? `Sinulle arvottiin Suomen <b>${esc(tour.label)}</b> -joukkue. Valitse siitä yksi pelaaja ykköskenttääsi.` : `Sinulle arvottiin <b>${esc(G.ERAS[S.draw])}</b>. Valitse siltä aikakaudelta yksi pelaaja ykköskenttääsi.`) + ' Napauta paikkaa pelaajan kortissa. Kuuden kierroksen jälkeen kenttä on valmis.'
         : (tour ? 'Valitse yksi pelaaja Suomen ' + esc(tour.label) + ' -joukkueesta.' : 'Valitse yksi pelaaja tältä aikakaudelta.') + ' Napauta paikkaa pelaajan kortissa.'}</div>
-      ${tour && tour.res === 'kulta' ? `<div class="vire-line"><span aria-hidden="true">◆</span> <span><b>Kultavire:</b> tämä joukkue voitti kultaa, joten sen pelaajat ovat vireessä: arvio +${G.GOLD_FORM}.</span></div>` : ''}
-      <div class="rating-info">${ratingsOn()
-        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa: tähtivire +2 tai +1, ja ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
-        : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
+      ${tour && tour.res === 'kulta' ? `<div class="vire-line"><span aria-hidden="true">◆</span> <span><b>Kultavire:</b> tämä joukkue voitti kultaa, joten sen pelaajat ovat vireessä: arvio +${G.GOLD_FORM}.</span></div>` : ''}`;
     for (const [key, label] of groups) {
       const list = pool.filter((p) => GROUP_POS[key].includes(p.p))
         .sort((a, b) => a.n.localeCompare(b.n, 'fi'));
@@ -942,6 +940,10 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       }
       html += `</div></div>`;
     }
+    // Arvioiden selitys listan alla: pelaaja lukee sen, kun luku alkaa kiinnostaa
+    html += `<div class="rating-info after-list">${ratingsOn()
+        ? `<span>${tour ? 'Luku kortissa on pelaajan taso 0–100 tässä turnauksessa. Ikä vaikuttaa: huippu on noin 24–31-vuotiaana, maalivahdeilla 27–34. ★-merkityt loistivat tässä turnauksessa: tähtivire +2 tai +1, ja ikä painaa heillä vähemmän.' : 'Luku kortissa on pelaajan taso 0–100 huippuvuosinaan.'}</span><button class="link-btn" id="ratingsToggle">Sumenna arviot</button>`
+        : `<span><span class="demo">88</span> Sumea luku on pelaajan taso 0–100. Napauta lukua nähdäksesi sen.</span><button class="link-btn" id="ratingsToggle">Näytä kaikki</button>`}</div>`;
     $('#draftCol').innerHTML = html;
     if (S.spin && modalOpen) { $('#draftCol').classList.add('spinning'); $('#eraTitle').textContent = '…'; }
     else if (S.spin) { S.spin = false; spinDraw(); }
