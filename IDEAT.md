@@ -258,6 +258,8 @@ Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä
 - Myöhemmin: pelin jälkeen päivän paras mahdollinen kenttä (mentori), oppimisen tueksi uusinnan sijaan.
 - GoatCounter-tapahtumat: haaste-aloitettu, haaste-pelattu, haaste-harjoitus.
 - Vaihe 2: haastelinkki ja vertailu kaverin tulokseen (toteutettu 27.11.2026, ks. 18.2).
+- **Päivitys päivän haasteesee** - Jotta taidolla ja tiedolla on merkitystä, tehdään niin että pelaajien arvot ovat aina sumennettu. Tähäb tarvitaan selite. Jos haluan helpotusta peliin, voin tehdä sitä vain yksinpelimoodissa. 
+- **Selvennys päivän haasteesee** - Lähetin haasteen kaverille. Hän pelasi matsin ja lähetti oman tuloksensa takaisin kuvakaappauksena. Hän ei ymmärtänyt miten se tehdään pelissä. Klikkasin sitten itse linkkiä, jonka olin lähettänyt hänelle. Sen seurauksena peli näytti minulle oman tulokseni verrattuna omaan tulokseeni. Selvennetään flow ja varmistetaan ettei ole bugeja tai rikkinäistä logiikkaa. 
 
 ### 18.2 Päivän haaste, vaihe 2: haastelinkki (toteutettu 27.11.2026)
 - Pelatun haasteen näkymässä "Haasta kaveri": vapaaehtoinen nimi (muistetaan) ja "Jaa haastelinkki" (puhelimessa jakovalikko) tai "Kopioi haastelinkki". Viesti: päivän tulos ja "Pystytkö parempaan?". Kenttä ei näy viestissä.
