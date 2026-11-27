@@ -257,7 +257,17 @@ Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä
 - Välilehdet otsikon alla: Draft | Päivän haaste (punainen piste, kun pelaamatta). Kumpikin välilehti muistaa tilanteensa käynnin ajan. Pelatun haasteen näkymä: tulos, kenttä kaukalossa, jakokuva, "Uusi haaste huomenna". Jakokuvassa ja tekstissä "Päivän haaste 26.11.".
 - Myöhemmin: pelin jälkeen päivän paras mahdollinen kenttä (mentori), oppimisen tueksi uusinnan sijaan.
 - GoatCounter-tapahtumat: haaste-aloitettu, haaste-pelattu, haaste-harjoitus.
-- Vaihe 2: haastelinkki ja vertailu kaverin tulokseen.
+- Vaihe 2: haastelinkki ja vertailu kaverin tulokseen (toteutettu 27.11.2026, ks. 18.2).
+
+### 18.2 Päivän haaste, vaihe 2: haastelinkki (toteutettu 27.11.2026)
+- Pelatun haasteen näkymässä "Haasta kaveri": vapaaehtoinen nimi (muistetaan) ja "Jaa haastelinkki" (puhelimessa jakovalikko) tai "Kopioi haastelinkki". Viesti: päivän tulos ja "Pystytkö parempaan?". Kenttä ei näy viestissä.
+- Tulos kulkee linkin #-osassa (päivä, ennätys, mitali, vahvuus, otteluiden W/L/O, nimi, kenttä). Ei palvelinta. Linkki osoittaa GitHub Pages -versioon.
+- Linkin avaaja: avautuu Päivän haaste -välilehti ja ikkuna "Pekka haastaa sinut" (ennätys, mitali, vahvuus). Uusi pelaaja näkee ensin esittelyn. Kaverin tulos näkyy myös ennen kauden alkua.
+- Kaverin kenttä paljastuu vasta, kun avaaja on pelannut. Sitten vertailu: kumpi voitti (voitot, mitali, vähemmän tappioita), ottelurivit, MM, vahvuus ja kentät rinnakkain, samat valinnat merkitty.
+- Vanha linkki: kaverin tulos ja vertailu, jos oma tulos sille päivälle on tallessa; muuten ohjaus tämän päivän haasteeseen.
+- Kaverien tulokset tallessa selaimessa 14 päivää, enintään 8 päivässä.
+- GoatCounter-tapahtumat: haaste-linkki-jaettu, haaste-linkki-avattu.
+- Huom: tulosta voi muokata linkistä käsin. Ei haittaa kaverien kesken; tulostaulukko vaatisi palvelimen.
 
 ## 19. Kilpailijatutkimus: saman kategorian draft-pelit (kirjattu 26.11.2026)
 Rajaus: verrataan vain 17-0- ja 82-0-tyyppisiin draft-peleihin (arvottu joukkue tai aikakausi → kaikkien aikojen kokoonpano → simuloitu kausi). Konamin ja EA:n lisensoidut korttipelit (eFootball, FC Mobile) ja managerit (Top Eleven ym.) jätetään pois, koska emme kilpaile niiden kanssa.

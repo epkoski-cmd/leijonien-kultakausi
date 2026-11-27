@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <script data-goatcounter="https://kultakausi.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="cb0b2ba">
+<meta name="lkk-version" content="c88de80">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -338,6 +338,28 @@ button.opt:hover { background: var(--blue); color: #fff; }
 .daily-card .btn { flex: none; }
 .daily-card.on { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 8%, var(--panel)); }
 .reveal .daily-card { margin-top: 0; }
+.vs { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; background: var(--panel); }
+.vs-head { display: grid; gap: 2px; }
+.vs-head b { font-family: var(--f-display); font-weight: 800; font-size: 24px; line-height: 1.05; text-transform: uppercase; }
+.vs-head span { font-size: 14px; color: var(--muted); }
+.vs.won { border-color: var(--win); } .vs.won .vs-head b { color: var(--win); }
+.vs.lost { border-color: var(--red); } .vs.lost .vs-head b { color: var(--red); }
+.vs-tab { width: 100%; border-collapse: collapse; font-size: 14.5px; table-layout: fixed; }
+.vs-tab th, .vs-tab td { text-align: left; padding: 4px 6px; border-top: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+.vs-tab thead th { border-top: 0; font-family: var(--f-data); font-weight: 600; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.vs-tab th[scope="row"] { width: 22%; font-family: var(--f-data); font-weight: 600; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.vs-tab .num { font-family: var(--f-display); font-weight: 800; font-size: 20px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.vs-tab .best { color: var(--win); }
+.vs-tab .same { font-weight: 700; }
+.vs-tab .same::after { content: ' ='; color: var(--muted); font-weight: 400; }
+.vs-tab .bc-strip i { height: 10px; }
+.vs-tab .bc-strip { gap: 2px; }
+.vs-hidden { color: var(--muted); font-size: 14px; margin: 0; }
+.chal { border: 1.5px dashed var(--blue); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+.chal p { margin: 0; font-size: 14px; color: var(--muted); }
+.chal-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chal-row input { flex: 1 1 160px; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); }
+.chal textarea.share { margin: 0; }
 .mode-switch { display: flex; align-items: center; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
 .mode-switch .label { margin-right: 4px; }
 .seg { border: 1px solid var(--line); background: var(--panel); padding: 5px 12px; border-radius: 99px; font-family: var(--f-data); font-weight: 600; font-size: 14px; }
@@ -573,7 +595,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 26.11.2026 klo 17.30 · cb0b2ba</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 27.11.2026 klo 15.05 · c88de80</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1546,12 +1568,17 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     if (S.phase === 'draft' && !S.draw) { S.draw = rollDraw(); S.spin = true; }
     if (!S.revealed) S.revealed = [];
     applyRatings();
-    if (!store.get('lkk-seen-intro') && S.phase === 'draft' && !Object.keys(S.lineup).length) showIntro();
+    const intro = !store.get('lkk-seen-intro') && S.phase === 'draft' && !Object.keys(S.lineup).length;
+    if (intro) showIntro(openChallengeLink);
     render();
+    if (!intro) openChallengeLink();
   }
+  window.addEventListener('hashchange', () => { if (!modalOpen) openChallengeLink(); });
 
   // Perehdytys: esittely, vinkit ja kultasuonen ohje. Selain muistaa näytetyt (localStorage).
   let modalOpen = false;
+  // Toinen ikkuna (esim. ohjeet arvonnan jälkeen) odottaa, kunnes auki oleva ikkuna on suljettu
+  let afterModal = null;
   function showModal(html, btnLabel, onClose, extraBtns = '') {
     modalOpen = true;
     $('#modalCard').innerHTML = html + `<div class="modal-actions">${extraBtns}<button class="btn primary" id="modalOk">${btnLabel}</button></div>`;
@@ -1561,18 +1588,19 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       modalOpen = false;
       document.removeEventListener('keydown', onKey);
       onClose && onClose();
+      if (!modalOpen && afterModal) { const f = afterModal; afterModal = null; f(); }
     };
     const onKey = (e) => { if (e.key === 'Escape') close(); };
     document.addEventListener('keydown', onKey);
     $('#modalOk').onclick = close;
     setTimeout(() => $('#modalOk').focus(), 30);
   }
-  function showIntro() {
+  function showIntro(then) {
     showModal(`<div class="label">Tervetuloa</div>
       <h2 id="modalTitle">Leijonien <span class="gold">kultakausi</span></h2>
       <p>Kokoa kaikkien aikojen Leijonat. Joka kierroksella sinulle arvotaan yksi Suomen turnausjoukkue, josta valitset yhden pelaajan.</p>
       <p>Kuuden draft-kierroksen jälkeen ykköskenttäsi pelaa vuoden kauden: Euro Hockey Tour ja MM-kisat. <b>Pystytkö täydelliseen 22–0-mestaruuskauteen?</b></p>`,
-      'Aloita', () => { store.set('lkk-seen-intro', '1'); render(); });
+      'Aloita', () => { store.set('lkk-seen-intro', '1'); render(); then && then(); });
   }
   const TIPS = `<ul class="tips">
       <li><span>→</span> Valitse pelaaja ja napauta hänen kortistaan paikka, jolle hän menee.</li>
@@ -1591,6 +1619,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   }
   function afterDrawShown() {
     if (S.phase !== 'draft') return;
+    if (modalOpen) { afterModal = afterDrawShown; return; }
     if (!store.get('lkk-seen-tips')) { showTips(true); return; }
     synCoach();
   }
@@ -1680,7 +1709,148 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const cardLine = (c) => `${c.W}–${c.L}–${c.OTL} · ${c.medal ? MEDAL[c.medal][1] : 'ei mitalia'}`;
   function dailyResultHtml() {
     if (!S.daily) return '';
-    return `<div class="daily-card on"><div><b>Päivän haaste ${dayLabel(S.daily)}</b><span>Tämä on päivän tuloksesi. Uusi haaste huomenna.</span></div></div>`;
+    return `<div class="daily-card on"><div><b>Päivän haaste ${dayLabel(S.daily)}</b><span>Tämä on päivän tuloksesi. Uusi haaste huomenna.</span></div></div>
+      ${rivalsHtml(S.daily)}${challengeBoxHtml()}`;
+  }
+
+  // Haastelinkki: oma päivän tulos kulkee linkin #-osassa (ei palvelinta). Kaverin kenttä paljastuu vasta,
+  // kun avaaja on pelannut saman päivän haasteen. Linkki osoittaa aina GitHub Pages -versioon,
+  // ellei peliä ajeta siellä tai paikallisesti.
+  const PAGES_URL = 'https://epkoski-cmd.github.io/leijonien-kultakausi/';
+  const MEDAL_CODE = { gold: 'g', silver: 's', bronze: 'b' };
+  const ORDER = ['LW', 'C', 'RW', 'D1', 'D2', 'G'];
+  const b64enc = (s) => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64dec = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0)));
+  function challengeUrl(ds, c, name) {
+    const p = [1, ds, c.W, c.L, c.OTL, MEDAL_CODE[c.medal] || '', Math.round(c.rating * 10), c.games.join(''), name.slice(0, 20), ...ORDER.map((id) => c.lineup[id])];
+    const local = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
+    return (local ? location.origin + location.pathname : PAGES_URL) + '#haaste=' + b64enc(JSON.stringify(p));
+  }
+  function parseChallenge(str) {
+    try {
+      const p = JSON.parse(b64dec(str));
+      if (!Array.isArray(p) || p[0] !== 1 || p.length !== 15 || !/^\d{4}-\d\d-\d\d$/.test(p[1])) return null;
+      const [W, L, OTL] = [p[2], p[3], p[4]].map(Number);
+      if (![W, L, OTL].every((n) => Number.isInteger(n) && n >= 0) || W + L + OTL !== G.SEASON_GAMES) return null;
+      const medal = { g: 'gold', s: 'silver', b: 'bronze' }[p[5]] || null;
+      const lineup = {};
+      ORDER.forEach((id, i) => { lineup[id] = String(p[9 + i] || '?').slice(0, 40); });
+      return { ds: p[1], W, L, OTL, medal, rating: (+p[6] || 0) / 10, games: String(p[7]).replace(/[^WLO]/g, '').slice(0, G.SEASON_GAMES).split(''), name: String(p[8] || '').trim().slice(0, 20), lineup };
+    } catch (e) { return null; }
+  }
+  // Vastaanotetut haasteet päivittäin (tallessa 14 päivää, enintään 8 kaveria päivässä)
+  function rivalStore() {
+    try { const m = JSON.parse(store.get('lkk-rivals')); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; }
+  }
+  const rivalsFor = (ds) => rivalStore()[ds] || [];
+  const rivalKey = (r) => [r.name, r.W, r.L, r.OTL, ORDER.map((id) => r.lineup[id]).join('|')].join('/');
+  function saveRival(r) {
+    const m = rivalStore();
+    const list = (m[r.ds] || []).filter((x) => rivalKey(x) !== rivalKey(r));
+    list.unshift(r);
+    m[r.ds] = list.slice(0, 8);
+    const keep = Object.keys(m).sort().slice(-14);
+    store.set('lkk-rivals', JSON.stringify(Object.fromEntries(keep.map((k) => [k, m[k]]))));
+  }
+  // Järjestys kuten omassa ennätyksessä: voitot, sitten mitali, sitten vähemmän varsinaisen ajan tappioita
+  const cmpCards = (a, b) => (a.W - b.W) || ((MEDAL_RANK[a.medal] || 0) - (MEDAL_RANK[b.medal] || 0)) || (b.L - a.L);
+  const rivalName = (r) => r.name || 'Kaveri';
+  const medalTxt = (m) => m ? MEDAL[m][1] : 'Ei mitalia';
+  function vsHtml(me, r) {
+    const c = cmpCards(me, r), who = esc(rivalName(r));
+    const head = c > 0 ? `Voitit${r.name ? ' ' + who : ' kaverin'}` : c < 0 ? `${r.name ? who : 'Kaveri'} voitti` : 'Tasapeli';
+    const same = ORDER.filter((id) => me.lineup[id] === r.lineup[id]).length;
+    const sub = same === 6 ? 'Täsmälleen sama kenttä.' : same ? `${same}/6 samaa valintaa.` : 'Ei yhtään samaa valintaa.';
+    const best = (x) => x > 0 ? ' best' : '';
+    const strip = (g) => `<div class="bc-strip">${Array.from({ length: G.SEASON_GAMES }, (_, i) => `<i class="${g[i] || ''}"></i>`).join('')}</div>`;
+    const mr = (MEDAL_RANK[me.medal] || 0) - (MEDAL_RANK[r.medal] || 0);
+    const rows = ORDER.map((id) => {
+      const s = me.lineup[id] === r.lineup[id] ? ' class="same"' : '';
+      return `<tr><th scope="row">${G.SLOTS.find((x) => x.id === id).short}</th><td${s}>${esc(me.lineup[id])}</td><td${s}>${esc(r.lineup[id])}</td></tr>`;
+    }).join('');
+    return `<div class="vs ${c > 0 ? 'won' : c < 0 ? 'lost' : ''}">
+      <div class="vs-head"><span class="label">Päivän haaste ${dayLabel(r.ds)} · sinä vs. ${who}</span><b>${head}</b><span>${sub}</span></div>
+      <table class="vs-tab">
+        <thead><tr><th></th><th>Sinä</th><th>${who}</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Kausi</th><td class="num${best(c)}">${me.W}–${me.L}–${me.OTL}</td><td class="num${best(-c)}">${r.W}–${r.L}–${r.OTL}</td></tr>
+          <tr><th scope="row">Ottelut</th><td>${strip(me.games)}</td><td>${strip(r.games)}</td></tr>
+          <tr><th scope="row">MM</th><td class="${best(mr).trim()}">${medalTxt(me.medal)}</td><td class="${best(-mr).trim()}">${medalTxt(r.medal)}</td></tr>
+          <tr><th scope="row">Vahvuus</th><td>${me.rating.toFixed(1)}</td><td>${r.rating.toFixed(1)}</td></tr>
+          ${rows}
+        </tbody>
+      </table>
+    </div>`;
+  }
+  // Kaverien tulokset: vertailu, jos oma tulos on jo tallessa, muuten pelkkä tulos ilman kenttää
+  function rivalsHtml(ds) {
+    const list = rivalsFor(ds);
+    if (!list.length) return '';
+    const mine = dailyResult(ds);
+    if (mine) return list.map((r) => vsHtml(mine.card, r)).join('');
+    return list.map((r) => `<div class="daily-card"><div><b>${esc(rivalName(r))} haastaa sinut: ${r.W}–${r.L}–${r.OTL} · ${medalTxt(r.medal)}</b><span>Kaverin kenttä paljastuu, kun olet pelannut kautesi. Pystytkö parempaan?</span></div></div>`).join('');
+  }
+  function challengeBoxHtml() {
+    if (!S.daily || !dailyResult(S.daily)) return '';
+    const canShare = !!navigator.share && matchMedia('(pointer: coarse)').matches;
+    return `<div class="chal">
+      <span class="label">Haasta kaveri</span>
+      <p>Lähetä linkki: kaveri pelaa saman päivän haasteen ja näkee, kumpi pärjäsi paremmin. Kenttäsi paljastuu hänelle vasta, kun hän on pelannut.</p>
+      <div class="chal-row">
+        <input id="chalName" maxlength="20" placeholder="Nimesi (vapaaehtoinen)" autocomplete="nickname" value="${esc(store.get('lkk-nick') || '')}">
+        <button class="btn primary" id="chalBtn">${canShare ? 'Jaa haastelinkki' : 'Kopioi haastelinkki'}</button>
+        <span class="copied" id="chalOk" hidden>Kopioitu</span>
+      </div>
+      <textarea class="share" id="chalText" rows="3" hidden readonly></textarea>
+    </div>`;
+  }
+  function bindChallenge() {
+    const btn = $('#chalBtn');
+    if (!btn) return;
+    btn.onclick = () => {
+      const ds = S.daily, rec = dailyResult(ds);
+      if (!rec) return;
+      const name = $('#chalName').value.trim();
+      store.set('lkk-nick', name);
+      const c = rec.card, url = challengeUrl(ds, c, name);
+      const text = `Leijonien kultakausi · Päivän haaste ${dayLabel(ds)}: ${c.W}–${c.L}–${c.OTL} · ${medalTxt(c.medal).toLowerCase()}. Pystytkö parempaan?`;
+      track('haaste-linkki-jaettu', 'Haastelinkki jaettu');
+      const fallback = () => { const ta = $('#chalText'); ta.value = text + '\n' + url; ta.hidden = false; ta.select(); };
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+        navigator.share({ title: 'Leijonien kultakausi', text, url }).catch((e) => { if (e && e.name !== 'AbortError') fallback(); });
+        return;
+      }
+      try { navigator.clipboard.writeText(text + '\n' + url).then(() => { $('#chalOk').hidden = false; }, fallback); } catch (e) { fallback(); }
+    };
+  }
+  // Avattu haastelinkki: tallennetaan kaverin tulos, siivotaan osoite ja näytetään haaste
+  function openChallengeLink() {
+    const m = location.hash.match(/^#haaste=([\w-]+)/);
+    if (!m) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    const r = parseChallenge(m[1]);
+    if (!r) { toast('Haastelinkki ei avautunut. Pyydä kaveriltasi uusi linkki.'); return; }
+    saveRival(r);
+    track('haaste-linkki-avattu', 'Haastelinkki avattu');
+    const today = todayStr(), who = esc(rivalName(r));
+    const line = `<div class="record bc-rec">${recHtml([r.W, r.L, r.OTL])}</div><p><b>${medalTxt(r.medal)}</b> · vahvuus ${r.rating.toFixed(1)}</p>`;
+    if (r.ds === today) {
+      if (S.daily !== today) switchTab('daily');
+      else if (S.phase === 'dailyDone' && !dailyResult(today)) startDaily();
+      else render();
+      if (dailyResult(today)) {
+        showModal(`<div class="label">Päivän haaste ${dayLabel(today)}</div><h2 id="modalTitle">${who} <span class="gold">haastoi</span></h2>${line}<p>Olet jo pelannut tämän päivän haasteen. Vertailu näkyy haasteen tuloksessa.</p>`,
+          'Katso vertailu', () => { const v = document.querySelector('.vs'); v && v.scrollIntoView({ behavior: 'smooth', block: 'center' }); });
+      } else {
+        showModal(`<div class="label">Päivän haaste ${dayLabel(today)}</div><h2 id="modalTitle">${who} <span class="gold">haastaa sinut</span></h2>${line}<p>Pelaa sama haaste: samat turnaukset ja samat vastustajat. Kaverin kenttä paljastuu, kun olet pelannut kautesi. Yksi yritys päivässä.</p>`,
+          'Pelaa haaste', null);
+      }
+      return;
+    }
+    const mine = dailyResult(r.ds);
+    showModal(`<div class="label">Päivän haaste ${dayLabel(r.ds)}</div><h2 id="modalTitle">${who} <span class="gold">haastoi</span></h2>
+      ${mine ? vsHtml(mine.card, r) : `${line}<p>Tämä haaste oli ${dayLabel(r.ds)}, joten sitä ei voi enää pelata. Tämän päivän haaste on auki kaikille.</p>`}`,
+      mine ? 'Sulje' : 'Pelaa tämän päivän haaste', mine ? null : () => switchTab('daily'));
   }
   // Välilehdet: Draft ja Päivän haaste. Kumpikin välilehti muistaa oman tilanteensa tämän käynnin ajan.
   const tabState = { draft: null, daily: null };
@@ -1742,6 +1912,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <p>${esc(d.medal ? MEDAL[d.medal][1] : 'Ei mitalia')}${d.expect ? ' · ' + esc(d.expect.head) : ''} · vahvuus ${d.rating.toFixed(1)}</p>
         </div>
         <div class="daily-card on"><div><b>Uusi haaste huomenna</b><span>Kaikki pelaavat saman päivän haasteen kerran. Sillä välin voit pelata vapaata draftia.</span></div></div>
+        ${rivalsHtml(S.daily)}
+        ${challengeBoxHtml()}
         <div class="actions">
           <button class="btn primary" id="toDraft">Pelaa vapaata draftia</button>
           <button class="btn" id="dailyImg">Jaa kuva</button>
@@ -1750,6 +1922,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       </div>`;
     $('#toDraft').onclick = () => switchTab('draft');
     $('#dailyImg').onclick = () => showShareImage(d, $('#shareImgBox'));
+    bindChallenge();
   }
   function rollDraw(exclude) {
     if (S.daily) {
@@ -2242,6 +2415,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
           <p>Euro Hockey Tour (12 ottelua), MM-alkusarja (7) ja MM-pudotuspelit (3). Täydellinen kausi on 22 voittoa ja MM-kulta.</p>
         </div>
         ${forecastHtml(G.forecast(rating, S.oppForm), rating)}
+        ${S.daily ? rivalsHtml(S.daily) : ''}
         <div class="actions">
           <button class="btn primary" id="playStep">Pelaa ottelu kerrallaan</button>
           <button class="btn" id="playAll">Simuloi koko kausi</button>
@@ -2701,6 +2875,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
     $('#again').onclick = restart;
     $('#copy').onclick = copyResult;
     $('#mkImg').onclick = () => showShareImage(seasonCard(), $('#shareImgBox'));
+    bindChallenge();
     bindChips(render);
     bindExpand();
     bindDepthToggle();
