@@ -1,5 +1,5 @@
 <title>Leijonien kultakausi</title>
-<meta name="lkk-version" content="c88de80">
+<meta name="lkk-version" content="16d0f98">
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -590,7 +590,7 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   </aside>
 </main>
 
-<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 27.11.2026 klo 15.05 · c88de80</span></footer>
+<footer class="wrap site-foot">Epävirallinen fanipeli. Ei yhteyttä Suomen Jääkiekkoliittoon, IIHF:ään tai NHL:ään. Pelaajien arviot ovat tekijän näkemyksiä. Kävijämäärä lasketaan GoatCounterilla ilman evästeitä. <span class="ver">Versio 27.11.2026 klo 18.03 · 16d0f98</span></footer>
 <div class="update-bar" id="updateBar" role="status" hidden><span>Pelistä on uusi versio.</span><button class="btn primary" id="updateBtn">Päivitä</button><button class="btn" id="updateLater">Myöhemmin</button></div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
@@ -1716,17 +1716,49 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   const ORDER = ['LW', 'C', 'RW', 'D1', 'D2', 'G'];
   const b64enc = (s) => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const b64dec = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0)));
+  // Lyhyt muoto #h=päivä.nimi.mitali.vahvuus.ottelut.kenttä: päivä, vahvuus ja ottelut (kolmikantaluku W/L/O)
+  // 36-kantaisina, pelaajat nimen tiivisteestä (4 merkkiä, ei päällekkäisyyksiä nykyisessä pelaajalistassa).
+  // Ennätys lasketaan otteluista. Pisteet nimessä koodataan, jotta osat erottuvat.
+  const GAME_TRIT = { W: 0, L: 1, O: 2 };
+  const playerCode = (n) => (hashStr(n) % 1679616).toString(36).padStart(4, '0');
+  let codeIndex = null;
+  const playerByCode = (k) => {
+    if (!codeIndex) { codeIndex = new Map(); for (const pl of G.PLAYERS) if (!codeIndex.has(playerCode(pl.n))) codeIndex.set(playerCode(pl.n), pl.n); }
+    return codeIndex.get(k) || '?';
+  };
   function challengeUrl(ds, c, name) {
-    const p = [1, ds, c.W, c.L, c.OTL, MEDAL_CODE[c.medal] || '', Math.round(c.rating * 10), c.games.join(''), name.slice(0, 20), ...ORDER.map((id) => c.lineup[id])];
+    // Alussa ykkönen merkkinä, jotta otteluiden määrä säilyy (alkusarjaan jäänyt joukkue pelaa 19 ottelua)
+    let g = 1;
+    for (let i = c.games.length - 1; i >= 0; i--) g = g * 3 + GAME_TRIT[c.games[i]];
+    const p = [Number(ds.replace(/-/g, '')).toString(36), encodeURIComponent(name.slice(0, 20)).replace(/\./g, '%2E'), MEDAL_CODE[c.medal] || 'x',
+      Math.round(c.rating * 10).toString(36), g.toString(36), ORDER.map((id) => playerCode(c.lineup[id])).join('')];
     const local = /github\.io$|^localhost$|^127\.0\.0\.1$/.test(location.hostname);
-    return (local ? location.origin + location.pathname : PAGES_URL) + '#haaste=' + b64enc(JSON.stringify(p));
+    return (local ? location.origin + location.pathname : PAGES_URL) + '#h=' + p.join('.');
+  }
+  function parseShort(str) {
+    const p = str.split('.');
+    if (p.length !== 6 || !/^[0-9a-z]{24}$/.test(p[5])) return null;
+    const d = String(parseInt(p[0], 36));
+    if (!/^\d{8}$/.test(d)) return null;
+    let g = parseInt(p[4], 36);
+    if (!Number.isFinite(g) || g < 1) return null;
+    const games = [];
+    while (g > 1 && games.length < G.SEASON_GAMES) { games.push('WLO'[g % 3]); g = Math.floor(g / 3); }
+    if (g !== 1 || games.length < 19) return null;
+    const cnt = (k) => games.filter((x) => x === k).length;
+    let name = '';
+    try { name = decodeURIComponent(p[1]).trim().slice(0, 20); } catch (e) {}
+    const lineup = {};
+    ORDER.forEach((id, i) => { lineup[id] = playerByCode(p[5].slice(i * 4, i * 4 + 4)); });
+    return { ds: `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}`, W: cnt('W'), L: cnt('L'), OTL: cnt('O'), medal: { g: 'gold', s: 'silver', b: 'bronze' }[p[2]] || null,
+      rating: (parseInt(p[3], 36) || 0) / 10, games, name, lineup };
   }
   function parseChallenge(str) {
     try {
       const p = JSON.parse(b64dec(str));
       if (!Array.isArray(p) || p[0] !== 1 || p.length !== 15 || !/^\d{4}-\d\d-\d\d$/.test(p[1])) return null;
       const [W, L, OTL] = [p[2], p[3], p[4]].map(Number);
-      if (![W, L, OTL].every((n) => Number.isInteger(n) && n >= 0) || W + L + OTL !== G.SEASON_GAMES) return null;
+      if (![W, L, OTL].every((n) => Number.isInteger(n) && n >= 0) || W + L + OTL > G.SEASON_GAMES || W + L + OTL < 19) return null;
       const medal = { g: 'gold', s: 'silver', b: 'bronze' }[p[5]] || null;
       const lineup = {};
       ORDER.forEach((id, i) => { lineup[id] = String(p[9 + i] || '?').slice(0, 40); });
@@ -1812,7 +1844,8 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
       track('haaste-linkki-jaettu', 'Haastelinkki jaettu');
       const fallback = () => { const ta = $('#chalText'); ta.value = text + '\n' + url; ta.hidden = false; ta.select(); };
       if (navigator.share && matchMedia('(pointer: coarse)').matches) {
-        navigator.share({ title: 'Leijonien kultakausi', text, url }).catch((e) => { if (e && e.name !== 'AbortError') fallback(); });
+        // Linkki tekstin sisällä: iPhonen jakoruudun "Kopioi" ottaa vain tekstin, jos linkki on erillisenä kenttänä
+        navigator.share({ text: text + '\n' + url }).catch((e) => { if (e && e.name !== 'AbortError') fallback(); });
         return;
       }
       try { navigator.clipboard.writeText(text + '\n' + url).then(() => { $('#chalOk').hidden = false; }, fallback); } catch (e) { fallback(); }
@@ -1820,10 +1853,11 @@ textarea.share { width: 100%; font: 13px/1.4 var(--f-body); padding: 8px; border
   }
   // Avattu haastelinkki: tallennetaan kaverin tulos, siivotaan osoite ja näytetään haaste
   function openChallengeLink() {
-    const m = location.hash.match(/^#haaste=([\w-]+)/);
+    // #h= on lyhyt muoto, #haaste= ensimmäinen (base64-JSON) muoto, jota vanhat linkit käyttävät
+    const m = location.hash.match(/^#h=([\w.%~!*'()-]+)/) || location.hash.match(/^#haaste=([\w-]+)/);
     if (!m) return;
     history.replaceState(null, '', location.pathname + location.search);
-    const r = parseChallenge(m[1]);
+    const r = m[0].startsWith('#h=') ? parseShort(m[1]) : parseChallenge(m[1]);
     if (!r) { toast('Haastelinkki ei avautunut. Pyydä kaveriltasi uusi linkki.'); return; }
     saveRival(r);
     track('haaste-linkki-avattu', 'Haastelinkki avattu');

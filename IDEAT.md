@@ -262,6 +262,7 @@ Oikeudet: oikeat pelaajanimet ovat pelin ydin (keksityillä nimillä ei järkeä
 ### 18.2 Päivän haaste, vaihe 2: haastelinkki (toteutettu 27.11.2026)
 - Pelatun haasteen näkymässä "Haasta kaveri": vapaaehtoinen nimi (muistetaan) ja "Jaa haastelinkki" (puhelimessa jakovalikko) tai "Kopioi haastelinkki". Viesti: päivän tulos ja "Pystytkö parempaan?". Kenttä ei näy viestissä.
 - Tulos kulkee linkin #-osassa (päivä, ennätys, mitali, vahvuus, otteluiden W/L/O, nimi, kenttä). Ei palvelinta. Linkki osoittaa GitHub Pages -versioon.
+- Korjattu 27.11.2026: lyhyt linkkimuoto #h= (noin 120 merkkiä, ennen noin 280; vanhat #haaste=-linkit toimivat). Linkki viestitekstin sisällä, koska iPhonen jakoruudun Kopioi otti vain tekstin. Linkin esikatselukuva (og.png) ja kuvakkeet. Alkusarjaan jääneen 19 ottelun kauden linkki ei ennen avautunut.
 - Linkin avaaja: avautuu Päivän haaste -välilehti ja ikkuna "Pekka haastaa sinut" (ennätys, mitali, vahvuus). Uusi pelaaja näkee ensin esittelyn. Kaverin tulos näkyy myös ennen kauden alkua.
 - Kaverin kenttä paljastuu vasta, kun avaaja on pelannut. Sitten vertailu: kumpi voitti (voitot, mitali, vähemmän tappioita), ottelurivit, MM, vahvuus ja kentät rinnakkain, samat valinnat merkitty.
 - Vanha linkki: kaverin tulos ja vertailu, jos oma tulos sille päivälle on tallessa; muuten ohjaus tämän päivän haasteeseen.
